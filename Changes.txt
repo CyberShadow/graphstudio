@@ -1,4 +1,4 @@
-[0.1.5.1 - Alpha ]
+[0.1.5.1 - Alpha   02/Feb/2008]
 + added most recently used list (with Clear button)
 + filters are disconnected and removed manually when closing graph
 + added screenshot-to-clipboard feature
