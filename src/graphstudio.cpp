@@ -65,7 +65,7 @@ BOOL CgraphstudioApp::InitInstance()
 	AfxEnableControlContainer();
 
 	SetRegistryKey(_T("MONOGRAM"));
-	LoadStdProfileSettings(0);  // Load standard INI file options (including MRU)
+	LoadStdProfileSettings(8);  // Load standard INI file options (including MRU)
 
 	CSingleDocTemplate* pDocTemplate;
 	pDocTemplate = new CSingleDocTemplate(
@@ -87,14 +87,16 @@ BOOL CgraphstudioApp::InitInstance()
 
 	// The one and only window has been initialized, so show and update it
 	m_pMainWnd->SetWindowPos(NULL, 0, 0, 900, 400, SWP_NOMOVE);
-	m_pMainWnd->ShowWindow(SW_SHOW);
-	m_pMainWnd->UpdateWindow();
 
 	CMainFrame	*frame = (CMainFrame *)m_pMainWnd;
 	CGraphView	*view  = (CGraphView *)frame->GetActiveView();
 
 	// initialize the graph
 	view->OnInit();
+
+	m_pMainWnd->SetFocus();
+	m_pMainWnd->ShowWindow(SW_SHOW);
+	m_pMainWnd->UpdateWindow();
 
 	// call DragAcceptFiles only if there's a suffix
 	//  In an SDI app, this should occur after ProcessShellCommand

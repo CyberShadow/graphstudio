@@ -368,6 +368,61 @@ namespace GraphStudio
 	{
 	}
 
+	void DisplayView::MakeScreenshot()
+	{
+		// find out the rectangle
+		int	minx = 10000000;
+		int	miny = 10000000;
+		int maxx = 0;
+		int maxy = 0;
+
+		for (int i=0; i<graph.filters.GetCount(); i++) {
+			Filter	*filter = graph.filters[i];
+			if (filter->posx < minx) minx = filter->posx;
+			if (filter->posy < miny) miny = filter->posy;
+			if (filter->posx + filter->width > maxx) maxx = filter->posx+filter->width;
+			if (filter->posy + filter->height > maxy) maxy = filter->posy+filter->height;
+		}
+
+		minx = minx &~ 0x07; minx -= 8;	if (minx < 0) minx = 0;
+		miny = miny &~ 0x07; miny -= 8;	if (miny < 0) miny = 0;
+		maxx = (maxx+7) &~ 0x07; maxx += 8;
+		maxy = (maxy+7) &~ 0x07; maxy += 8;
+
+		// now copy the bitmap
+		int	cx = (maxx-minx);
+		int cy = (maxy-miny);
+
+		if (cx == 0 || cy == 0) {
+			OpenClipboard();
+			EmptyClipboard();
+			CloseClipboard();
+			return ;
+		}
+
+		CRect		imgrect(minx, miny, maxx, maxy);
+		CRect		bufrect(0, 0, back_width, back_height);
+		CDC			tempdc;
+		CBitmap		tempbitmap;
+
+		CRect		area=imgrect;
+		area.IntersectRect(&imgrect, &bufrect);
+
+		tempdc.CreateCompatibleDC(&memDC);
+		tempbitmap.CreateBitmap(area.Width(), area.Height(), 1, 32, NULL);
+		CBitmap *old = tempdc.SelectObject(&tempbitmap);
+		tempdc.BitBlt(0, 0, area.Width(), area.Height(), &memDC, area.left, area.top, SRCCOPY);
+
+		OpenClipboard();
+		EmptyClipboard();
+		SetClipboardData(CF_BITMAP, tempbitmap.GetSafeHandle());
+		CloseClipboard();
+
+		tempdc.SelectObject(old);
+		tempbitmap.DeleteObject();
+		tempdc.DeleteDC();
+
+	}
 
 };
 

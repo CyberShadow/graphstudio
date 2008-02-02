@@ -37,8 +37,13 @@ BEGIN_MESSAGE_MAP(CGraphView, GraphStudio::DisplayView)
 	ON_COMMAND(ID_FILE_SAVE, &CGraphView::OnFileSaveClick)
 	ON_COMMAND(ID_FILE_SAVE_AS, &CGraphView::OnFileSaveAsClick)
 	ON_COMMAND(ID_FILE_RENDERFILE, &CGraphView::OnRenderFileClick)
+	ON_COMMAND(ID_FILE_CONNECTTOREMOTEGRAPH, &CGraphView::OnConnectRemote)
+	ON_COMMAND(ID_FILE_DISCONNECTFROMREMOTEGRAPH, &CGraphView::OnDisconnectRemote)
 	ON_COMMAND(ID_GRAPH_INSERTFILTER, &CGraphView::OnGraphInsertfilter)
 	ON_COMMAND(ID_VIEW_GRAPHEVENTS, &CGraphView::OnViewGraphEvents)
+	ON_COMMAND(ID_LIST_MRU_CLEAR, &CGraphView::OnClearMRUClick)
+	ON_COMMAND(ID_GRAPH_MAKEGRAPHSCREENSHOT, &CGraphView::OnGraphScreenshot)
+	ON_COMMAND_RANGE(ID_LIST_MRU_FILE0, ID_LIST_MRU_FILE0+10, &CGraphView::OnMRUClick)
 
 	ON_WM_KEYDOWN()
 	ON_WM_DESTROY()
@@ -49,7 +54,8 @@ BEGIN_MESSAGE_MAP(CGraphView, GraphStudio::DisplayView)
 	ON_UPDATE_COMMAND_UI(ID_BUTTON_PAUSE, &CGraphView::OnUpdatePauseButton)
 	ON_UPDATE_COMMAND_UI(ID_BUTTON_STOP, &CGraphView::OnUpdateStopButton)
 	ON_UPDATE_COMMAND_UI(ID_FILE_RENDERFILE, &CGraphView::OnUpdateRenderMediaFile)
-
+	ON_UPDATE_COMMAND_UI(ID_FILE_CONNECTTOREMOTEGRAPH, &CGraphView::OnUpdateConnectRemote)
+	ON_UPDATE_COMMAND_UI(ID_FILE_DISCONNECTFROMREMOTEGRAPH, &CGraphView::OnUpdateDisconnectRemote)
 	
 	ON_COMMAND(ID_VIEW_TEXTINFORMATION, &CGraphView::OnViewTextInformation)
 	ON_COMMAND(ID_GRAPH_INSERTFILESOURCE, &CGraphView::OnGraphInsertFileSource)
@@ -105,12 +111,36 @@ void CGraphView::OnEndPrinting(CDC* /*pDC*/, CPrintInfo* /*pInfo*/)
 
 void CGraphView::OnDestroy()
 {
+	SaveWindowPosition();
+
 	ClosePropertyPages();
 	graph.MakeNew();
 
 	__super::OnDestroy();
 }
 
+void CGraphView::LoadWindowPosition()
+{
+	int	x,y,cx,cy;
+
+	x = AfxGetApp()->GetProfileInt(_T("Settings"), _T("left"), 100);
+	y = AfxGetApp()->GetProfileInt(_T("Settings"), _T("top"), 100);
+	cx = AfxGetApp()->GetProfileInt(_T("Settings"), _T("width"), 640);
+	cy = AfxGetApp()->GetProfileInt(_T("Settings"), _T("height"), 320);
+
+	GetParentFrame()->SetWindowPos(NULL, x, y, cx, cy, SWP_SHOWWINDOW);
+}
+
+void CGraphView::SaveWindowPosition()
+{
+	CRect	rc;
+	GetParentFrame()->GetWindowRect(&rc);
+
+	AfxGetApp()->WriteProfileInt(_T("Settings"), _T("left"), rc.left);
+	AfxGetApp()->WriteProfileInt(_T("Settings"), _T("top"), rc.top);
+	AfxGetApp()->WriteProfileInt(_T("Settings"), _T("width"), rc.Width());
+	AfxGetApp()->WriteProfileInt(_T("Settings"), _T("height"), rc.Height());
+}
 
 // CGraphView diagnostics
 
@@ -138,6 +168,8 @@ void CGraphView::OnInit()
 {
 	DragAcceptFiles(TRUE);
 
+	LoadWindowPosition();
+
 	// initialize our event logger
 	form_events = new CEventsForm(NULL);
 	form_events->view = this;
@@ -155,11 +187,23 @@ void CGraphView::OnInit()
 	CMainFrame *frame = (CMainFrame*)GetParentFrame();
 	frame->m_wndSeekingBar.SetGraphView(this);
 
+	mru.Load();
+
 	UpdateGraphState();
+	UpdateMRUMenu();
 }
 
 void CGraphView::OnFileRenderdvd()
 {
+}
+
+
+void CGraphView::UpdateMRUMenu()
+{
+	CMenu	*mainmenu = GetParentFrame()->GetMenu();
+	if (!mainmenu) return ;
+	CMenu	*filemenu = mainmenu->GetSubMenu(0);
+	mru.GenerateMenu(filemenu);
 }
 
 void CGraphView::OnPlayClick()
@@ -189,7 +233,12 @@ void CGraphView::OnPauseClick()
 
 void CGraphView::OnNewClick()
 {
-	OnStopClick();
+	KillTimer(2);
+
+	if (!graph.is_remote) {
+		OnStopClick();
+	}
+
 	GetDocument()->SetTitle(_T("Untitled"));
 	ClosePropertyPages();
 	graph.MakeNew();
@@ -208,6 +257,10 @@ void CGraphView::OnFileSaveClick()
 			// error
 			MessageBox(_T("Cannot save file"));
 		}
+
+		// updatujeme MRU list
+		mru.NotifyEntry(filename);
+		UpdateMRUMenu();
 	} else {
 		OnFileSaveAsClick();
 	}
@@ -219,7 +272,7 @@ void CGraphView::OnFileSaveAsClick()
 	CString		filter;
 	CString		filename;
 
-	filter = _T("GraphEdit Files|*.grf");
+	filter = _T("GraphEdit Files|*.grf|");
 
 	CFileDialog dlg(FALSE,NULL,NULL,OFN_OVERWRITEPROMPT|OFN_ENABLESIZING|OFN_PATHMUSTEXIST,filter);
     int ret = dlg.DoModal();
@@ -232,6 +285,10 @@ void CGraphView::OnFileSaveAsClick()
 			MessageBox(_T("Cannot save file"));
 			return ;
 		}
+
+		// updatujeme MRU list
+		mru.NotifyEntry(filename);
+		UpdateMRUMenu();
 
 		this->filename = filename;
 		can_save = true;
@@ -268,6 +325,10 @@ int CGraphView::TryOpenFile(CString fn)
 
 	if (ret < 0) return ret;
 
+	// updatujeme MRU list
+	mru.NotifyEntry(fn);
+	UpdateMRUMenu();
+
 	CGraphDoc *doc = GetDocument();
 	int pos = path.FindFileName();
 	CString	short_fn = fn;
@@ -286,7 +347,7 @@ void CGraphView::OnFileOpenClick()
 	CString		filter;
 	CString		filename;
 
-	filter = _T("GraphEdit Files|*.grf");
+	filter = _T("GraphEdit Files|*.grf|");
 
 	CFileDialog dlg(TRUE,NULL,NULL,OFN_OVERWRITEPROMPT|OFN_ENABLESIZING|OFN_FILEMUSTEXIST,filter);
     int ret = dlg.DoModal();
@@ -307,7 +368,7 @@ void CGraphView::OnRenderFileClick()
 	CString		filter;
 	CString		filename;
 
-	filter = _T("All Files|*.*");
+	filter = _T("All Files|*.*|");
 
 	CFileDialog dlg(TRUE,NULL,NULL,OFN_OVERWRITEPROMPT|OFN_ENABLESIZING|OFN_FILEMUSTEXIST,filter);
     int ret = dlg.DoModal();
@@ -403,6 +464,11 @@ void CGraphView::OnTimer(UINT_PTR nIDEvent)
 	case 1:
 		{
 			KillTimer(1);
+			UpdateGraphState();
+		}
+		break;
+	case 2:
+		{
 			UpdateGraphState();
 		}
 		break;
@@ -615,4 +681,88 @@ void CGraphView::ClosePropertyPages()
 	property_pages.RemoveAll();
 }
 
+void CGraphView::OnClearMRUClick()
+{
+	mru.Clear();
+	UpdateMRUMenu();
+}
 
+void CGraphView::OnMRUClick(UINT nID)
+{
+	int idx = nID - ID_LIST_MRU_FILE0;
+
+	// let's try to open this one
+	if (idx < 0 || idx >= mru.list.GetCount()) return ;
+
+	CString	fn = mru.list[idx];
+	TryOpenFile(fn);
+}
+
+void CGraphView::OnGraphScreenshot()
+{
+	MakeScreenshot();
+}
+
+void CGraphView::OnConnectRemote()
+{
+	CRemoteGraphForm	remote_form;
+	int ret = remote_form.DoModal();
+	if (ret == IDOK) {
+		if (remote_form.sel_graph) {
+
+			// get a graph object
+			CComPtr<IRunningObjectTable>	rot;
+			CComPtr<IUnknown>				unk;
+			CComPtr<IFilterGraph>			fg;
+			HRESULT							hr;
+
+			hr = GetRunningObjectTable(0, &rot);
+			ASSERT(SUCCEEDED(hr));
+
+			hr = rot->GetObject(remote_form.sel_graph, &unk);
+			if (SUCCEEDED(hr)) {
+
+				hr = unk->QueryInterface(IID_IFilterGraph, (void**)&fg);
+				if (SUCCEEDED(hr)) {
+
+					ret = graph.ConnectToRemote(fg);
+					if (ret == 0) {
+						SetTimer(2, 200, NULL);
+					}
+
+					// get all filters
+					graph.RefreshFilters();
+					graph.SmartPlacement();
+					Invalidate();
+				}
+				fg = NULL;
+			}
+			unk = NULL;
+
+			rot = NULL;
+		}
+	}
+}
+
+void CGraphView::OnDisconnectRemote()
+{
+	OnNewClick();
+}
+
+void CGraphView::OnUpdateConnectRemote(CCmdUI *ui)
+{
+	if (graph.is_remote) {
+		ui->Enable(FALSE);
+	} else {
+		ui->Enable(TRUE);
+	}
+}
+
+void CGraphView::OnUpdateDisconnectRemote(CCmdUI *ui)
+{
+	if (graph.is_remote) {
+		ui->Enable(TRUE);
+	} else {
+		ui->Enable(FALSE);
+	}
+}

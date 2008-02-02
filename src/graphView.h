@@ -34,6 +34,9 @@ public:
 	// active property pages
 	CArray<CPropertyForm*>	property_pages;
 
+	// most recently used list
+	GraphStudio::MRUList	mru;
+
 
 	CString			filename;
 	bool			can_save;
@@ -65,6 +68,14 @@ public:
 	void OnNewClick();
 	void OnRenderFileClick();
 	void OnGraphInsertfilter();
+	void OnClearMRUClick();
+	void OnMRUClick(UINT nID);
+	void OnGraphScreenshot();
+	void OnConnectRemote();
+	void OnDisconnectRemote();
+
+	// menu
+	void UpdateMRUMenu();
 
 	// keyboard events
 	void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
@@ -76,6 +87,8 @@ public:
 	void OnGraphStopped();
 	void OnGraphPaused();
 
+	void OnUpdateConnectRemote(CCmdUI *ui);
+	void OnUpdateDisconnectRemote(CCmdUI *ui);
 	void OnUpdatePlayButton(CCmdUI *ui);
 	void OnUpdatePauseButton(CCmdUI *ui);
 	void OnUpdateStopButton(CCmdUI *ui);
@@ -90,6 +103,9 @@ public:
 	void ClosePropertyPages();
 	void ClosePropertyPage(IUnknown *filter);
 
+	// save/load window position
+	void LoadWindowPosition();
+	void SaveWindowPosition();
 
 	afx_msg void OnViewTextInformation();
 	afx_msg void OnGraphInsertFileSource();

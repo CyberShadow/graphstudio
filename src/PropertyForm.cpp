@@ -182,33 +182,57 @@ int CPropertyForm::AnalyzeObject(IUnknown *obj)
 	CComPtr<ISpecifyPropertyPages>	specify;
 	HRESULT							hr;
 
-	hr = obj->QueryInterface(IID_ISpecifyPropertyPages, (void**)&specify);
-	if (SUCCEEDED(hr)) {
-		CAUUID	pagelist;
-		hr = specify->GetPages(&pagelist);
-		if (SUCCEEDED(hr)) {
+	CComPtr<IBaseFilter>			filter;
+	hr = obj->QueryInterface(IID_IBaseFilter, (void**)&filter);
+	if (FAILED(hr)) filter = NULL;
 
-			// now create all pages
-			for (int i=0; i<pagelist.cElems; i++) {
-				CComPtr<IPropertyPage>	page;
-				hr = CoCreateInstance(pagelist.pElems[i], NULL, CLSCTX_INPROC_SERVER, IID_IPropertyPage, (void**)&page);
-				if (SUCCEEDED(hr)) {
-					// assign the object
-					hr = page->SetObjects(1, &obj);
-					if (SUCCEEDED(hr)) {
-						// and add the page to our container
-						container->AddPage(page);
-					}
-				}
-
-				page = NULL;
-			}
-
-			// free used memory
-			if (pagelist.pElems) CoTaskMemFree(pagelist.pElems);
-		}
+	CLSID		clsid;
+	if (filter) {
+		filter->GetClassID(&clsid);
 	}
 
+	bool		can_specify_pp = true;
+
+	if (view->graph.is_remote) {
+
+		// some filters don't like showing property page via remote connection
+		if (clsid == CLSID_DSoundRender || clsid == CLSID_AudioRender) {
+			can_specify_pp = false;
+		}
+
+	}
+
+	if (can_specify_pp) {
+		hr = obj->QueryInterface(IID_ISpecifyPropertyPages, (void**)&specify);
+		if (SUCCEEDED(hr)) {
+			CAUUID	pagelist;
+			hr = specify->GetPages(&pagelist);
+			if (SUCCEEDED(hr)) {
+
+				// now create all pages
+				for (int i=0; i<pagelist.cElems; i++) {
+					CComPtr<IPropertyPage>	page;
+					hr = CoCreateInstance(pagelist.pElems[i], NULL, CLSCTX_INPROC_SERVER, IID_IPropertyPage, (void**)&page);
+					if (SUCCEEDED(hr)) {
+						// assign the object
+						hr = page->SetObjects(1, &obj);
+						if (SUCCEEDED(hr)) {
+							// and add the page to our container
+							container->AddPage(page);
+						}
+					}
+
+					page = NULL;
+				}
+
+				// free used memory
+				if (pagelist.pElems) CoTaskMemFree(pagelist.pElems);
+			}
+		}
+		specify = NULL;
+	}
+	
+	filter = NULL;
 	return 0;
 }
 

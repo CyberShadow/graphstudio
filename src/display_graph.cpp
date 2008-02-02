@@ -28,6 +28,7 @@ namespace GraphStudio
 		ms = NULL;
 		gb = NULL;
 		dc = NULL;
+		is_remote = false;
 
 		MakeNew();
 	}
@@ -43,25 +44,71 @@ namespace GraphStudio
 		RemoveUnusedFilters();
 	}
 
-	int DisplayGraph::MakeNew()
+	int DisplayGraph::ConnectToRemote(IFilterGraph *remote_graph)
 	{
-		if (ms) ms = NULL;
+		int ret = MakeNew();
+		if (ret < 0) return -1;
 
-		if (mc) {
-			mc->Stop();
-			mc = NULL;
-		}
-
+		// release graph objects
+		mc = NULL;
+		ms = NULL;
 		if (me) {
 			// clear events...
 			me->SetNotifyWindow(NULL, 0, NULL);
 			me = NULL;
 		}
-
 		gb = NULL;
-		ZeroTags();
-		RemoveUnusedFilters();
-		bins.RemoveAll();
+		is_remote = false;
+
+		// attach remote graph
+		HRESULT hr;
+		hr = remote_graph->QueryInterface(IID_IGraphBuilder, (void**)&gb);
+		if (FAILED(hr)) return -1;
+
+		// get hold of interfaces
+		gb->QueryInterface(IID_IMediaControl, (void**)&mc);
+		gb->QueryInterface(IID_IMediaSeeking, (void**)&ms);
+
+		// now we're a remote graph
+		is_remote = true;
+		return 0;
+	}
+
+	int DisplayGraph::MakeNew()
+	{
+		if (ms) ms = NULL;
+
+		// we only do this for our own graph so we don't mess up
+		// the host application when connected to remote graph
+		if (!is_remote) {
+			if (mc) {
+				mc->Stop();
+				mc = NULL;
+			}
+
+			if (me) {
+				// clear events...
+				me->SetNotifyWindow(NULL, 0, NULL);
+				me = NULL;
+			}
+
+			ZeroTags();
+			RemoveAllFilters();
+			RemoveUnusedFilters();
+			bins.RemoveAll();
+			gb = NULL;
+		} else {
+			mc = NULL;
+			me = NULL;
+
+			ZeroTags();
+			RemoveUnusedFilters();
+			bins.RemoveAll();
+			gb = NULL;
+		}
+
+		is_remote = false;
+
 
 		// create new instance of filter graph
 		HRESULT hr;
@@ -85,6 +132,16 @@ namespace GraphStudio
 		}
 
 		return 0;
+	}
+
+	void DisplayGraph::RemoveAllFilters()
+	{
+		// we find all filters, disconnect them and remove from graph
+		for (int i=0; i<filters.GetCount(); i++) {
+			if (callback) callback->OnFilterRemoved(this, filters[i]);
+			filters[i]->DeleteFilter();
+		}
+		RefreshFilters();
 	}
 
 	int DisplayGraph::GetState(FILTER_STATE &state, DWORD timeout)
@@ -618,6 +675,10 @@ namespace GraphStudio
 			height = MINHEIGHT;
 		}
 		if (!filter || !f) return ;
+		
+		// get the filter CLSID
+		f->GetClassID(&clsid);
+		NameGuid(clsid, clsid_str);
 
 		FILTER_INFO	info;
 		memset(&info, 0, sizeof(info));

@@ -69,10 +69,12 @@
 #include "filter_list.h"
 
 #include "graphstudio.h"
+#include "mru_list.h"
 #include "MainFrm.h"
 #include "graphDoc.h"
 #include "FiltersForm.h"
 #include "EventsForm.h"
+#include "RemoteGraphForm.h"
 #include "TextInfoForm.h"
 #include "FileSrcForm.h"
 #include "PropertyForm.h"

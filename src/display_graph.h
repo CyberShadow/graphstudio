@@ -157,6 +157,7 @@ namespace GraphStudio
 		// 
 		HWND							wndEvents;
 		GraphCallback					*callback;
+		bool							is_remote;
 
 	public:
 		DisplayGraph();
@@ -167,6 +168,7 @@ namespace GraphStudio
 		int RenderFile(CString fn);
 		int LoadGRF(CString fn);
 		int SaveGRF(CString fn);
+		int ConnectToRemote(IFilterGraph *remote_graph);
 
 		// adding filters
 		HRESULT AddFilter(IBaseFilter *filter, CString proposed_name);
@@ -177,6 +179,7 @@ namespace GraphStudio
 		Filter *FindParentFilter(IPin *pin);
 		Pin *FindPin(IPin *pin);
 		void RemoveUnusedFilters();
+		void RemoveAllFilters();
 		void SmartPlacement();
 		void LoadPeers();
 		void DeleteSelected();

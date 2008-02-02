@@ -80,6 +80,8 @@ namespace GraphStudio
 		void OnRenderPin();
 		void OnPropertyPage();
 
+		void MakeScreenshot();
+
 		// to be overriden
 		virtual void OnDisplayPropertyPage(IUnknown *object, IUnknown *filter, CString title);
 		virtual void OnFilterRemoved(DisplayGraph *sender, Filter *filter);

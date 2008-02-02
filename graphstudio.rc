@@ -121,14 +121,6 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "E&xit",                       ID_APP_EXIT
     END
-    POPUP "&Edit"
-    BEGIN
-        MENUITEM "&Undo\tCtrl+Z",               ID_EDIT_UNDO
-        MENUITEM SEPARATOR
-        MENUITEM "Cu&t\tCtrl+X",                ID_EDIT_CUT
-        MENUITEM "&Copy\tCtrl+C",               ID_EDIT_COPY
-        MENUITEM "&Paste\tCtrl+V",              ID_EDIT_PASTE
-    END
     POPUP "&View"
     BEGIN
         MENUITEM "&Toolbar",                    ID_VIEW_TOOLBAR
@@ -142,6 +134,8 @@ BEGIN
     BEGIN
         MENUITEM "Insert Filter...\tCtrl+F",    ID_GRAPH_INSERTFILTER
         MENUITEM "Insert File Source (Async.)", ID_GRAPH_INSERTFILESOURCE
+        MENUITEM SEPARATOR
+        MENUITEM "Make Graph Screenshot\tCtrl+F12", ID_GRAPH_MAKEGRAPHSCREENSHOT
     END
     POPUP "&Help"
     BEGIN
@@ -168,13 +162,16 @@ BEGIN
     "N",            ID_FILE_NEW,            VIRTKEY, CONTROL, NOINVERT
     "O",            ID_FILE_OPEN,           VIRTKEY, CONTROL, NOINVERT
     "P",            ID_FILE_PRINT,          VIRTKEY, CONTROL, NOINVERT
+    "R",            ID_FILE_RENDERFILE,     VIRTKEY, CONTROL, NOINVERT
     "S",            ID_FILE_SAVE,           VIRTKEY, CONTROL, NOINVERT
+    "F",            ID_GRAPH_INSERTFILTER,  VIRTKEY, CONTROL, NOINVERT
+    VK_F12,         ID_GRAPH_MAKEGRAPHSCREENSHOT, VIRTKEY, CONTROL, NOINVERT
     VK_F6,          ID_NEXT_PANE,           VIRTKEY, NOINVERT
     VK_F6,          ID_PREV_PANE,           VIRTKEY, SHIFT, NOINVERT
-    "R",            ID_FILE_RENDERFILE,     VIRTKEY, CONTROL, NOINVERT
-    "F",            ID_GRAPH_INSERTFILTER,  VIRTKEY, CONTROL, NOINVERT
     "E",            ID_VIEW_GRAPHEVENTS,    VIRTKEY, CONTROL, NOINVERT
     "T",            ID_VIEW_TEXTINFORMATION, VIRTKEY, CONTROL, NOINVERT
+    "G",            ID_FILE_CONNECTTOREMOTEGRAPH, VIRTKEY, CONTROL, NOINVERT
+    "H",            ID_FILE_DISCONNECTFROMREMOTEGRAPH, VIRTKEY, CONTROL, NOINVERT
 END
 
 
@@ -188,7 +185,7 @@ STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSM
 CAPTION "About MONOGRAM GraphStudio"
 FONT 8, "MS Shell Dlg", 0, 0, 0x1
 BEGIN
-    LTEXT           "MONOGRAM GraphStudio v0.1.4.0 Alpha",IDC_STATIC,6,30,156,8,SS_NOPREFIX
+    LTEXT           "MONOGRAM GraphStudio v0.1.5.1 Alpha",IDC_STATIC,6,30,156,8,SS_NOPREFIX
     DEFPUSHBUTTON   "OK",IDOK,198,78,50,16,WS_GROUP
     LTEXT           "This software is free under the GNU GPL license",IDC_STATIC,6,72,153,8
     LTEXT           "http://www.monogrammultimedia.com",IDC_STATIC,6,84,123,8
@@ -265,6 +262,15 @@ BEGIN
     CONTROL         "",IDC_TAB_PAGES,"SysTabControl32",0x0,6,6,282,174
 END
 
+IDD_DIALOG_ROT DIALOGEX 0, 0, 222, 148
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CLIPCHILDREN | WS_CAPTION | WS_SYSMENU
+CAPTION "Remote Graphs"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    CONTROL         "",IDC_TITLEBAR,"Static",SS_OWNERDRAW,0,0,222,21
+    LISTBOX         IDC_LIST_GRAPHS,6,30,210,114,LBS_NOINTEGRALHEIGHT | NOT WS_BORDER | WS_VSCROLL | WS_TABSTOP
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -272,8 +278,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 0,1,4,0
- PRODUCTVERSION 0,1,4,0
+ FILEVERSION 0,1,5,1
+ PRODUCTVERSION 0,1,5,1
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -290,11 +296,11 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "MONOGRAM Mutimedia s.r.o."
             VALUE "FileDescription", "GraphStudio"
-            VALUE "FileVersion", "0.1.4.0"
+            VALUE "FileVersion", "0.1.5.1"
             VALUE "InternalName", "graphstudio.exe"
             VALUE "OriginalFilename", "graphstudio.exe"
             VALUE "ProductName", "MONOGRAM GraphStudio"
-            VALUE "ProductVersion", "0.1.4.0"
+            VALUE "ProductVersion", "0.1.5.1"
         END
     END
     BLOCK "VarFileInfo"
@@ -358,6 +364,14 @@ BEGIN
         RIGHTMARGIN, 285
         TOPMARGIN, 7
         BOTTOMMARGIN, 198
+    END
+
+    IDD_DIALOG_ROT, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 215
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 141
     END
 END
 #endif    // APSTUDIO_INVOKED

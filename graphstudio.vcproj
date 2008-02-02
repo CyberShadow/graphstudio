@@ -242,7 +242,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\mru_list.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\PropertyForm.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\RemoteGraphForm.cpp"
 				>
 			</File>
 			<File
@@ -308,7 +316,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\mru_list.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\PropertyForm.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\RemoteGraphForm.h"
 				>
 			</File>
 			<File
