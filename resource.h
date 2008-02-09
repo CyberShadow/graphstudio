@@ -57,6 +57,8 @@
 #define IDC_BUTTON_CONNECT              1030
 #define ID_LIST_MRU_CLEAR               4999
 #define ID_LIST_MRU_FILE0               5000
+#define ID_AUDIO_RENDERER0              6000
+#define ID_VIDEO_RENDERER0              7000
 #define ID_Menu                         32771
 #define ID_FILE_RENDERURL               32772
 #define ID_FILE_RENDERDVD               32773
@@ -83,13 +85,14 @@
 #define ID_GRAPH_INSERTFILEWRITER       32805
 #define ID_GRAPH_INSERTVIDEORENDERER    32806
 #define ID_GRAPH_INSERTAUDIORENDERER    32807
+#define ID_FILE_ADDMEDIAFILE            32808
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        142
-#define _APS_NEXT_COMMAND_VALUE         32808
+#define _APS_NEXT_COMMAND_VALUE         32809
 #define _APS_NEXT_CONTROL_VALUE         1030
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

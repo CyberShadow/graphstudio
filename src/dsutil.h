@@ -48,6 +48,23 @@ namespace DSUtil
 	//
 	//-------------------------------------------------------------------------
 
+	class PinTemplate
+	{
+	public:
+		PIN_DIRECTION	dir;
+		BOOL			rendered;
+		BOOL			many;
+		int				types;
+		CArray<GUID>	major;
+		CArray<GUID>	minor;	
+
+	public:
+		PinTemplate();
+		PinTemplate(const PinTemplate &pt);
+		virtual ~PinTemplate();
+		PinTemplate &operator =(const PinTemplate &pt);
+	};
+
 	class FilterTemplate
 	{
 	public:
@@ -59,6 +76,9 @@ namespace DSUtil
 		CString		file;
 		bool		file_exists;
 
+		CArray<PinTemplate>		input_pins;
+		CArray<PinTemplate>		output_pins;
+
 	public:
 		FilterTemplate();
 		FilterTemplate(const FilterTemplate &ft);
@@ -68,6 +88,8 @@ namespace DSUtil
 		// vytvorenie instancie
 		HRESULT CreateInstance(IBaseFilter **filter);
 		HRESULT FindFilename();
+
+		int Load(char *buf, int size);
 	};
 
 	class FilterCategory
@@ -107,9 +129,21 @@ namespace DSUtil
 		int Enumerate(FilterCategory &cat);
 		int Enumerate(GUID clsid);
 
+		// enumerating filters
+		int EnumerateAudioRenderers();
+		int EnumerateVideoRenderers();
+
 		// vyhladavanie
 		int Find(CString name, FilterTemplate *filter);
 		int Find(GUID clsid, FilterTemplate *filter); 
+		int AddFilters(IEnumMoniker *emoniker, int enumtype=0);
+
+		// testing
+		int IsVideoRenderer(FilterTemplate &filter);
+
+		void SortByName();
+		void SwapItems(int i, int j);
+		void _Sort_(int lo, int hi);
 
 		// vytvaranie
 		HRESULT CreateInstance(CString name, IBaseFilter **filter);

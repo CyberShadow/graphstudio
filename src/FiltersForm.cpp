@@ -295,47 +295,10 @@ void CFiltersForm::OnBnClickedButtonInsert()
 			} else {
 				
 				// now check for a few interfaces
-
-				//-------------------------------------------------------------
-				//	IFileSourceFilter
-				//-------------------------------------------------------------
-				CComPtr<IFileSourceFilter>	fs;
-				hr = instance->QueryInterface(IID_IFileSourceFilter, (void**)&fs);
-				if (SUCCEEDED(hr)) {
-					CFileSrcForm		src_form;
-					int ret = src_form.DoModal();
-					if (ret == IDOK) {
-						hr = fs->Load((LPCOLESTR)src_form.result_file, NULL);
-						if (FAILED(hr)) {
-							MessageBox(_T("Cannot load specified file"), _T("Error"), MB_ICONERROR);
-						}
-					} else {
-						// cancel the filter
-						instance = NULL;
-					}
-					fs = NULL;
+				int ret = ConfigureInsertedFilter(instance);
+				if (ret < 0) {
+					instance = NULL;
 				}
-
-				//-------------------------------------------------------------
-				//	IFileSinkFilter
-				//-------------------------------------------------------------
-				CComPtr<IFileSinkFilter>	fsink;
-				hr = instance->QueryInterface(IID_IFileSinkFilter, (void**)&fsink);
-				if (SUCCEEDED(hr)) {
-					CFileSinkForm		sink_form;
-					int ret = sink_form.DoModal();
-					if (ret == IDOK) {
-						hr = fsink->SetFileName((LPCOLESTR)sink_form.result_file, NULL);
-						if (FAILED(hr)) {
-							MessageBox(_T("Cannot write specified file"), _T("Error"), MB_ICONERROR);
-						}
-					} else {
-						// cancel the filter
-						instance = NULL;
-					}
-					fsink = NULL;
-				}
-
 
 				if (instance) {
 					// add the filter to graph
@@ -431,3 +394,58 @@ void CFiltersForm::OnBnClickedButtonPropertypage()
 	}
 
 }
+
+
+int ConfigureInsertedFilter(IBaseFilter *filter)
+{
+	int	ret = 0;
+	HRESULT hr;
+
+	//-------------------------------------------------------------
+	//	IFileSourceFilter
+	//-------------------------------------------------------------
+	CComPtr<IFileSourceFilter>	fs;
+	hr = filter->QueryInterface(IID_IFileSourceFilter, (void**)&fs);
+	if (SUCCEEDED(hr)) {
+		CFileSrcForm		src_form;
+		ret = src_form.DoModal();
+		if (ret == IDOK) {
+			hr = fs->Load((LPCOLESTR)src_form.result_file, NULL);
+			if (FAILED(hr)) {
+				MessageBox(NULL, _T("Cannot load specified file"), _T("Error"), MB_ICONERROR);
+			}
+			ret = 0;
+		} else {
+			// cancel the filter
+			ret = -1;
+		}
+		fs = NULL;
+	}
+
+	if (ret < 0) return -1;
+
+	//-------------------------------------------------------------
+	//	IFileSinkFilter
+	//-------------------------------------------------------------
+	CComPtr<IFileSinkFilter>	fsink;
+	hr = filter->QueryInterface(IID_IFileSinkFilter, (void**)&fsink);
+	if (SUCCEEDED(hr)) {
+		CFileSinkForm		sink_form;
+		ret = sink_form.DoModal();
+		if (ret == IDOK) {
+			hr = fsink->SetFileName((LPCOLESTR)sink_form.result_file, NULL);
+			if (FAILED(hr)) {
+				MessageBox(NULL, _T("Cannot write specified file"), _T("Error"), MB_ICONERROR);
+			}
+			ret = 0;
+		} else {
+			// cancel the filter
+			ret = -1;
+		}
+		fsink = NULL;
+	}
+	if (ret < 0) return -1;
+
+	return ret;
+}
+

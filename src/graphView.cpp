@@ -44,6 +44,8 @@ BEGIN_MESSAGE_MAP(CGraphView, GraphStudio::DisplayView)
 	ON_COMMAND(ID_LIST_MRU_CLEAR, &CGraphView::OnClearMRUClick)
 	ON_COMMAND(ID_GRAPH_MAKEGRAPHSCREENSHOT, &CGraphView::OnGraphScreenshot)
 	ON_COMMAND_RANGE(ID_LIST_MRU_FILE0, ID_LIST_MRU_FILE0+10, &CGraphView::OnMRUClick)
+	ON_COMMAND_RANGE(ID_AUDIO_RENDERER0, ID_AUDIO_RENDERER0+100, &CGraphView::OnAudioRendererClick)
+	ON_COMMAND_RANGE(ID_VIDEO_RENDERER0, ID_VIDEO_RENDERER0+100, &CGraphView::OnVideoRendererClick)
 
 	ON_WM_KEYDOWN()
 	ON_WM_DESTROY()
@@ -70,6 +72,7 @@ BEGIN_MESSAGE_MAP(CGraphView, GraphStudio::DisplayView)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_100, &CGraphView::OnUpdateView100)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_150, &CGraphView::OnUpdateView150)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_200, &CGraphView::OnUpdateView200)
+	ON_COMMAND(ID_FILE_ADDMEDIAFILE, &CGraphView::OnFileAddmediafile)
 END_MESSAGE_MAP()
 
 //-----------------------------------------------------------------------------
@@ -181,6 +184,7 @@ void CGraphView::OnInit()
 
 	LoadWindowPosition();
 
+
 	// initialize our event logger
 	form_events = new CEventsForm(NULL);
 	form_events->view = this;
@@ -211,12 +215,57 @@ void CGraphView::OnInit()
 
 	UpdateGraphState();
 	UpdateMRUMenu();
+
+	// trick to refresh menu in a while...
+	SetTimer(1001, 20, NULL);
 }
 
 void CGraphView::OnFileRenderdvd()
 {
 }
 
+void CGraphView::UpdateRenderersMenu()
+{
+	int		i;
+
+	audio_renderers.filters.RemoveAll();
+	video_renderers.filters.RemoveAll();
+
+	audio_renderers.EnumerateAudioRenderers();
+	video_renderers.EnumerateVideoRenderers();
+
+	CMenu	*mainmenu  = GetParentFrame()->GetMenu();
+	CMenu	*graphmenu = mainmenu->GetSubMenu(2);
+	CMenu	audio_menu, video_menu;
+
+	// fill in audio renderers
+	audio_menu.CreatePopupMenu();
+	for (i=0; i<audio_renderers.filters.GetCount(); i++) {
+		DSUtil::FilterTemplate	&filter = audio_renderers.filters[i];
+		audio_menu.InsertMenu(i, MF_STRING, ID_AUDIO_RENDERER0 + i, filter.name);
+	}
+
+	graphmenu->ModifyMenu(ID_GRAPH_INSERTAUDIORENDERER,
+						  MF_BYCOMMAND | MF_POPUP | MF_STRING, 
+						  (UINT_PTR)audio_menu.m_hMenu,
+						  _T("Insert Audio Renderer"));
+
+	audio_menu.Detach();
+
+	// fill in video renderers
+	video_menu.CreatePopupMenu();
+	for (i=0; i<video_renderers.filters.GetCount(); i++) {
+		DSUtil::FilterTemplate	&filter = video_renderers.filters[i];
+		video_menu.InsertMenu(i, MF_STRING, ID_VIDEO_RENDERER0 + i, filter.name);
+	}
+
+	graphmenu->ModifyMenu(ID_GRAPH_INSERTVIDEORENDERER,
+						  MF_BYCOMMAND | MF_POPUP | MF_STRING, 
+						  (UINT_PTR)video_menu.m_hMenu,
+						  _T("Insert Video Renderer"));
+
+	video_menu.Detach();
+}
 
 void CGraphView::UpdateMRUMenu()
 {
@@ -300,6 +349,13 @@ void CGraphView::OnFileSaveAsClick()
 	filename = dlg.GetPathName();
 	if (ret == IDOK) {
 
+		CPath	path(filename);
+		if (path.GetExtension() == _T("")) {
+			path.AddExtension(_T(".grf"));
+
+			filename = CString(path);
+		}
+
 		ret = graph.SaveGRF(filename);	
 		if (ret < 0) {
 			MessageBox(_T("Cannot save file"));
@@ -313,7 +369,7 @@ void CGraphView::OnFileSaveAsClick()
 		this->filename = filename;
 		can_save = true;
 
-		CPath	path(filename);
+		
 		CGraphDoc *doc = GetDocument();
 		int pos = path.FindFileName();
 		CString	short_fn = filename;
@@ -382,7 +438,7 @@ void CGraphView::OnFileOpenClick()
 
 }
 
-void CGraphView::OnRenderFileClick()
+void CGraphView::OnFileAddmediafile()
 {
 	// nabrowsujeme subor
 	CString		filter;
@@ -401,8 +457,43 @@ void CGraphView::OnRenderFileClick()
 			MessageBox(_T("Cannot render file"));
 		}
 
+		// updatujeme MRU list
+		mru.NotifyEntry(filename);
+		UpdateMRUMenu();
+
 		graph.RefreshFilters();
 		graph.SmartPlacement();
+		graph.Dirty();
+		Invalidate();
+	}
+}
+
+void CGraphView::OnRenderFileClick()
+{
+	// nabrowsujeme subor
+	CString		filter;
+	CString		filename;
+
+	filter = _T("All Files|*.*|");
+
+	CFileDialog dlg(TRUE,NULL,NULL,OFN_OVERWRITEPROMPT|OFN_ENABLESIZING|OFN_FILEMUSTEXIST,filter);
+    int ret = dlg.DoModal();
+
+	filename = dlg.GetPathName();
+	if (ret == IDOK) {
+		OnNewClick();
+		int ret = graph.RenderFile(filename);
+		if (ret < 0) {
+			MessageBox(_T("Cannot render file"));
+		}
+
+		// updatujeme MRU list
+		mru.NotifyEntry(filename);
+		UpdateMRUMenu();
+
+		graph.RefreshFilters();
+		graph.SmartPlacement();
+		graph.Dirty();
 		Invalidate();
 	}
 }
@@ -490,6 +581,12 @@ void CGraphView::OnTimer(UINT_PTR nIDEvent)
 	case 2:
 		{
 			UpdateGraphState();
+		}
+		break;
+	case 1001:
+		{
+			KillTimer(1001);
+			UpdateRenderersMenu();
 		}
 		break;
 	}
@@ -872,3 +969,54 @@ void CGraphView::OnUpdateView200(CCmdUI *pCmdUI)
 {
 	pCmdUI->SetCheck(render_params.zoom == 200);
 }
+
+void CGraphView::OnAudioRendererClick(UINT nID)
+{
+	int	n = nID - ID_AUDIO_RENDERER0;
+	if (n < 0 || n >= audio_renderers.filters.GetCount()) return ;
+
+	InsertFilterFromTemplate(audio_renderers.filters[n]);
+}
+
+void CGraphView::OnVideoRendererClick(UINT nID)
+{
+	int	n = nID - ID_VIDEO_RENDERER0;
+	if (n < 0 || n >= video_renderers.filters.GetCount()) return ;
+
+	InsertFilterFromTemplate(video_renderers.filters[n]);
+}
+
+int CGraphView::InsertFilterFromTemplate(DSUtil::FilterTemplate &filter)
+{
+	// now create an instance of this filter
+	CComPtr<IBaseFilter>	instance;
+	HRESULT					hr;
+
+	hr = filter.CreateInstance(&instance);
+	if (FAILED(hr)) {
+		// display error message
+	} else {
+		
+		// now check for a few interfaces
+		int ret = ConfigureInsertedFilter(instance);
+		if (ret < 0) {
+			instance = NULL;
+		}
+
+		if (instance) {
+			// add the filter to graph
+			hr = graph.AddFilter(instance, filter.name);
+			if (FAILED(hr)) {
+				// display error message
+			} else {
+				graph.SmartPlacement();
+				Invalidate();
+			}
+		}
+	}
+	instance = NULL;
+	return 0;
+}
+
+
+

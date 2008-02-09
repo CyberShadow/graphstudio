@@ -163,6 +163,41 @@ namespace DSUtil
 		return *this;
 	}
 
+	PinTemplate::PinTemplate() :
+		dir(PINDIR_INPUT),
+		rendered(FALSE),
+		many(FALSE),
+		types(0)
+	{
+	}
+
+	PinTemplate::PinTemplate(const PinTemplate &pt) :
+		dir(pt.dir),
+		rendered(pt.rendered),
+		many(pt.many),
+		types(pt.types)
+	{
+		major.Append(pt.major);
+		minor.Append(pt.minor);
+	}
+
+	PinTemplate::~PinTemplate()
+	{
+		major.RemoveAll();
+		minor.RemoveAll();
+	}
+
+	PinTemplate &PinTemplate::operator =(const PinTemplate &pt)
+	{
+		dir = pt.dir;
+		rendered = pt.rendered;
+		many = pt.many;
+		major.RemoveAll();	major.Append(pt.major);
+		minor.RemoveAll();	minor.Append(pt.minor);
+		types = pt.types;
+		return *this;
+	}
+
 	FilterTemplate::FilterTemplate() :
 		name(_T("")),
 		file(_T("")),
@@ -187,10 +222,15 @@ namespace DSUtil
 			moniker = ft.moniker;
 			moniker->AddRef();
 		}
+
+		input_pins.Append(ft.input_pins);
+		output_pins.Append(ft.output_pins);
 	}
 
 	FilterTemplate::~FilterTemplate()
 	{
+		input_pins.RemoveAll();
+		output_pins.RemoveAll();
 		if (moniker) {
 			moniker->Release();
 			moniker = NULL;
@@ -202,6 +242,11 @@ namespace DSUtil
 		if (moniker) { moniker->Release(); moniker = NULL; }
 		moniker = ft.moniker;
 		if (moniker) moniker->AddRef();
+
+		input_pins.RemoveAll();
+		output_pins.RemoveAll();
+		input_pins.Append(ft.input_pins);
+		output_pins.Append(ft.output_pins);
 
 		name = ft.name;
 		file = ft.file;
@@ -246,6 +291,66 @@ namespace DSUtil
 		}
 
 		return NOERROR;
+	}
+
+	int FilterTemplate::Load(char *buf, int size)
+	{
+		DWORD	*b = (DWORD*)buf;
+
+		version = b[0];
+		merit   = b[1];
+
+		int cpins1, cpins2;
+		cpins1  = b[2];
+		cpins2  = b[3];
+
+		CArray<PinTemplate>		temp_pins;
+
+		DWORD	*ps = b+4;
+		for (int i=0; i<cpins1; i++) {
+			PinTemplate	pin;
+
+			DWORD	flags = ps[1];
+			pin.rendered  = (flags & 0x02 ? TRUE : FALSE);
+			pin.many      = (flags & 0x04 ? TRUE : FALSE);
+			pin.dir       = (flags & 0x08 ? PINDIR_OUTPUT : PINDIR_INPUT);
+			pin.types     = ps[3];
+			
+			// skip dummy data
+			ps += 6;
+			for (int j=0; j<pin.types; j++) {
+				int maj_offset = ps[2];
+				int min_offset = ps[3];
+
+				if ((maj_offset + 16 <= size) && (min_offset + 16 <= size)) {
+					GUID	g;
+					BYTE	*m = (BYTE*)(&buf[maj_offset]);
+					g.Data1 = m[0] | (m[1] << 8) | (m[2] << 16) | (m[3] << 24);
+					g.Data2 = m[4] | (m[5] << 8);
+					g.Data3 = m[6] | (m[7] << 8);
+					memcpy(g.Data4, m+8, 8);
+					pin.major.Add(g);
+
+					m = (BYTE*)(&buf[min_offset]);
+					g.Data1 = m[0] | (m[1] << 8) | (m[2] << 16) | (m[3] << 24);
+					g.Data2 = m[4] | (m[5] << 8);
+					g.Data3 = m[6] | (m[7] << 8);
+					memcpy(g.Data4, m+8, 8);
+					pin.minor.Add(g);
+				}
+			
+				ps += 4;
+			}
+			pin.types = pin.major.GetCount();
+
+			if (pin.dir == PINDIR_OUTPUT) {
+				output_pins.Add(pin);
+			} else {
+				input_pins.Add(pin);
+			}
+		}
+
+		return 0;
 	}
 
 	// vytvorenie instancie
@@ -373,6 +478,52 @@ namespace DSUtil
 		filters.RemoveAll();
 	}
 
+
+	int _FilterCompare(FilterTemplate &f1, FilterTemplate &f2)
+	{
+		CString s1 = f1.name; s1.MakeUpper();
+		CString s2 = f2.name; s2.MakeUpper();
+
+		return s1.Compare(s2);
+	}
+
+	void FilterTemplates::SwapItems(int i, int j)
+	{	
+		if (i == j) return ;
+		FilterTemplate	temp = filters[i];
+		filters[i] = filters[j];
+		filters[j] = temp;
+	}
+
+	void FilterTemplates::_Sort_(int lo, int hi)
+	{
+		int i = lo, j = hi;
+		FilterTemplate m;
+
+		// pivot
+		m = filters[ (lo+hi)>>1 ];
+
+		do {
+			while (_FilterCompare(m, filters[i])>0) i++;
+			while (_FilterCompare(filters[j], m)>0) j--;
+
+			if (i <= j) {
+				SwapItems(i, j);
+				i++;
+				j--;
+			}
+		} while (i <= j);
+
+		if (j > lo) _Sort_(lo, j);
+		if (i < hi) _Sort_(i, hi);
+	}
+
+	void FilterTemplates::SortByName()
+	{
+		if (filters.GetCount() == 0) return ;
+		_Sort_(0, filters.GetCount()-1);
+	}
+
 	int FilterTemplates::Enumerate(FilterCategory &cat)
 	{
 		return Enumerate(cat.clsid);
@@ -425,6 +576,49 @@ namespace DSUtil
 		return E_FAIL;
 	}
 
+	int FilterTemplates::EnumerateAudioRenderers()
+	{
+		int ret = Enumerate(CLSID_AudioRendererCategory);
+		if (ret < 0) return ret;
+		SortByName();
+		return ret;
+	}
+
+	int FilterTemplates::EnumerateVideoRenderers()
+	{
+		CComPtr<IFilterMapper2>		mapper;
+		CComPtr<IEnumMoniker>		emoniker;
+		HRESULT						hr;
+		int							ret = 0;
+
+		// we're only interested in video types
+		GUID						types[] = {
+			MEDIATYPE_Video, MEDIASUBTYPE_None,
+			MEDIATYPE_Video, MEDIASUBTYPE_RGB32,
+			MEDIATYPE_Video, MEDIASUBTYPE_YUY2
+		};
+
+		hr = mapper.CoCreateInstance(CLSID_FilterMapper2);
+		if (FAILED(hr)) return -1;
+
+		// find all matching filters
+		hr = mapper->EnumMatchingFilters(&emoniker, 0, FALSE,
+					MERIT_DO_NOT_USE,
+					TRUE, 3, types,	NULL, NULL,
+					FALSE,
+					FALSE, 0, NULL, NULL, NULL);
+		if (SUCCEEDED(hr)) {
+			ret = AddFilters(emoniker, 1);
+		}
+
+		emoniker = NULL;
+		mapper = NULL;
+
+		SortByName();
+
+		return ret;
+	}
+
 	int FilterTemplates::Enumerate(GUID clsid)
 	{
 		filters.RemoveAll();
@@ -432,9 +626,6 @@ namespace DSUtil
 		// ideme nato
 		ICreateDevEnum		*sys_dev_enum = NULL;
 		IEnumMoniker		*enum_moniker = NULL;
-		IMoniker			*moniker = NULL;
-		IPropertyBag		*propbag = NULL;
-		ULONG				f;
 		HRESULT				hr;
 		int					ret = -1;
 
@@ -445,71 +636,110 @@ namespace DSUtil
 			// ideme enumerovat filtre
 			hr = sys_dev_enum->CreateClassEnumerator(clsid, &enum_moniker, 0);
 			if (hr != NOERROR) break;
-
-			enum_moniker->Reset();
-			while (enum_moniker->Next(1, &moniker, &f) == NOERROR) {
-				hr = moniker->BindToStorage(NULL, NULL, IID_IPropertyBag, (void**)&propbag);
-				if (SUCCEEDED(hr)) {
-					VARIANT				var;
-					FilterTemplate		filter;
-
-					VariantInit(&var);
-					hr = propbag->Read(L"FriendlyName", &var, 0);
-					if (SUCCEEDED(hr)) {
-						filter.name = CString(var.bstrVal);
-					}
-					VariantClear(&var);
-
-					VariantInit(&var);
-					hr = propbag->Read(L"FilterData", &var, 0);
-					if (SUCCEEDED(hr)) {
-						SAFEARRAY	*ar = var.parray;
-						int	size = ar->rgsabound[0].cElements;
-
-						// load merit and version
-						if (size >= 8) {
-							DWORD	*ptr = (DWORD*)ar->pvData;
-							filter.version = ptr[0];
-							filter.merit = ptr[1];
-						}
-					}
-					VariantClear(&var);
-
-					VariantInit(&var);
-					hr = propbag->Read(L"CLSID", &var, 0);
-					if (SUCCEEDED(hr)) {
-						if (SUCCEEDED(CLSIDFromString(var.bstrVal, &filter.clsid))) {
-							// mame novy filter
-							filter.moniker = moniker;
-							filter.moniker->AddRef();
-							filter.FindFilename();
-
-							filters.Add(filter);
-						}
-					}
-					VariantClear(&var);
-
-					propbag->Release();
-					propbag = NULL;
-				}
-				moniker->Release();
-				moniker = NULL;
-			}
-
-			// sme okej
-			ret = 0;
+		
+			ret = AddFilters(enum_moniker);
 		} while (0);
 
 	label_done:
-		if (propbag) propbag->Release();
-		if (moniker) moniker->Release();
 		if (enum_moniker) enum_moniker->Release();
 		if (sys_dev_enum) sys_dev_enum->Release();
 
 		return ret;
 	}
 
+	int FilterTemplates::AddFilters(IEnumMoniker *emoniker, int enumtype)
+	{
+		IMoniker			*moniker = NULL;
+		IPropertyBag		*propbag = NULL;
+		ULONG				f;
+		HRESULT				hr;
 
+		emoniker->Reset();
+		while (emoniker->Next(1, &moniker, &f) == NOERROR) {
+
+			hr = moniker->BindToStorage(NULL, NULL, IID_IPropertyBag, (void**)&propbag);
+			if (SUCCEEDED(hr)) {
+				VARIANT				var;
+				FilterTemplate		filter;
+
+				VariantInit(&var);
+				hr = propbag->Read(L"FriendlyName", &var, 0);
+				if (SUCCEEDED(hr)) {
+					filter.name = CString(var.bstrVal);
+				}
+				VariantClear(&var);
+
+				VariantInit(&var);
+				hr = propbag->Read(L"FilterData", &var, 0);
+				if (SUCCEEDED(hr)) {
+					SAFEARRAY	*ar = var.parray;
+					int	size = ar->rgsabound[0].cElements;
+
+					// load merit and version
+					filter.Load((char*)ar->pvData, size);
+				}
+				VariantClear(&var);
+
+				VariantInit(&var);
+				hr = propbag->Read(L"CLSID", &var, 0);
+				if (SUCCEEDED(hr)) {
+					if (SUCCEEDED(CLSIDFromString(var.bstrVal, &filter.clsid))) {
+						// mame novy filter
+						filter.moniker = moniker;
+						filter.moniker->AddRef();
+						filter.FindFilename();
+
+						int	can_go = 0;
+						switch (enumtype) {
+						case 0:		can_go = 0; break;
+						case 1:		can_go = IsVideoRenderer(filter); break;
+						}
+
+						if (can_go == 0) filters.Add(filter);
+					}
+				}
+				VariantClear(&var);
+
+				propbag->Release();
+				propbag = NULL;
+			}
+			moniker->Release();
+			moniker = NULL;
+		}
+
+		if (propbag) propbag->Release();
+		if (moniker) moniker->Release();
+		return 0;
+	}
+
+	int FilterTemplates::IsVideoRenderer(FilterTemplate &filter)
+	{
+		// video renderer must have no output pins
+		if (filter.output_pins.GetCount() > 0) return -1;
+
+		// video renderer must have MEDIATYPE_Video registered for input pin
+		bool	okay = false;
+		for (int i=0; i<filter.input_pins.GetCount(); i++) {
+			PinTemplate &pin = filter.input_pins[i];
+
+			for (int j=0; j<pin.types; j++) {
+				if (pin.major[j] == MEDIATYPE_Video) {
+					okay = true;
+					break;
+				}
+			}
+
+			if (okay) break;
+		}
+		if (!okay) return -1;
+
+		// VMR-7 and old VR have the same name
+		if (filter.clsid == CLSID_VideoRendererDefault) {
+			filter.name = _T("Video Mixing Renderer 7");
+		}
+
+		return 0;
+	}
 
 
 	HRESULT DisplayPropertyPage(IBaseFilter *filter, HWND parent)

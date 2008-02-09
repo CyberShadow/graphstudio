@@ -27,23 +27,27 @@ protected:
 
 public:
 
-	CFiltersForm			*form_filters;
-	CEventsForm				*form_events;
-	CTextInfoForm			*form_textinfo;
+	CFiltersForm				*form_filters;
+	CEventsForm					*form_events;
+	CTextInfoForm				*form_textinfo;
 
 	// active property pages
-	CArray<CPropertyForm*>	property_pages;
+	CArray<CPropertyForm*>		property_pages;
 
 	// most recently used list
-	GraphStudio::MRUList	mru;
+	GraphStudio::MRUList		mru;
+
+	// enumerated audio & video renderers
+	DSUtil::FilterTemplates		audio_renderers;
+	DSUtil::FilterTemplates		video_renderers;
 
 
-	CString			filename;
-	bool			can_save;
+	CString						filename;
+	bool						can_save;
 
 	// filter state
-	bool			state_ready;
-	FILTER_STATE	graph_state;
+	bool						state_ready;
+	FILTER_STATE				graph_state;
 
 
 public:
@@ -77,6 +81,11 @@ public:
 
 	// menu
 	void UpdateMRUMenu();
+	void UpdateRenderersMenu();
+
+	void OnAudioRendererClick(UINT nID);
+	void OnVideoRendererClick(UINT nID);
+	int InsertFilterFromTemplate(DSUtil::FilterTemplate &filter);
 
 	// keyboard events
 	void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
@@ -126,6 +135,7 @@ public:
 	afx_msg void OnUpdateView100(CCmdUI *pCmdUI);
 	afx_msg void OnUpdateView150(CCmdUI *pCmdUI);
 	afx_msg void OnUpdateView200(CCmdUI *pCmdUI);
+	afx_msg void OnFileAddmediafile();
 };
 
 #ifndef _DEBUG  // debug version in graphView.cpp

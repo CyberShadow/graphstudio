@@ -10,6 +10,8 @@
 #include <atlbase.h>
 #include <atlpath.h>
 
+#pragma warning(disable: 4244)			// DWORD -> BYTE warning
+
 namespace GraphStudio
 {
 

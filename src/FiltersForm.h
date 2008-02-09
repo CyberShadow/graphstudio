@@ -85,3 +85,7 @@ public:
 	virtual void OnItemDblClk(int item);
 
 };
+
+int ConfigureInsertedFilter(IBaseFilter *filter);
+
+
