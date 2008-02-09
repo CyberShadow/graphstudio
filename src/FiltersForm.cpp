@@ -295,6 +295,10 @@ void CFiltersForm::OnBnClickedButtonInsert()
 			} else {
 				
 				// now check for a few interfaces
+
+				//-------------------------------------------------------------
+				//	IFileSourceFilter
+				//-------------------------------------------------------------
 				CComPtr<IFileSourceFilter>	fs;
 				hr = instance->QueryInterface(IID_IFileSourceFilter, (void**)&fs);
 				if (SUCCEEDED(hr)) {
@@ -311,6 +315,27 @@ void CFiltersForm::OnBnClickedButtonInsert()
 					}
 					fs = NULL;
 				}
+
+				//-------------------------------------------------------------
+				//	IFileSinkFilter
+				//-------------------------------------------------------------
+				CComPtr<IFileSinkFilter>	fsink;
+				hr = instance->QueryInterface(IID_IFileSinkFilter, (void**)&fsink);
+				if (SUCCEEDED(hr)) {
+					CFileSinkForm		sink_form;
+					int ret = sink_form.DoModal();
+					if (ret == IDOK) {
+						hr = fsink->SetFileName((LPCOLESTR)sink_form.result_file, NULL);
+						if (FAILED(hr)) {
+							MessageBox(_T("Cannot write specified file"), _T("Error"), MB_ICONERROR);
+						}
+					} else {
+						// cancel the filter
+						instance = NULL;
+					}
+					fsink = NULL;
+				}
+
 
 				if (instance) {
 					// add the filter to graph

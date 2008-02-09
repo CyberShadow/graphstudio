@@ -15,7 +15,7 @@ namespace GraphStudio
 	//	DisplayView class
 	//
 	//-------------------------------------------------------------------------
-	class DisplayView : public CView, public GraphCallback
+	class DisplayView : public CScrollView, public GraphCallback
 	{
 	protected:
 		DECLARE_DYNCREATE(DisplayView)
@@ -23,45 +23,31 @@ namespace GraphStudio
 
 	public:
 
-		// color and font settings
-		DWORD			color_back;
-		
-		// filter settings
-		DWORD			filter_color;
-		DWORD			color_filter_border_light;
-		DWORD			color_filter_border_dark;
-		DWORD			select_color;
-		DWORD			filter_type_colors[4];
-
-		CFont			font_filter;
-		CFont			font_pin;
+		RenderParameters	render_params;
 
 		// graph currently displayed
-		DisplayGraph	graph;
-
-		// zoom
-		double			zoom;
+		DisplayGraph		graph;
 
 		// double buffered view
-		CBitmap			backbuffer;
-		CDC				memDC;
-		int				back_width, back_height;
+		CBitmap				backbuffer;
+		CDC					memDC;
+		int					back_width, back_height;
 
-		CPoint			start_drag_point;
+		CPoint				start_drag_point;
 
 		// creating new connection
-		CPoint			new_connection_start;
-		CPoint			new_connection_end;
+		CPoint				new_connection_start;
+		CPoint				new_connection_end;
 
 		enum {
 			DRAG_GROUP = 0,
 			DRAG_CONNECTION = 1
 		};
-		int				drag_mode;
+		int					drag_mode;
 
 		// helpers for rightclick menu
-		Filter			*current_filter;
-		Pin				*current_pin;
+		Filter				*current_filter;
+		Pin					*current_pin;
 
 	public:
 		DisplayView();
@@ -82,12 +68,15 @@ namespace GraphStudio
 
 		void MakeScreenshot();
 
+		// scrolling aid
+		void UpdateScrolling();
+		void RepaintBackbuffer();
+
 		// to be overriden
 		virtual void OnDisplayPropertyPage(IUnknown *object, IUnknown *filter, CString title);
 		virtual void OnFilterRemoved(DisplayGraph *sender, Filter *filter);
 	};
 
-	void MakeFont(CFont &f, CString name, int size, bool bold, bool italic);
 
 };
 

@@ -86,7 +86,7 @@ BOOL CgraphstudioApp::InitInstance()
 	if (!ProcessShellCommand(cmdInfo)) return FALSE;
 
 	// The one and only window has been initialized, so show and update it
-	m_pMainWnd->SetWindowPos(NULL, 0, 0, 900, 400, SWP_NOMOVE);
+	//m_pMainWnd->SetWindowPos(NULL, 0, 0, 900, 400, SWP_NOMOVE);
 
 	CMainFrame	*frame = (CMainFrame *)m_pMainWnd;
 	CGraphView	*view  = (CGraphView *)frame->GetActiveView();

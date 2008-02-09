@@ -10,13 +10,13 @@
 
 //-----------------------------------------------------------------------------
 //
-//	CFileSrcForm class
+//	CFileSinkForm class
 //
 //-----------------------------------------------------------------------------
-class CFileSrcForm : public CDialog
+class CFileSinkForm : public CDialog
 {
 protected:
-	DECLARE_DYNAMIC(CFileSrcForm)
+	DECLARE_DYNAMIC(CFileSinkForm)
 	DECLARE_MESSAGE_MAP()
 
 	virtual void DoDataExchange(CDataExchange* pDX);
@@ -38,11 +38,11 @@ public:
 	void SaveRecentlyUsedList(CString name, CArray<CString> &list);
 	void UpdateList(CString item, CArray<CString> &list);
 public:
-	CFileSrcForm(CWnd* pParent = NULL);   
-	virtual ~CFileSrcForm();
+	CFileSinkForm(CWnd* pParent = NULL);   
+	virtual ~CFileSinkForm();
 
 	// Dialog Data
-	enum { IDD = IDD_DIALOG_ASYNCOPEN };
+	enum { IDD = IDD_DIALOG_FILESINK };
 
 	afx_msg void OnBnClickedRadioFile();
 	afx_msg void OnBnClickedRadioUrl();

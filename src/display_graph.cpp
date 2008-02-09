@@ -13,6 +13,19 @@
 namespace GraphStudio
 {
 
+	void MakeFont(CFont &f, CString name, int size, bool bold, bool italic)
+	{
+		HDC dc = CreateCompatibleDC(NULL);
+		int nHeight    = -MulDiv(size, (int)(GetDeviceCaps(dc, LOGPIXELSY)), 72 );
+		DeleteDC(dc);
+
+		DWORD dwBold   = (bold ? FW_BOLD : 0);
+		DWORD dwItalic = (italic ? TRUE : FALSE);
+
+		f.CreateFont(nHeight, 0, 0, 0, dwBold, dwItalic, FALSE, FALSE, DEFAULT_CHARSET,
+					  OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, 5, VARIABLE_PITCH, name);
+	}
+
 	//-------------------------------------------------------------------------
 	//
 	//	DisplayGraph class
@@ -31,6 +44,8 @@ namespace GraphStudio
 		is_remote = false;
 
 		MakeNew();
+
+		dirty = true;
 	}
 
 	DisplayGraph::~DisplayGraph()
@@ -142,6 +157,26 @@ namespace GraphStudio
 			filters[i]->DeleteFilter();
 		}
 		RefreshFilters();
+		Dirty();
+	}
+
+	CSize DisplayGraph::GetGraphSize()
+	{
+		// find out the rectangle
+		int maxx = 0;
+		int maxy = 0;
+
+		for (int i=0; i<filters.GetCount(); i++) {
+			Filter	*filter = filters[i];
+			if (filter->posx + filter->width > maxx) maxx = filter->posx+filter->width;
+			if (filter->posy + filter->height > maxy) maxy = filter->posy+filter->height;
+		}
+
+		// 8-pixel alignment
+		maxx = (maxx+7) &~ 0x07; maxx += 8;
+		maxy = (maxy+7) &~ 0x07; maxy += 8;
+
+		return CSize(maxx, maxy);
 	}
 
 	int DisplayGraph::GetState(FILTER_STATE &state, DWORD timeout)
@@ -467,6 +502,8 @@ namespace GraphStudio
 		// kill those inactive
 		RemoveUnusedFilters();
 		LoadPeers();
+		Dirty();
+
 	}
 
 	void DisplayGraph::LoadPeers()
@@ -479,22 +516,22 @@ namespace GraphStudio
 
 
 	// kreslenie grafu
-	void DisplayGraph::Draw(DisplayView *view)
+	void DisplayGraph::Draw(CDC *dc)
 	{
 		int i;
 		for (i=0; i<filters.GetCount(); i++) {
 			Filter *filter = filters[i];
-			filter->Draw(view);
+			filter->Draw(dc);
 		}
 
 		// now draw all connections
 		for (i=0; i<filters.GetCount(); i++) {
 			Filter *filter = filters[i];
-			filter->DrawConnections(view);
+			filter->DrawConnections(dc);
 		}
 	}
 
-	void DisplayGraph::DrawArrow(DisplayView *view, CPoint p1, CPoint p2)
+	void DisplayGraph::DrawArrow(CDC *dc, CPoint p1, CPoint p2)
 	{
 		DoDrawArrow(dc, p1, p2, RGB(0,0,0));
 	}
@@ -567,12 +604,10 @@ namespace GraphStudio
 	//
 	//-------------------------------------------------------------------------
 
-	int Filter::MINWIDTH  = 92;
-	int	Filter::MINHEIGHT = 86;
-
 	Filter::Filter(DisplayGraph *parent)
 	{
 		graph = parent;
+		params = graph->params;
 		name = _T("");
 		clsid = CLSID_VideoMixingRenderer9;
 		clsid_str = _T("");
@@ -671,8 +706,8 @@ namespace GraphStudio
 
 			// keep a reference
 			f->QueryInterface(IID_IBaseFilter, (void**)&filter);
-			width = MINWIDTH;
-			height = MINHEIGHT;
+			width = params->min_filter_width;
+			height = params->min_filter_height;
 		}
 		if (!filter || !f) return ;
 		
@@ -690,26 +725,45 @@ namespace GraphStudio
 
 		// todo: check for IFileSourceFilter
 		display_name = name;
+
+		//---------------------------------------------------------------------
+		//	Check FileSource & FileSink
+		//---------------------------------------------------------------------
 		CComPtr<IFileSourceFilter>	fs;
+		CComPtr<IFileSinkFilter>	fsink;
 		HRESULT						hr;
+		CString						url_name = _T("");
+
 		hr = f->QueryInterface(IID_IFileSourceFilter, (void**)&fs);
 		if (SUCCEEDED(hr)) {
-			LPOLESTR	url_name;
-			hr = fs->GetCurFile(&url_name, NULL);
+			LPOLESTR	url_name_ole;
+			hr = fs->GetCurFile(&url_name_ole, NULL);
 			if (SUCCEEDED(hr)) {
-				CString		fn = CString(url_name);
-				CPath		path(fn);
-				CoTaskMemFree(url_name);
-
-				int fstart = path.FindFileName();
-				if (fstart >= 0) {
-					fn.Delete(0, fstart);
-					if (fn != ""){
-						display_name = fn;
-					}
-				}
+				url_name = CString(url_name_ole);
+				CoTaskMemFree(url_name_ole);
 			}
 			fs = NULL;
+		}
+		hr = f->QueryInterface(IID_IFileSinkFilter, (void**)&fsink);
+		if (SUCCEEDED(hr)) {
+			LPOLESTR	url_name_ole;
+			hr = fsink->GetCurFile(&url_name_ole, NULL);
+			if (SUCCEEDED(hr)) {
+				url_name = CString(url_name_ole);
+				CoTaskMemFree(url_name_ole);
+			}
+			fsink = NULL;
+		}
+
+		if (url_name != _T("")) {
+			CPath		path(url_name);
+			int fstart = path.FindFileName();
+			if (fstart >= 0) {
+				url_name.Delete(0, fstart);
+				if (url_name != ""){
+					display_name = url_name;
+				}
+			}
 		}
 
 		// now scan for pins
@@ -750,14 +804,14 @@ namespace GraphStudio
 		//---------------------------------------------------------------------
 		// calculate size
 		//---------------------------------------------------------------------		
-		graph->dc->SelectObject(graph->filter_font);
+		graph->dc->SelectObject(&params->font_filter);
 		CSize	size = graph->dc->GetTextExtent(display_name);
 		size.cx += 2 * 24;
-		width = (size.cx + 15) &~ 0x0f;		if (width < MINWIDTH) width = MINWIDTH;
-		height = (size.cy + 15) &~ 0x0f;	if (height < MINHEIGHT) height = MINHEIGHT;
+		width = (size.cx + 15) &~ 0x0f;		if (width < params->min_filter_width) width = params->min_filter_width;
+		height = (size.cy + 15) &~ 0x0f;	if (height < params->min_filter_height) height = params->min_filter_height;
 
 		int		maxpins = max(input_pins.GetCount(), output_pins.GetCount());
-		int		minsize = ((26 + maxpins*27) + 15) &~ 0x0f;
+		int		minsize = (((1 + maxpins)*params->pin_spacing) + (params->pin_spacing/2)) &~ 0x0f;
 		if (height < minsize) height = minsize;
 
 		// we don't need it anymore
@@ -856,10 +910,8 @@ namespace GraphStudio
 		dc->LineTo(p2);
 	}
 
-	void Filter::DrawConnections(DisplayView *view)
-	{
-		CDC		*dc = graph->dc;
-
+	void Filter::DrawConnections(CDC *dc)
+	{		
 		// render directed arrows for all connected output pins
 		for (int i=0; i<output_pins.GetCount(); i++) {
 			Pin		*pin = output_pins[i];
@@ -870,38 +922,36 @@ namespace GraphStudio
 				CPoint	pt1, pt2;
 				pin->GetCenterPoint(&pt1);
 				peer->GetCenterPoint(&pt2);
-				if (pin->selected) color = view->select_color;
+				if (pin->selected) color = params->select_color;
 			
 				DoDrawArrow(dc, pt1, pt2, color);
 			}
 		}
 	}
 
-	void Filter::Draw(DisplayView *view)
+	void Filter::Draw(CDC *dc)
 	{
-		CDC		*dc = graph->dc;
-
-		DWORD	back_color = view->filter_type_colors[0];
+		DWORD	back_color = params->filter_type_colors[0];
 		if (connected) {
-			back_color = view->filter_type_colors[filter_type];
+			back_color = params->filter_type_colors[filter_type];
 		}
 
-		CPen	pen_light(PS_SOLID, 1, view->color_filter_border_light);
-		CPen	pen_dark(PS_SOLID, 1, view->color_filter_border_dark);
+		CPen	pen_light(PS_SOLID, 1, params->color_filter_border_light);
+		CPen	pen_dark(PS_SOLID, 1, params->color_filter_border_dark);
 		CPen	pen_back(PS_SOLID, 1, back_color);
 		CBrush	brush_back(back_color);
 		dc->SetBkMode(TRANSPARENT);
 
 		CPen	*prev_pen   = dc->SelectObject(&pen_back);
 		CBrush	*prev_brush = dc->SelectObject(&brush_back);
-		CFont	*prev_font	= dc->SelectObject(&view->font_filter);
+		CFont	*prev_font	= dc->SelectObject(&params->font_filter);
 
 		//---------------------------------------------------------------------
 		// draw the selection frame
 		//---------------------------------------------------------------------
 		if (selected) {
-			CPen	sel_pen(PS_SOLID, 1, view->select_color);
-			CBrush	sel_brush(view->select_color);
+			CPen	sel_pen(PS_SOLID, 1, params->select_color);
+			CBrush	sel_brush(params->select_color);
 			dc->SelectObject(&sel_pen);
 			dc->SelectObject(&sel_brush);
 			dc->Rectangle(posx-2, posy-2, posx+width+2, posy+height+2);
@@ -944,18 +994,18 @@ namespace GraphStudio
 		//---------------------------------------------------------------------
 		int i, x, y;
 		x = posx-5;
-		y = posy+26;
+		y = posy + params->pin_spacing;
 		for (i=0; i<input_pins.GetCount(); i++) {
 			Pin *pin = input_pins[i];
-			pin->Draw(dc, view, true, x, y);
-			y += 27;
+			pin->Draw(dc, true, x, y);
+			y += params->pin_spacing;
 		}
 		x = posx+width-2;
-		y = posy+26;
+		y = posy + params->pin_spacing;
 		for (i=0; i<output_pins.GetCount(); i++) {
 			Pin *pin = output_pins[i];
-			pin->Draw(dc, view, false, x, y);
-			y += 27;
+			pin->Draw(dc, false, x, y);
+			y += params->pin_spacing;
 		}
 
 
@@ -1120,6 +1170,7 @@ namespace GraphStudio
 		filter(parent),
 		id(_T(""))
 	{
+		params = parent->params;
 		pin = NULL;
 		peer = NULL;
 		selected = false;
@@ -1182,7 +1233,7 @@ namespace GraphStudio
 		}
 
 		// calculate X and Y
-		pt->y = filter->posy + 26 + index*27 + 4;
+		pt->y = filter->posy + (1+index)*params->pin_spacing + 4;
 		if (dir == PINDIR_INPUT) {
 			pt->x = filter->posx - 1;
 		} else {
@@ -1249,15 +1300,15 @@ namespace GraphStudio
 		return false;
 	}
 
-	void Pin::Draw(CDC *dc, DisplayView *view, bool input, int x, int y)
+	void Pin::Draw(CDC *dc, bool input, int x, int y)
 	{
-		CPen	pen_light(PS_SOLID, 1, view->color_filter_border_light);
-		CPen	pen_dark(PS_SOLID, 1, view->color_filter_border_dark);
-		CPen	pen_back(PS_SOLID, 1, view->filter_type_colors[0]);
-		CBrush	brush_back(view->filter_type_colors[0]);
+		CPen	pen_light(PS_SOLID, 1, params->color_filter_border_light);
+		CPen	pen_dark(PS_SOLID, 1, params->color_filter_border_dark);
+		CPen	pen_back(PS_SOLID, 1, params->filter_type_colors[0]);
+		CBrush	brush_back(params->filter_type_colors[0]);
 
 		int		pinsize = 5;
-		dc->SelectObject(&view->font_pin);
+		dc->SelectObject(&params->font_pin);
 		CSize	size = dc->GetTextExtent(name);
 
 		if (input) {
@@ -1275,7 +1326,7 @@ namespace GraphStudio
 
 			// dot in the middle
 			dc->SelectObject(&pen_dark);
-			dc->SetPixel(x+2+pinsize/2, y+pinsize/2 + 2, view->color_filter_border_dark);
+			dc->SetPixel(x+2+pinsize/2, y+pinsize/2 + 2, params->color_filter_border_dark);
 
 			// pin name
 			CRect	rc(x+pinsize+6, y - 10, x+pinsize+6+size.cx, y + 4+pinsize + 10);
@@ -1299,7 +1350,7 @@ namespace GraphStudio
 
 			// dot in the middle
 			dc->SelectObject(&pen_dark);
-			dc->SetPixel(x+pinsize/2, y+pinsize/2 + 2, view->color_filter_border_dark);
+			dc->SetPixel(x+pinsize/2, y+pinsize/2 + 2, params->color_filter_border_dark);
 
 			// pin name
 			CRect	rc(x-4-size.cx, y - 10, x-4, y + 4+pinsize + 10);
@@ -1356,6 +1407,57 @@ namespace GraphStudio
 	}
 
 
+	//-------------------------------------------------------------------------
+	//
+	//	RenderParameters class
+	//
+	//-------------------------------------------------------------------------
+
+	RenderParameters::RenderParameters()
+	{
+		color_back = RGB(192, 192, 192);		// default background color
+		select_color = RGB(0,0,255);
+
+		// filter colors
+		color_filter_border_light = RGB(255, 255, 255);
+		color_filter_border_dark = RGB(128, 128, 128);
+
+		filter_type_colors[Filter::FILTER_UNKNOWN] = RGB(192,192,192);
+		filter_type_colors[Filter::FILTER_STANDARD] = RGB(192,192,255);
+		filter_type_colors[Filter::FILTER_WDM] = RGB(255,128,0);
+		filter_type_colors[Filter::FILTER_DMO] = RGB(0,192,64);
+
+		// default size at 100%
+		def_min_width = 92;
+		def_min_height = 86;
+		def_pin_spacing = 27;
+		def_filter_text_size = 10;
+		def_pin_text_size = 7;
+
+		Zoom(1.0);
+	}
+
+	RenderParameters::~RenderParameters()
+	{
+	}
+
+	void RenderParameters::Zoom(int z)
+	{
+		zoom = z;
+
+		min_filter_width = (((int)(z * def_min_width / 100.0))); // &~ 0x08;
+		min_filter_height = (((int)(z * def_min_height / 100.0))); // &~ 0x08;
+		pin_spacing = (int)(z * def_pin_spacing / 100.0);
+
+		if (font_filter.m_hObject != 0) { font_filter.DeleteObject(); }
+		if (font_pin.m_hObject != 0) { font_pin.DeleteObject(); }
+
+		int size = 5 + (5.0*z / 100.0);
+		MakeFont(font_filter, _T("Arial"), size, false, false); 
+		size = 5 + (2.0*z / 100.0);
+		MakeFont(font_pin, _T("Arial"), size, false, false);
+
+	}
 
 
 

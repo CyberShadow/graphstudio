@@ -15,12 +15,58 @@ namespace GraphStudio
 
 	//-------------------------------------------------------------------------
 	//
+	//	RenderParameters class
+	//
+	//-------------------------------------------------------------------------
+	class RenderParameters
+	{
+	public:
+
+		// color and font settings
+		DWORD			color_back;
+
+		// filter settings
+		DWORD			filter_color;
+		DWORD			color_filter_border_light;
+		DWORD			color_filter_border_dark;
+		DWORD			select_color;
+		DWORD			filter_type_colors[4];
+
+		CFont			font_filter;
+		CFont			font_pin;
+
+		// zoom
+		int				zoom;
+		
+		// size of elements
+		int				min_filter_width;
+		int				min_filter_height;
+		int				pin_spacing;
+
+		// default size at 100%
+		int				def_min_width;
+		int				def_min_height;
+		int				def_pin_spacing;
+		int				def_filter_text_size;
+		int				def_pin_text_size;
+
+	public:
+		RenderParameters();
+		virtual ~RenderParameters();
+
+		// adjust sizes
+		void Zoom(int z);
+	};
+
+	//-------------------------------------------------------------------------
+	//
 	//	Pin class
 	//
 	//-------------------------------------------------------------------------
 	class Pin
 	{
 	public:
+		RenderParameters		*params;
 		Filter					*filter;
 		CString					name;
 		CString					id;
@@ -35,7 +81,7 @@ namespace GraphStudio
 		virtual ~Pin();
 
 		// draw the pin
-		void Draw(CDC *dc, DisplayView *view, bool input, int x, int y);
+		void Draw(CDC *dc, bool input, int x, int y);
 		void GetCenterPoint(CPoint *pt);
 
 		int Load(IPin *pin);
@@ -55,10 +101,9 @@ namespace GraphStudio
 	class Filter
 	{
 	public:
-		static int				MINWIDTH;
-		static int				MINHEIGHT;
 
 		DisplayGraph			*graph;
+		RenderParameters		*params;
 		CString					name;				// name of the filter
 		CString					display_name;		// name as it appears
 		CLSID					clsid;				// it's CLASS_ID
@@ -90,8 +135,8 @@ namespace GraphStudio
 		virtual ~Filter();
 
 		// kreslenie filtra
-		void Draw(DisplayView *view);
-		void DrawConnections(DisplayView *view);
+		void Draw(CDC *dc);
+		void DrawConnections(CDC *dc);
 
 		// I/O
 		void Release();
@@ -149,7 +194,9 @@ namespace GraphStudio
 
 		CArray<Filter*>					filters;
 		CDC								*dc;
-		CFont							*filter_font;
+
+		// render parameters
+		RenderParameters				*params;
 
 		// bins in filters are (smart placement)
 		CArray<CPoint>					bins;
@@ -158,6 +205,7 @@ namespace GraphStudio
 		HWND							wndEvents;
 		GraphCallback					*callback;
 		bool							is_remote;
+		bool							dirty;
 
 	public:
 		DisplayGraph();
@@ -186,8 +234,8 @@ namespace GraphStudio
 		int ConnectPins(Pin *p1, Pin *p2);
 
 		// rendering the graph
-		void Draw(DisplayView *view);
-		void DrawArrow(DisplayView *view, CPoint p1, CPoint p2);
+		void Draw(CDC *dc);
+		void DrawArrow(CDC *dc, CPoint p1, CPoint p2);
 
 		// mouse interaction
 		Filter *FindFilterByPos(CPoint pt);
@@ -199,6 +247,11 @@ namespace GraphStudio
 		// seeking helpers
 		int GetPositions(double &current_ms, double &duration_ms);
 		int Seek(double time_ms);
+
+		// scrolling aid
+		CSize GetGraphSize();
+
+		inline void Dirty() { dirty = true; }
 	};
 
 	// helpers
@@ -207,5 +260,7 @@ namespace GraphStudio
 
 	// GUID helpers
 	bool NameGuid(GUID guid, CString &str);
+
+	void MakeFont(CFont &f, CString name, int size, bool bold, bool italic);
 
 };

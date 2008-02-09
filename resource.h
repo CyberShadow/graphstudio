@@ -16,6 +16,8 @@
 #define IDD_DIALOG_ASYNCOPEN            137
 #define IDD_DIALOG_PROPERTYPAGE         138
 #define IDD_DIALOG_ROT                  141
+#define IDD_DIALOG_ASYNCOPEN1           142
+#define IDD_DIALOG_FILESINK             142
 #define IDC_COMBO_CATEGORIES            1001
 #define IDC_LIST_FILTERS                1002
 #define IDC_COMBO_MERIT                 1003
@@ -26,7 +28,6 @@
 #define IDC_BUTTON3                     1008
 #define IDC_BUTTON_UNREGISTER           1008
 #define IDC_BUTTON_COPYTEXT             1008
-#define IDC_BUTTON_CONNECT              1008
 #define IDC_BUTTON_INSERT               1009
 #define IDC_BUTTON_MEDIATYPES           1010
 #define IDC_STATIC_TITLE                1011
@@ -53,6 +54,7 @@
 #define IDC_TITLEBAR                    1027
 #define IDC_TITLE                       1028
 #define IDC_LIST_GRAPHS                 1029
+#define IDC_BUTTON_CONNECT              1030
 #define ID_LIST_MRU_CLEAR               4999
 #define ID_LIST_MRU_FILE0               5000
 #define ID_Menu                         32771
@@ -73,13 +75,21 @@
 #define ID_PROPERTYPAGE                 32786
 #define ID_PIN_RENDER                   32787
 #define ID_GRAPH_MAKEGRAPHSCREENSHOT    32788
+#define ID_VIEW_50                      32794
+#define ID_VIEW_75                      32795
+#define ID_VIEW_100                     32796
+#define ID_VIEW_150                     32797
+#define ID_VIEW_200                     32798
+#define ID_GRAPH_INSERTFILEWRITER       32805
+#define ID_GRAPH_INSERTVIDEORENDERER    32806
+#define ID_GRAPH_INSERTAUDIORENDERER    32807
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        142
-#define _APS_NEXT_COMMAND_VALUE         32791
+#define _APS_NEXT_COMMAND_VALUE         32808
 #define _APS_NEXT_CONTROL_VALUE         1030
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

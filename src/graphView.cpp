@@ -59,6 +59,17 @@ BEGIN_MESSAGE_MAP(CGraphView, GraphStudio::DisplayView)
 	
 	ON_COMMAND(ID_VIEW_TEXTINFORMATION, &CGraphView::OnViewTextInformation)
 	ON_COMMAND(ID_GRAPH_INSERTFILESOURCE, &CGraphView::OnGraphInsertFileSource)
+	ON_COMMAND(ID_GRAPH_INSERTFILEWRITER, &CGraphView::OnGraphInsertFileSink)
+	ON_COMMAND(ID_VIEW_50, &CGraphView::OnView50)
+	ON_COMMAND(ID_VIEW_75, &CGraphView::OnView75)
+	ON_COMMAND(ID_VIEW_100, &CGraphView::OnView100)
+	ON_COMMAND(ID_VIEW_150, &CGraphView::OnView150)
+	ON_COMMAND(ID_VIEW_200, &CGraphView::OnView200)
+	ON_UPDATE_COMMAND_UI(ID_VIEW_50, &CGraphView::OnUpdateView50)
+	ON_UPDATE_COMMAND_UI(ID_VIEW_75, &CGraphView::OnUpdateView75)
+	ON_UPDATE_COMMAND_UI(ID_VIEW_100, &CGraphView::OnUpdateView100)
+	ON_UPDATE_COMMAND_UI(ID_VIEW_150, &CGraphView::OnUpdateView150)
+	ON_UPDATE_COMMAND_UI(ID_VIEW_200, &CGraphView::OnUpdateView200)
 END_MESSAGE_MAP()
 
 //-----------------------------------------------------------------------------
@@ -188,6 +199,15 @@ void CGraphView::OnInit()
 	frame->m_wndSeekingBar.SetGraphView(this);
 
 	mru.Load();
+
+	int zoom_level = AfxGetApp()->GetProfileInt(_T("Settings"), _T("Zoom"), 100);
+	switch (zoom_level) {
+	case 200:	OnView200(); break;
+	case 150:	OnView150(); break;
+	case 75:	OnView75(); break;
+	case 50:	OnView50(); break;
+	default:	OnView100(); break;
+	}
 
 	UpdateGraphState();
 	UpdateMRUMenu();
@@ -612,6 +632,51 @@ void CGraphView::OnGraphInsertFileSource()
 	instance = NULL;
 }
 
+void CGraphView::OnGraphInsertFileSink()
+{
+	// directly insert a file source filter
+	CComPtr<IBaseFilter>	instance;
+	HRESULT					hr;
+
+	hr = CoCreateInstance(CLSID_FileWriter, NULL, CLSCTX_INPROC_SERVER, IID_IBaseFilter, (void**)&instance);
+	if (FAILED(hr)) {
+		// display error message
+		MessageBox(_T("Cannot create File Sink"), _T("Error"), MB_ICONERROR);
+		return ;
+	} else {
+		
+		// now check for a few interfaces
+		CComPtr<IFileSinkFilter>	fs;
+		hr = instance->QueryInterface(IID_IFileSinkFilter, (void**)&fs);
+		if (SUCCEEDED(hr)) {
+			CFileSinkForm		sink_form;
+			int ret = sink_form.DoModal();
+			if (ret == IDOK) {
+				hr = fs->SetFileName((LPCOLESTR)sink_form.result_file, NULL);
+				if (FAILED(hr)) {
+					MessageBox(_T("Cannot write specified file"), _T("Error"), MB_ICONERROR);
+				}
+			} else {
+				// cancel the filter
+				instance = NULL;
+			}
+			fs = NULL;
+		}
+
+		if (instance) {
+			// add the filter to graph
+			hr = graph.AddFilter(instance, _T("File Sink"));
+			if (FAILED(hr)) {
+				// display error message
+			} else {
+				graph.SmartPlacement();
+				Invalidate();
+			}
+		}
+	}
+	instance = NULL;
+}
+
 void CGraphView::OnPropertyPageClosed(CPropertyForm *page)
 {
 	for (int i=0; i<property_pages.GetCount(); i++) {
@@ -765,4 +830,45 @@ void CGraphView::OnUpdateDisconnectRemote(CCmdUI *ui)
 	} else {
 		ui->Enable(FALSE);
 	}
+}
+
+void CGraphView::DoZoom(int z)
+{	
+	render_params.Zoom(z);
+	graph.SmartPlacement();
+	graph.Dirty();
+	Invalidate();
+
+	AfxGetApp()->WriteProfileInt(_T("Settings"), _T("Zoom"), z);
+}
+
+void CGraphView::OnView50()		{ DoZoom(50);  }
+void CGraphView::OnView75()		{ DoZoom(75);  }
+void CGraphView::OnView100()	{ DoZoom(100); }
+void CGraphView::OnView150()	{ DoZoom(150); }
+void CGraphView::OnView200()	{ DoZoom(200); }
+
+void CGraphView::OnUpdateView50(CCmdUI *pCmdUI)
+{
+	pCmdUI->SetCheck(render_params.zoom == 50);
+}
+
+void CGraphView::OnUpdateView75(CCmdUI *pCmdUI)
+{
+	pCmdUI->SetCheck(render_params.zoom == 75);
+}
+
+void CGraphView::OnUpdateView100(CCmdUI *pCmdUI)
+{
+	pCmdUI->SetCheck(render_params.zoom == 100);
+}
+
+void CGraphView::OnUpdateView150(CCmdUI *pCmdUI)
+{
+	pCmdUI->SetCheck(render_params.zoom == 150);
+}
+
+void CGraphView::OnUpdateView200(CCmdUI *pCmdUI)
+{
+	pCmdUI->SetCheck(render_params.zoom == 200);
 }

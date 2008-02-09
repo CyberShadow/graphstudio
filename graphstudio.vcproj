@@ -210,6 +210,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\FileSinkForm.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\FileSrcForm.cpp"
 				>
 			</File>
@@ -285,6 +289,10 @@
 			</File>
 			<File
 				RelativePath=".\src\EventsForm.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\FileSinkForm.h"
 				>
 			</File>
 			<File

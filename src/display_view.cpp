@@ -10,28 +10,15 @@
 namespace GraphStudio
 {
 
-	void MakeFont(CFont &f, CString name, int size, bool bold, bool italic)
-	{
-		HDC dc = CreateCompatibleDC(NULL);
-		int nHeight    = -MulDiv(size, (int)(GetDeviceCaps(dc, LOGPIXELSY)), 72 );
-		DeleteDC(dc);
-
-		DWORD dwBold   = (bold ? FW_BOLD : 0);
-		DWORD dwItalic = (italic ? TRUE : FALSE);
-
-		f.CreateFont(nHeight, 0, 0, 0, dwBold, dwItalic, FALSE, FALSE, DEFAULT_CHARSET,
-					  OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, 5, VARIABLE_PITCH, name);
-	}
-
 	//-------------------------------------------------------------------------
 	//
 	//	DisplayView class
 	//
 	//-------------------------------------------------------------------------
 
-	IMPLEMENT_DYNCREATE(DisplayView, CView)
+	IMPLEMENT_DYNCREATE(DisplayView, CScrollView)
 
-	BEGIN_MESSAGE_MAP(DisplayView, CView)
+	BEGIN_MESSAGE_MAP(DisplayView, CScrollView)
 		// Standard printing commands
 		ON_WM_ERASEBKGND()
 		ON_WM_SIZE()
@@ -47,31 +34,13 @@ namespace GraphStudio
 
 	DisplayView::DisplayView()
 	{
-		color_back = RGB(192, 192, 192);		// default background color
-		select_color = RGB(0,0,255);
-
 		back_width = 0;
 		back_height = 0;
 
-		// filter colors
-		color_filter_border_light = RGB(255, 255, 255);
-		color_filter_border_dark = RGB(128, 128, 128);
-
-		filter_type_colors[Filter::FILTER_UNKNOWN] = RGB(192,192,192);
-		filter_type_colors[Filter::FILTER_STANDARD] = RGB(192,192,255);
-		filter_type_colors[Filter::FILTER_WDM] = RGB(255,128,0);
-		filter_type_colors[Filter::FILTER_DMO] = RGB(0,192,64);
-
-		MakeFont(font_filter, _T("Arial"), 10, false, false); 
-		MakeFont(font_pin, _T("Arial"), 7, false, false);
-
-		// 100% zoom
-		zoom = 1.0;
-
 		// nastavime DC
+		graph.params = &render_params;
 		graph.callback = this;
 		graph.dc = &memDC;
-		graph.filter_font = &font_filter;
 	}
 
 	DisplayView::~DisplayView()
@@ -89,6 +58,8 @@ namespace GraphStudio
 
 	void DisplayView::OnLButtonDblClk(UINT nFlags, CPoint point)
 	{
+		point += GetScrollPosition();
+
 		// find out if there is any filter being selected
 		current_filter = graph.FindFilterByPos(point);
 		if (!current_filter) return ;
@@ -100,6 +71,8 @@ namespace GraphStudio
 
 	void DisplayView::OnRButtonDown(UINT nFlags, CPoint point)
 	{
+		point += GetScrollPosition();
+
 		CMenu	menu;
 		// find out if there is any filter being selected
 		current_filter = graph.FindFilterByPos(point);
@@ -138,7 +111,9 @@ namespace GraphStudio
 
 	void DisplayView::OnLButtonDown(UINT nFlags, CPoint point)
 	{
-		SetCapture();
+		point += GetScrollPosition();
+
+		SetCapture();	
 		start_drag_point = point;
 
 		Filter	*current = graph.FindFilterByPos(point);
@@ -152,7 +127,10 @@ namespace GraphStudio
 				graph.filters[i]->SelectConnection(nFlags, point);
 				need_invalidate = true;
 			}
-			if (need_invalidate) Invalidate();
+			if (need_invalidate) {
+				graph.Dirty();
+				Invalidate();
+			}
 			return ;
 		}
 
@@ -173,6 +151,7 @@ namespace GraphStudio
 			if (current->selected) {
 				if (nFlags & MK_SHIFT) {
 					current->Select(false);
+					graph.Dirty();
 					Invalidate();
 				} else {
 					// nothing here...
@@ -180,6 +159,7 @@ namespace GraphStudio
 			} else {
 				if (nFlags & MK_SHIFT) {
 					current->Select(true);
+					graph.Dirty();
 					Invalidate();
 				} else {
 					// deselect all filters but this
@@ -187,6 +167,7 @@ namespace GraphStudio
 						graph.filters[i]->Select(false);
 					}
 					current->Select(true);
+					graph.Dirty();
 					Invalidate();
 				}
 			}
@@ -203,6 +184,8 @@ namespace GraphStudio
 
 	void DisplayView::OnLButtonUp(UINT nFlags, CPoint point)
 	{
+		point += GetScrollPosition();
+
 		if (drag_mode == DisplayView::DRAG_CONNECTION) {
 			Pin *p1 = graph.FindPinByPos(new_connection_start);
 			Pin *p2 = graph.FindPinByPos(new_connection_end);
@@ -216,11 +199,14 @@ namespace GraphStudio
 		new_connection_end = CPoint(-101, -101);
 		drag_mode = DisplayView::DRAG_GROUP;
 		ReleaseCapture();
+		graph.Dirty();
 		Invalidate();
 	}
 
 	void DisplayView::OnMouseMove(UINT nFlags, CPoint point)
 	{
+		point += GetScrollPosition();
+
 		// loop through the filters...
 		if (nFlags & MK_LBUTTON) {
 
@@ -284,12 +270,18 @@ namespace GraphStudio
 				break;
 			}
 
-			if (need_invalidate) Invalidate();
+			if (need_invalidate) {
+				graph.Dirty();
+				Invalidate();
+			}
 		}
 	}
 
 	void DisplayView::OnSize(UINT nType, int cx, int cy)
 	{
+		UpdateScrolling();
+
+		/*
 		CRect	r;
 		CDC		*dc = GetDC();
 		GetClientRect(&r);
@@ -306,9 +298,54 @@ namespace GraphStudio
 			memDC.SelectObject(&backbuffer);
 			back_width = r.Width();
 			back_height = r.Height();
+
 		}
 
 		ReleaseDC(dc);
+		*/
+	}
+
+	void DisplayView::RepaintBackbuffer()
+	{
+		CSize	size = graph.GetGraphSize();
+
+		if (size.cx != back_width || size.cy != back_height) {
+
+			CDC		*dc = GetDC();
+
+			// we initialize a new backbuffer with the size of the graph
+			if (memDC.GetSafeHdc()) {
+				memDC.DeleteDC();
+				backbuffer.DeleteObject();
+			}
+
+			memDC.CreateCompatibleDC(dc);
+			backbuffer.CreateCompatibleBitmap(dc, size.cx, size.cy);
+			memDC.SelectObject(&backbuffer);
+			back_width = size.cx;
+			back_height = size.cy;
+
+			ReleaseDC(dc);
+
+			graph.dirty = true;
+		}
+
+		if (graph.dirty) {
+			CRect	rect;
+
+			// now we repaint the buffer
+			CBrush backBrush(render_params.color_back);
+
+			memDC.SelectObject(&backBrush);
+			memDC.GetClipBox(&rect);
+			memDC.PatBlt(rect.left, rect.top, rect.Width(), rect.Height(), PATCOPY);
+
+			graph.Draw(&memDC);
+
+			// not dirty anymore
+			graph.dirty = false;
+			UpdateScrolling();
+		}
 	}
 
 	void DisplayView::OnDraw(CDC *pDC)
@@ -318,17 +355,21 @@ namespace GraphStudio
 		GetClientRect(&r);
 
 		// Set brush to desired background color
-		CBrush backBrush(color_back);
-		memDC.SelectObject(&backBrush);
-		memDC.GetClipBox(&rect);     // Erase the area needed
-		memDC.PatBlt(rect.left, rect.top, rect.Width(), rect.Height(), PATCOPY);
-		graph.Draw(this);
+		RepaintBackbuffer();
+		pDC->BitBlt(0, 0, back_width, back_height, &memDC, 0, 0, SRCCOPY);
 
+		// paint the rest of client area with background brush
+		CBrush backBrush(render_params.color_back);
+		CBrush *prev_brush = pDC->SelectObject(&backBrush);
+		pDC->PatBlt(back_width, 0, r.Width(), r.Height(), PATCOPY);
+		pDC->PatBlt(0, back_height, back_width, r.Height(), PATCOPY);
+
+		pDC->SelectObject(prev_brush);
+
+		// draw arrow
 		if (drag_mode == DisplayView::DRAG_CONNECTION) {
-			graph.DrawArrow(this, new_connection_start, new_connection_end);
+			graph.DrawArrow(pDC, new_connection_start, new_connection_end);
 		}
-
-		pDC->BitBlt(0, 0, r.Width(), r.Height(), &memDC, 0, 0, SRCCOPY);
 	}
 
 	void DisplayView::OnRenderPin()
@@ -339,6 +380,7 @@ namespace GraphStudio
 		if (SUCCEEDED(hr)) {
 			graph.RefreshFilters();
 			graph.SmartPlacement();
+			graph.Dirty();
 			Invalidate();
 		}
 
@@ -366,6 +408,15 @@ namespace GraphStudio
 
 	void DisplayView::OnDisplayPropertyPage(IUnknown *object, IUnknown *filter, CString title)
 	{
+	}
+
+	// scrolling aid
+	void DisplayView::UpdateScrolling()
+	{
+		CSize	size = graph.GetGraphSize();
+		
+		SetScrollSizes(MM_TEXT, size);
+
 	}
 
 	void DisplayView::MakeScreenshot()

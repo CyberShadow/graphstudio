@@ -6,39 +6,39 @@
 //
 //-----------------------------------------------------------------------------
 #include "stdafx.h"
-#include "FileSrcForm.h"
+#include "FileSinkForm.h"
 
 
 //-----------------------------------------------------------------------------
 //
-//	CFileSrcForm class
+//	CFileSinkForm class
 //
 //-----------------------------------------------------------------------------
-IMPLEMENT_DYNAMIC(CFileSrcForm, CDialog)
-BEGIN_MESSAGE_MAP(CFileSrcForm, CDialog)
-	ON_BN_CLICKED(IDC_RADIO_FILE, &CFileSrcForm::OnBnClickedRadioFile)
-	ON_BN_CLICKED(IDC_RADIO_URL, &CFileSrcForm::OnBnClickedRadioUrl)
-	ON_BN_CLICKED(IDC_BUTTON_BROWSE, &CFileSrcForm::OnBnClickedButtonBrowse)
-	ON_BN_CLICKED(IDC_BUTTON_CLEAR, &CFileSrcForm::OnBnClickedButtonClear)
+IMPLEMENT_DYNAMIC(CFileSinkForm, CDialog)
+BEGIN_MESSAGE_MAP(CFileSinkForm, CDialog)
+	ON_BN_CLICKED(IDC_RADIO_FILE, &CFileSinkForm::OnBnClickedRadioFile)
+	ON_BN_CLICKED(IDC_RADIO_URL, &CFileSinkForm::OnBnClickedRadioUrl)
+	ON_BN_CLICKED(IDC_BUTTON_BROWSE, &CFileSinkForm::OnBnClickedButtonBrowse)
+	ON_BN_CLICKED(IDC_BUTTON_CLEAR, &CFileSinkForm::OnBnClickedButtonClear)
 END_MESSAGE_MAP()
 
 //-----------------------------------------------------------------------------
 //
-//	CFileSrcForm class
+//	CFileSinkForm class
 //
 //-----------------------------------------------------------------------------
 
-CFileSrcForm::CFileSrcForm(CWnd* pParent)	: 
-	CDialog(CFileSrcForm::IDD, pParent)
+CFileSinkForm::CFileSinkForm(CWnd* pParent)	: 
+	CDialog(CFileSinkForm::IDD, pParent)
 {
 
 }
 
-CFileSrcForm::~CFileSrcForm()
+CFileSinkForm::~CFileSinkForm()
 {
 }
 
-void CFileSrcForm::DoDataExchange(CDataExchange* pDX)
+void CFileSinkForm::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_TITLEBAR, title);
@@ -49,14 +49,14 @@ void CFileSrcForm::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_COMBO_URL, combo_url);
 }
 
-BOOL CFileSrcForm::OnInitDialog()
+BOOL CFileSinkForm::OnInitDialog()
 {
 	BOOL ret = __super::OnInitDialog();
 	if (!ret) return FALSE;
 
 	// load saved lists
-	LoadRecentlyUsedList(_T("FileCache"), file_list);
-	LoadRecentlyUsedList(_T("URLCache"), url_list);
+	LoadRecentlyUsedList(_T("Sink-FileCache"), file_list);
+	LoadRecentlyUsedList(_T("Sink-URLCache"), url_list);
 
 	int i;
 	for (i=0; i<file_list.GetCount(); i++) combo_file.AddString(file_list[i]);
@@ -66,7 +66,7 @@ BOOL CFileSrcForm::OnInitDialog()
 	return TRUE;
 }
 
-void CFileSrcForm::SaveRecentlyUsedList(CString name, CArray<CString> &list)
+void CFileSinkForm::SaveRecentlyUsedList(CString name, CArray<CString> &list)
 {
 	CString		count_name;
 	count_name = name + _T("_count");
@@ -83,7 +83,7 @@ void CFileSrcForm::SaveRecentlyUsedList(CString name, CArray<CString> &list)
 	}
 }
 
-void CFileSrcForm::UpdateList(CString item, CArray<CString> &list)
+void CFileSinkForm::UpdateList(CString item, CArray<CString> &list)
 {
 	for (int i=0; i<list.GetCount(); i++) {
 		if (list[i] == item) {
@@ -95,7 +95,7 @@ void CFileSrcForm::UpdateList(CString item, CArray<CString> &list)
 }
 
 
-void CFileSrcForm::LoadRecentlyUsedList(CString name, CArray<CString> &list)
+void CFileSinkForm::LoadRecentlyUsedList(CString name, CArray<CString> &list)
 {
 	CString		count_name;
 	count_name = name + _T("_count");
@@ -116,7 +116,7 @@ void CFileSrcForm::LoadRecentlyUsedList(CString name, CArray<CString> &list)
 	}
 }
 
-void CFileSrcForm::OnBnClickedRadioFile()
+void CFileSinkForm::OnBnClickedRadioFile()
 {
 	radio_url.SetCheck(FALSE);
 	radio_file.SetCheck(TRUE);
@@ -125,7 +125,7 @@ void CFileSrcForm::OnBnClickedRadioFile()
 	button_browse.EnableWindow(TRUE);
 }
 
-void CFileSrcForm::OnBnClickedRadioUrl()
+void CFileSinkForm::OnBnClickedRadioUrl()
 {
 	radio_url.SetCheck(TRUE);
 	radio_file.SetCheck(FALSE);
@@ -134,7 +134,7 @@ void CFileSrcForm::OnBnClickedRadioUrl()
 	button_browse.EnableWindow(FALSE);
 }
 
-void CFileSrcForm::OnBnClickedButtonBrowse()
+void CFileSinkForm::OnBnClickedButtonBrowse()
 {
 	// nabrowsujeme subor
 	CString		filter;
@@ -142,7 +142,7 @@ void CFileSrcForm::OnBnClickedButtonBrowse()
 
 	filter = _T("All Files|*.*|");
 
-	CFileDialog dlg(TRUE,NULL,NULL,OFN_OVERWRITEPROMPT|OFN_ENABLESIZING|OFN_FILEMUSTEXIST,filter);
+	CFileDialog dlg(FALSE,NULL,NULL,OFN_OVERWRITEPROMPT|OFN_ENABLESIZING,filter);
     int ret = dlg.DoModal();
 
 	filename = dlg.GetPathName();
@@ -151,7 +151,7 @@ void CFileSrcForm::OnBnClickedButtonBrowse()
 	}
 }
 
-void CFileSrcForm::OnOK()
+void CFileSinkForm::OnOK()
 {
 	if (radio_url.GetCheck()) {
 		combo_url.GetWindowText(result_file);
@@ -164,19 +164,19 @@ void CFileSrcForm::OnOK()
 		combo_file.GetWindowText(result_file);
 		if (result_file != _T("")) {
 			UpdateList(result_file, file_list);
-			SaveRecentlyUsedList(_T("FileCache"), file_list);
+			SaveRecentlyUsedList(_T("Sink-FileCache"), file_list);
 		}
 	}
 
 	EndDialog(IDOK);
 }
 
-void CFileSrcForm::OnBnClickedButtonClear()
+void CFileSinkForm::OnBnClickedButtonClear()
 {
 	url_list.RemoveAll();
 	file_list.RemoveAll();
-	SaveRecentlyUsedList(_T("URLCache"), url_list);
-	SaveRecentlyUsedList(_T("FileCache"), file_list);
+	SaveRecentlyUsedList(_T("Sink-URLCache"), url_list);
+	SaveRecentlyUsedList(_T("Sink-FileCache"), file_list);
 	combo_file.ResetContent();
 	combo_url.ResetContent();
 }

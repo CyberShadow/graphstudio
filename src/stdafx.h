@@ -77,6 +77,7 @@
 #include "RemoteGraphForm.h"
 #include "TextInfoForm.h"
 #include "FileSrcForm.h"
+#include "FileSinkForm.h"
 #include "PropertyForm.h"
 #include "graphView.h"
 

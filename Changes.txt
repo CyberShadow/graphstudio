@@ -1,3 +1,11 @@
+[0.1.6.0 - Alpha   09/Feb/2008]
++ added scrollbars when graph is larger than view area
++ added zoom (50%, 75%, 100%, 150%, 200%)
++ faster graph rendering
++ screenshot will contain whole graph even if it is not completely visible in the view area
++ added IFileSinkFilter handling page
++ added shortcuts to create File Writer
+
 [0.1.5.1 - Alpha   02/Feb/2008]
 + added most recently used list (with Clear button)
 + filters are disconnected and removed manually when closing graph

@@ -45,6 +45,7 @@ public:
 	bool			state_ready;
 	FILTER_STATE	graph_state;
 
+
 public:
 	virtual ~CGraphView();
 
@@ -107,9 +108,24 @@ public:
 	void LoadWindowPosition();
 	void SaveWindowPosition();
 
-	afx_msg void OnViewTextInformation();
-	afx_msg void OnGraphInsertFileSource();
+	void OnViewTextInformation();
+	void OnGraphInsertFileSource();
+	void OnGraphInsertFileSink();
+
 	afx_msg void OnDestroy();
+	
+	void OnView50();
+	void OnView75();
+	void OnView100();
+	void OnView150();
+	void OnView200();
+	void DoZoom(int z);
+	void SelectZoomItem(int idc);
+	afx_msg void OnUpdateView50(CCmdUI *pCmdUI);
+	afx_msg void OnUpdateView75(CCmdUI *pCmdUI);
+	afx_msg void OnUpdateView100(CCmdUI *pCmdUI);
+	afx_msg void OnUpdateView150(CCmdUI *pCmdUI);
+	afx_msg void OnUpdateView200(CCmdUI *pCmdUI);
 };
 
 #ifndef _DEBUG  // debug version in graphView.cpp
