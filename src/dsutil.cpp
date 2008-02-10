@@ -319,8 +319,8 @@ namespace DSUtil
 			// skip dummy data
 			ps += 6;
 			for (int j=0; j<pin.types; j++) {
-				int maj_offset = ps[2];
-				int min_offset = ps[3];
+				DWORD maj_offset = ps[2];
+				DWORD min_offset = ps[3];
 
 				if ((maj_offset + 16 <= size) && (min_offset + 16 <= size)) {
 					GUID	g;
