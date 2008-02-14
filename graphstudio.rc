@@ -75,6 +75,7 @@ IDR_graphstudioTYPE     ICON                    "res\\graphstudioDoc.ico"
 
 IDR_MAINFRAME           BITMAP                  "res\\Toolbar.bmp"
 IDB_BITMAP_LOGO         BITMAP                  "res\\bitmap_logo.bmp"
+IDB_BITMAP_TREE         BITMAP                  "res\\bitmap_tree.bmp"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -136,6 +137,9 @@ BEGIN
         MENUITEM "100%\tCtrl+4",                ID_VIEW_100
         MENUITEM "150%\tCtrl+5",                ID_VIEW_150
         MENUITEM "200%\tCtrl+6",                ID_VIEW_200
+        MENUITEM SEPARATOR
+        MENUITEM "Decrease Zoom Level\t-",      ID_VIEW_DECREASEZOOMLEVEL
+        MENUITEM "Increase Zoom Level\t+",      ID_VIEW_INCREASEZOOMLEVEL
     END
     POPUP "Graph"
     BEGIN
@@ -147,6 +151,12 @@ BEGIN
         MENUITEM "Insert Video Renderer",       ID_GRAPH_INSERTVIDEORENDERER
         MENUITEM SEPARATOR
         MENUITEM "Make Graph Screenshot\tCtrl+F12", ID_GRAPH_MAKEGRAPHSCREENSHOT
+    END
+    POPUP "Filters"
+    BEGIN
+        MENUITEM "Double Selected Filters\tCtrl+D", ID_FILTERS_DOUBLESELECTEDFILTERS
+        MENUITEM SEPARATOR
+        MENUITEM "Manage Favorites ...",        ID_FILTERS_MANAGEFAVORITES
     END
     POPUP "&Help"
     BEGIN
@@ -177,17 +187,21 @@ BEGIN
     "P",            ID_FILE_PRINT,          VIRTKEY, CONTROL, NOINVERT
     "R",            ID_FILE_RENDERFILE,     VIRTKEY, CONTROL, NOINVERT
     "S",            ID_FILE_SAVE,           VIRTKEY, CONTROL, NOINVERT
+    "D",            ID_FILTERS_DOUBLESELECTEDFILTERS, VIRTKEY, CONTROL, NOINVERT
     "F",            ID_GRAPH_INSERTFILTER,  VIRTKEY, CONTROL, NOINVERT
     VK_F12,         ID_GRAPH_MAKEGRAPHSCREENSHOT, VIRTKEY, CONTROL, NOINVERT
     VK_F6,          ID_NEXT_PANE,           VIRTKEY, NOINVERT
     VK_F6,          ID_PREV_PANE,           VIRTKEY, SHIFT, NOINVERT
-    "E",            ID_VIEW_GRAPHEVENTS,    VIRTKEY, CONTROL, NOINVERT
-    "T",            ID_VIEW_TEXTINFORMATION, VIRTKEY, CONTROL, NOINVERT
-    "2",            ID_VIEW_50,             VIRTKEY, CONTROL, NOINVERT
-    "3",            ID_VIEW_75,             VIRTKEY, CONTROL, NOINVERT
     "4",            ID_VIEW_100,            VIRTKEY, CONTROL, NOINVERT
     "5",            ID_VIEW_150,            VIRTKEY, CONTROL, NOINVERT
     "6",            ID_VIEW_200,            VIRTKEY, CONTROL, NOINVERT
+    "2",            ID_VIEW_50,             VIRTKEY, CONTROL, NOINVERT
+    "3",            ID_VIEW_75,             VIRTKEY, CONTROL, NOINVERT
+    "E",            ID_VIEW_GRAPHEVENTS,    VIRTKEY, CONTROL, NOINVERT
+    "T",            ID_VIEW_TEXTINFORMATION, VIRTKEY, CONTROL, NOINVERT
+    "+",            ID_VIEW_INCREASEZOOMLEVEL, ASCII, NOINVERT
+    "-",            ID_VIEW_DECREASEZOOMLEVEL, ASCII, NOINVERT
+    "=",            ID_VIEW_INCREASEZOOMLEVEL, ASCII, NOINVERT
 END
 
 
@@ -304,6 +318,15 @@ BEGIN
     CONTROL         "",IDC_TITLEBAR,"Static",SS_OWNERDRAW,0,0,294,24
 END
 
+IDD_DIALOG_FAVORITES DIALOGEX 0, 0, 336, 202
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_POPUP | WS_CLIPCHILDREN | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
+CAPTION "Favorite Filters"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    CONTROL         "",IDC_TITLEBAR,"Static",SS_OWNERDRAW,0,0,336,20
+    CONTROL         "",IDC_TREE_FAVORITES,"SysTreeView32",TVS_HASBUTTONS | TVS_HASLINES | TVS_LINESATROOT | TVS_SHOWSELALWAYS | WS_TABSTOP,6,24,324,168
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -413,6 +436,14 @@ BEGIN
         RIGHTMARGIN, 287
         TOPMARGIN, 7
         BOTTOMMARGIN, 99
+    END
+
+    IDD_DIALOG_FAVORITES, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 329
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 195
     END
 END
 #endif    // APSTUDIO_INVOKED

@@ -34,6 +34,7 @@ namespace GraphStudio
 		int					back_width, back_height;
 
 		CPoint				start_drag_point;
+		CPoint				end_drag_point;
 
 		// creating new connection
 		CPoint				new_connection_start;
@@ -41,7 +42,8 @@ namespace GraphStudio
 
 		enum {
 			DRAG_GROUP = 0,
-			DRAG_CONNECTION = 1
+			DRAG_CONNECTION = 1,
+			DRAG_SELECTION = 2
 		};
 		int					drag_mode;
 

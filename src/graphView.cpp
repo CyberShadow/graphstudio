@@ -73,6 +73,10 @@ BEGIN_MESSAGE_MAP(CGraphView, GraphStudio::DisplayView)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_150, &CGraphView::OnUpdateView150)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_200, &CGraphView::OnUpdateView200)
 	ON_COMMAND(ID_FILE_ADDMEDIAFILE, &CGraphView::OnFileAddmediafile)
+	ON_COMMAND(ID_FILTERS_DOUBLESELECTEDFILTERS, &CGraphView::OnFiltersDouble)
+	ON_COMMAND(ID_VIEW_DECREASEZOOMLEVEL, &CGraphView::OnViewDecreasezoomlevel)
+	ON_COMMAND(ID_VIEW_INCREASEZOOMLEVEL, &CGraphView::OnViewIncreasezoomlevel)
+	ON_COMMAND(ID_FILTERS_MANAGEFAVORITES, &CGraphView::OnFiltersManageFavorites)
 END_MESSAGE_MAP()
 
 //-----------------------------------------------------------------------------
@@ -87,6 +91,7 @@ CGraphView::CGraphView()
 	form_filters = NULL;
 	form_events = NULL;
 	form_textinfo = NULL;
+	form_favorites = NULL;
 	filename = _T("");
 	can_save = false;
 }
@@ -96,6 +101,7 @@ CGraphView::~CGraphView()
 	if (form_filters) { form_filters->DestroyWindow(); delete form_filters; }
 	if (form_events) { form_events->DestroyWindow(); delete form_events; }
 	if (form_textinfo) { form_textinfo->DestroyWindow(); delete form_textinfo; }
+	if (form_favorites) { form_favorites->DestroyWindow(); delete form_favorites; }
 }
 
 BOOL CGraphView::PreCreateWindow(CREATESTRUCT& cs)
@@ -521,7 +527,11 @@ void CGraphView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 					state = State_Running;
 				}
 
-				if (state != State_Stopped) return ;
+				if (state != State_Stopped) {
+					// play sound to warn the user
+					MessageBeep(MB_ICONASTERISK);
+					return ;
+				}
 
 				// delete selected objects
 				graph.DeleteSelected();
@@ -970,6 +980,34 @@ void CGraphView::OnUpdateView200(CCmdUI *pCmdUI)
 	pCmdUI->SetCheck(render_params.zoom == 200);
 }
 
+
+void CGraphView::OnViewDecreasezoomlevel()
+{
+	int	zl = 100;
+	switch (render_params.zoom) {
+	case 50:	zl = 50; break;
+	case 75:	zl = 50; break;
+	case 100:	zl = 75; break;
+	case 150:	zl = 100; break;
+	case 200:	zl = 150; break;
+	}
+	DoZoom(zl);
+}
+
+void CGraphView::OnViewIncreasezoomlevel()
+{
+	int	zl = 100;
+	switch (render_params.zoom) {
+	case 50:	zl = 75; break;
+	case 75:	zl = 100; break;
+	case 100:	zl = 150; break;
+	case 150:	zl = 200; break;
+	case 200:	zl = 200; break;
+	}
+	DoZoom(zl);
+}
+
+
 void CGraphView::OnAudioRendererClick(UINT nID)
 {
 	int	n = nID - ID_AUDIO_RENDERER0;
@@ -1018,5 +1056,20 @@ int CGraphView::InsertFilterFromTemplate(DSUtil::FilterTemplate &filter)
 	return 0;
 }
 
+void CGraphView::OnFiltersDouble()
+{
+	graph.DoubleSelected();
+	graph.SmartPlacement();
+	Invalidate();
+}
 
+void CGraphView::OnFiltersManageFavorites()
+{
+	if (!form_favorites) {	
+		form_favorites = new CFavoritesForm();
+		form_favorites->DoCreateDialog();
+	}
 
+	// display the form
+	form_favorites->ShowWindow(SW_SHOW);
+}

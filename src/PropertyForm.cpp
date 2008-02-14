@@ -376,6 +376,7 @@ CPageSite::CPageSite(LPUNKNOWN pUnk, CPageContainer *container) :
 	page = NULL;
 	size.cx = 0;
 	size.cy = 0;
+	active = false;
 }
 
 CPageSite::~CPageSite()
@@ -386,6 +387,7 @@ CPageSite::~CPageSite()
 int CPageSite::CloseSite()
 {
 	if (page) {
+		if (active) Deactivate();
 		page = NULL;
 	}
 	return 0;
@@ -436,6 +438,7 @@ int CPageSite::Deactivate()
 {
 	if (page) {
 		page->Deactivate();
+		active = false;
 	}
 	return 0;
 }
@@ -446,6 +449,7 @@ int CPageSite::Activate(HWND owner, CRect &rc)
 	if (page) {
 		HRESULT hr = page->Activate(owner, &rc, FALSE);
 		if (FAILED(hr)) return -1;
+		active = true;
 	}
 	return 0;
 }

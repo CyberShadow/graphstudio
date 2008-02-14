@@ -46,6 +46,7 @@ class CPageSite :
 public:
 	CPageContainer				*parent;
 	CComPtr<IPropertyPage>		page;
+	bool						active;
 
 	// page properties
 	CString						title;

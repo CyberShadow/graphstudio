@@ -18,6 +18,9 @@
 #define IDD_DIALOG_ROT                  141
 #define IDD_DIALOG_ASYNCOPEN1           142
 #define IDD_DIALOG_FILESINK             142
+#define IDD_DIALOG_FAVORITES            143
+#define IDB_BITMAP1                     144
+#define IDB_BITMAP_TREE                 144
 #define IDC_COMBO_CATEGORIES            1001
 #define IDC_LIST_FILTERS                1002
 #define IDC_COMBO_MERIT                 1003
@@ -55,6 +58,7 @@
 #define IDC_TITLE                       1028
 #define IDC_LIST_GRAPHS                 1029
 #define IDC_BUTTON_CONNECT              1030
+#define IDC_TREE_FAVORITES              1030
 #define ID_LIST_MRU_CLEAR               4999
 #define ID_LIST_MRU_FILE0               5000
 #define ID_AUDIO_RENDERER0              6000
@@ -86,14 +90,18 @@
 #define ID_GRAPH_INSERTVIDEORENDERER    32806
 #define ID_GRAPH_INSERTAUDIORENDERER    32807
 #define ID_FILE_ADDMEDIAFILE            32808
+#define ID_FILTERS_DOUBLESELECTEDFILTERS 32809
+#define ID_VIEW_DECREASEZOOMLEVEL       32812
+#define ID_VIEW_INCREASEZOOMLEVEL       32813
+#define ID_FILTERS_MANAGEFAVORITES      32818
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        142
-#define _APS_NEXT_COMMAND_VALUE         32809
-#define _APS_NEXT_CONTROL_VALUE         1030
+#define _APS_NEXT_RESOURCE_VALUE        145
+#define _APS_NEXT_COMMAND_VALUE         32819
+#define _APS_NEXT_CONTROL_VALUE         1031
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

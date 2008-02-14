@@ -231,6 +231,7 @@ namespace GraphStudio
 		void SmartPlacement();
 		void LoadPeers();
 		void DeleteSelected();
+		void DoubleSelected();
 		int ConnectPins(Pin *p1, Pin *p2);
 
 		// rendering the graph

@@ -30,6 +30,7 @@ public:
 	CFiltersForm				*form_filters;
 	CEventsForm					*form_events;
 	CTextInfoForm				*form_textinfo;
+	CFavoritesForm				*form_favorites;
 
 	// active property pages
 	CArray<CPropertyForm*>		property_pages;
@@ -136,6 +137,10 @@ public:
 	afx_msg void OnUpdateView150(CCmdUI *pCmdUI);
 	afx_msg void OnUpdateView200(CCmdUI *pCmdUI);
 	afx_msg void OnFileAddmediafile();
+	afx_msg void OnFiltersDouble();
+	afx_msg void OnViewDecreasezoomlevel();
+	afx_msg void OnViewIncreasezoomlevel();
+	afx_msg void OnFiltersManageFavorites();
 };
 
 #ifndef _DEBUG  // debug version in graphView.cpp

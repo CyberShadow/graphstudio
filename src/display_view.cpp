@@ -115,6 +115,7 @@ namespace GraphStudio
 
 		SetCapture();	
 		start_drag_point = point;
+		end_drag_point = point;
 
 		Filter	*current = graph.FindFilterByPos(point);
 		if (!current) {
@@ -127,6 +128,10 @@ namespace GraphStudio
 				graph.filters[i]->SelectConnection(nFlags, point);
 				need_invalidate = true;
 			}
+
+			// store the selection point
+			drag_mode = DisplayView::DRAG_SELECTION;
+
 			if (need_invalidate) {
 				graph.Dirty();
 				Invalidate();
@@ -268,6 +273,47 @@ namespace GraphStudio
 					need_invalidate = true;
 				}
 				break;
+			case DisplayView::DRAG_SELECTION:
+				{
+					int	minx = start_drag_point.x;
+					int miny = start_drag_point.y;
+					int maxx = point.x;
+					int maxy = point.y;
+
+					if (minx > maxx) {
+						minx = point.x;
+						maxx = start_drag_point.x;
+					}
+					if (miny > maxy) {
+						miny = point.y;
+						maxy = start_drag_point.y;
+					}
+
+					end_drag_point = point;
+					CRect	rc(minx, miny, maxx, maxy);
+
+					for (int i=0; i<graph.filters.GetCount(); i++) {
+						Filter *filter = graph.filters[i];
+
+						CRect	rc2(filter->posx, filter->posy, 
+									filter->posx+filter->width, 
+									filter->posy+filter->height);
+						CRect	rc3;						
+
+						rc3.IntersectRect(&rc, &rc2);
+						bool sel = (rc3.IsRectEmpty() ? false : true);
+
+						if (sel != filter->selected) {
+							filter->Select(sel);
+							need_invalidate = true;
+						}
+					}
+
+					if (!need_invalidate) {
+						Invalidate();
+					}
+				}
+				break;
 			}
 
 			if (need_invalidate) {
@@ -369,6 +415,24 @@ namespace GraphStudio
 		// draw arrow
 		if (drag_mode == DisplayView::DRAG_CONNECTION) {
 			graph.DrawArrow(pDC, new_connection_start, new_connection_end);
+		} else
+		if (drag_mode == DisplayView::DRAG_SELECTION) {
+
+			// select a null (hollow) brush
+			CBrush	*pOldBrush = (CBrush*)pDC->SelectStockObject(NULL_BRUSH);
+			CPen	pen(PS_DOT, 1, RGB(0,0,0));
+			CPen	*pOldPen = pDC->SelectObject(&pen);
+
+			// set pen pixels as the inverse of the screen color.
+			int nOldROP2 = pDC->SetROP2(R2_XORPEN);
+
+			// draw new or erase old selection rectangle
+			pDC->Rectangle(start_drag_point.x, start_drag_point.y,
+						   end_drag_point.x, end_drag_point.y);
+			
+			pDC->SetROP2(nOldROP2);
+			pDC->SelectObject(pOldBrush);
+			pDC->SelectObject(pOldPen);
 		}
 	}
 

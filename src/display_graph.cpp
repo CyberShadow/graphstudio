@@ -558,6 +558,51 @@ namespace GraphStudio
 		return NULL;
 	}
 
+	void DisplayGraph::DoubleSelected()
+	{
+		CArray<CLSID>	clsid;
+		CArray<CString>	names;
+		int				i;
+
+		for (i=0; i<filters.GetCount(); i++) {
+			Filter *filter = filters[i];
+			if (filter->selected) {
+				clsid.Add(filter->clsid);
+				names.Add(filter->name);
+			}
+		}
+
+		// now insert them
+		for (i=0; i<clsid.GetCount(); i++) {
+
+			// now create an instance of this filter
+			CComPtr<IBaseFilter>	instance;
+			HRESULT					hr;
+			int						ret;
+
+			hr = CoCreateInstance(clsid[i], NULL, CLSCTX_INPROC_SERVER, IID_IBaseFilter, (void**)&instance);
+			if (SUCCEEDED(hr)) {
+				
+				// now check for a few interfaces
+				int ret = ConfigureInsertedFilter(instance);
+				if (ret < 0) {
+					instance = NULL;
+				}
+
+				if (instance) {
+					// add the filter to graph
+					hr = AddFilter(instance, names[i]);
+					if (FAILED(hr)) {
+						// display error message
+					}
+				}
+
+				instance = NULL;
+			}
+
+		}
+	}
+
 	void DisplayGraph::SmartPlacement()
 	{
 		bins.RemoveAll();

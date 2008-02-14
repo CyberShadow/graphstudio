@@ -6,6 +6,12 @@
 + added shortcuts to Video and Audio renderers
 + fixed media type parsing
 + Windows XP fixes - at startup window does not flicker and move
++ warning sound is played when trying to remove filters from a running graph
++ added selection box to select multiple filters
++ added "Ctrl+D" shortcut to insert another instance(s) of currently selected filter(s)
++ added Increase/Decrease zoom level shortcuts
++ added favorite filters with subcategories (not ready)
++ added form to manage favorite filters (not ready)
 
 [0.1.6.0 - Alpha   09/Feb/2008]
 + added scrollbars when graph is larger than view area

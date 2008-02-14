@@ -428,7 +428,7 @@ namespace DSUtil
 
 			// ideme enumerovat clasy
 			hr = sys_dev_enum->CreateClassEnumerator(CLSID_ActiveMovieCategories, &enum_moniker, 0);
-			if (FAILED(hr)) break;
+			if ((hr != NOERROR) || !enum_moniker) break;
 
 			enum_moniker->Reset();
 			while (enum_moniker->Next(1, &moniker, &f) == NOERROR) {
