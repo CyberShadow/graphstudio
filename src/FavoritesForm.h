@@ -7,6 +7,52 @@
 //-----------------------------------------------------------------------------
 #pragma once
 
+namespace GraphStudio
+{
+
+	//-------------------------------------------------------------------------
+	//
+	//	FavoriteFilter class
+	//
+	//-------------------------------------------------------------------------
+	class FavoriteFilter
+	{
+	public:
+		CString		type;				// sw, dmo
+		CString		name;				// filter name
+		GUID		clsid_category;
+		GUID		clsid_filter;
+	public:
+		FavoriteFilter();
+		FavoriteFilter(const FavoriteFilter &f);
+		~FavoriteFilter();
+		FavoriteFilter &operator =(const FavoriteFilter &f);
+
+		// helpers
+		void FromTemplate(DSUtil::FilterTemplate &ft);
+	};
+
+	//-------------------------------------------------------------------------
+	//
+	//	FavoriteGroup class
+	//
+	//-------------------------------------------------------------------------
+	class FavoriteGroup
+	{
+	public:
+		CString					name;
+		CArray<FavoriteFilter>	filters;
+	public:
+		FavoriteGroup();
+		FavoriteGroup(const FavoriteGroup &g);
+		~FavoriteGroup();
+		FavoriteGroup &operator =(const FavoriteGroup &g);
+	};
+
+
+};
+
+
 //-----------------------------------------------------------------------------
 //
 //	CFavoritesForm class

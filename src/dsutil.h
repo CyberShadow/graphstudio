@@ -70,6 +70,7 @@ namespace DSUtil
 	public:
 		CString		name;
 		GUID		clsid;
+		GUID		category;
 		DWORD		version;
 		DWORD		merit;
 		IMoniker	*moniker;
@@ -136,7 +137,7 @@ namespace DSUtil
 		// vyhladavanie
 		int Find(CString name, FilterTemplate *filter);
 		int Find(GUID clsid, FilterTemplate *filter); 
-		int AddFilters(IEnumMoniker *emoniker, int enumtype=0);
+		int AddFilters(IEnumMoniker *emoniker, int enumtype=0, GUID category=GUID_NULL);
 
 		// testing
 		int IsVideoRenderer(FilterTemplate &filter);

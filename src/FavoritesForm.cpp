@@ -108,3 +108,91 @@ void CFavoritesForm::OnSize(UINT nType, int cx, int cy)
 	}
 }
 
+
+
+
+namespace GraphStudio
+{
+
+	//-------------------------------------------------------------------------
+	//
+	//	FavoriteFilter class
+	//
+	//-------------------------------------------------------------------------
+
+	FavoriteFilter::FavoriteFilter() :
+		type(_T("sw")),
+		name(_T("")),
+		clsid_category(GUID_NULL),
+		clsid_filter(GUID_NULL)
+	{
+	}
+
+	FavoriteFilter::FavoriteFilter(const FavoriteFilter &f) :
+		type(f.type),
+		name(f.name),
+		clsid_category(f.clsid_category),
+		clsid_filter(f.clsid_filter)
+	{
+	}
+
+	FavoriteFilter::~FavoriteFilter()
+	{
+		// nic
+	}
+
+	FavoriteFilter &FavoriteFilter::operator =(const GraphStudio::FavoriteFilter &f)
+	{
+		type = f.type;
+		name = f.name;
+		clsid_category = f.clsid_category;
+		clsid_filter = f.clsid_filter;
+		return *this;
+	}
+
+	void FavoriteFilter::FromTemplate(DSUtil::FilterTemplate &ft)
+	{
+		type = _T("sw");		// for now... :-
+		name = ft.name;
+		clsid_category = ft.category;
+		clsid_filter   = ft.clsid;
+	}
+
+	//-------------------------------------------------------------------------
+	//
+	//	FavoriteGroup class
+	//
+	//-------------------------------------------------------------------------
+
+	FavoriteGroup::FavoriteGroup() :
+		name(_T(""))
+	{
+	}
+
+	FavoriteGroup::FavoriteGroup(const FavoriteGroup &g) :
+		name(g.name)
+	{
+		filters.Append(g.filters);
+	}
+
+	FavoriteGroup::~FavoriteGroup()
+	{
+		filters.RemoveAll();
+	}
+
+	FavoriteGroup &FavoriteGroup::operator =(const FavoriteGroup &g)
+	{
+		filters.RemoveAll();
+		filters.Append(g.filters);
+		name = g.name;
+		return *this;
+	}
+
+
+};
+
+
+
+
+
+

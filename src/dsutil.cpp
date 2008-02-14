@@ -203,6 +203,7 @@ namespace DSUtil
 		file(_T("")),
 		file_exists(false),
 		clsid(GUID_NULL),
+		category(GUID_NULL),
 		moniker(NULL),
 		version(0),
 		merit(0)
@@ -214,6 +215,7 @@ namespace DSUtil
 		file(ft.file),
 		file_exists(ft.file_exists),
 		clsid(ft.clsid),
+		category(ft.category),
 		version(ft.version),
 		merit(ft.merit),
 		moniker(NULL)
@@ -252,6 +254,7 @@ namespace DSUtil
 		file = ft.file;
 		file_exists = ft.file_exists;
 		clsid = ft.clsid;
+		category = ft.category;
 		version = ft.version;
 		merit = ft.merit;
 		return *this;
@@ -616,7 +619,7 @@ namespace DSUtil
 					FALSE,
 					FALSE, 0, NULL, NULL, NULL);
 		if (SUCCEEDED(hr)) {
-			ret = AddFilters(emoniker, 1);
+			ret = AddFilters(emoniker, 1, CLSID_LegacyAmFilterCategory);
 		}
 
 		emoniker = NULL;
@@ -645,7 +648,7 @@ namespace DSUtil
 			hr = sys_dev_enum->CreateClassEnumerator(clsid, &enum_moniker, 0);
 			if (hr != NOERROR) break;
 		
-			ret = AddFilters(enum_moniker);
+			ret = AddFilters(enum_moniker, 0, clsid);
 		} while (0);
 
 	label_done:
@@ -655,7 +658,7 @@ namespace DSUtil
 		return ret;
 	}
 
-	int FilterTemplates::AddFilters(IEnumMoniker *emoniker, int enumtype)
+	int FilterTemplates::AddFilters(IEnumMoniker *emoniker, int enumtype, GUID category)
 	{
 		IMoniker			*moniker = NULL;
 		IPropertyBag		*propbag = NULL;
@@ -703,6 +706,7 @@ namespace DSUtil
 						case 1:		can_go = IsVideoRenderer(filter); break;
 						}
 
+						filter.category = category;
 						if (can_go == 0) filters.Add(filter);
 					}
 				}
