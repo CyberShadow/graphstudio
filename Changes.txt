@@ -4,6 +4,8 @@
 + added "Add Media File" that has the original "Render Media File" functionality
 + rendered files are now loaded into the recently used list
 + added shortcuts to Video and Audio renderers
++ fixed media type parsing
++ Windows XP fixes - at startup window does not flicker and move
 
 [0.1.6.0 - Alpha   09/Feb/2008]
 + added scrollbars when graph is larger than view area

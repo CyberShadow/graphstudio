@@ -308,6 +308,8 @@ namespace DSUtil
 
 		DWORD	*ps = b+4;
 		for (int i=0; i<cpins1; i++) {
+			if ((char*)ps > (buf + size - 6*4)) break;
+
 			PinTemplate	pin;
 
 			DWORD	flags = ps[1];
@@ -319,12 +321,17 @@ namespace DSUtil
 			// skip dummy data
 			ps += 6;
 			for (int j=0; j<pin.types; j++) {
+
+				// make sure we have at least 16 bytes available
+				if ((char*)ps > (buf + size - 16)) break;
+				
 				DWORD maj_offset = ps[2];
 				DWORD min_offset = ps[3];
 
 				if ((maj_offset + 16 <= size) && (min_offset + 16 <= size)) {
 					GUID	g;
 					BYTE	*m = (BYTE*)(&buf[maj_offset]);
+					if ((char*)m > (buf+size - 16)) break;
 					g.Data1 = m[0] | (m[1] << 8) | (m[2] << 16) | (m[3] << 24);
 					g.Data2 = m[4] | (m[5] << 8);
 					g.Data3 = m[6] | (m[7] << 8);
@@ -332,6 +339,7 @@ namespace DSUtil
 					pin.major.Add(g);
 
 					m = (BYTE*)(&buf[min_offset]);
+					if ((char*)m > (buf+size - 16)) break;
 					g.Data1 = m[0] | (m[1] << 8) | (m[2] << 16) | (m[3] << 24);
 					g.Data2 = m[4] | (m[5] << 8);
 					g.Data3 = m[6] | (m[7] << 8);

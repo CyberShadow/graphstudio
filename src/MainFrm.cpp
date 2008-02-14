@@ -111,6 +111,12 @@ BOOL CMainFrame::PreCreateWindow(CREATESTRUCT& cs)
 {
 	if (!CFrameWnd::PreCreateWindow(cs)) return FALSE;
 
+	cs.style = cs.style &~ WS_VISIBLE;
+
+	cs.cx = 0;
+	cs.cy = 0;
+	cs.y = GetSystemMetrics(SM_CYSCREEN);
+	cs.x = GetSystemMetrics(SM_CXSCREEN);
 
 	return TRUE;
 }
