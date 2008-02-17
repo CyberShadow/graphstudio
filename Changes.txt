@@ -1,5 +1,7 @@
-[0.1.8.0 - Alpha   xx/Feb/2008]
+[0.1.8.0 - Alpha   17/Feb/2008]
 + favorite filters and managing form now work
++ DMO filters are displayed in green color
++ KSProxy filters are displayed in orange color
 
 [0.1.7.0 - Alpha   14/Feb/2008]
 + .grf extension is now added automatically when saving graph
