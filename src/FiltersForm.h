@@ -76,6 +76,7 @@ public:
 	afx_msg void OnBnClickedButtonInsert();
 
 	// filtering
+	DSUtil::FilterTemplate *GetSelected();
 	bool CanBeDisplayed(DSUtil::FilterTemplate &filter);
 	afx_msg void OnComboMeritChange();
 	afx_msg void OnFilterItemClick(NMHDR *pNMHDR, LRESULT *pResult);
@@ -84,6 +85,7 @@ public:
 	// filterlist callback
 	virtual void OnItemDblClk(int item);
 
+	afx_msg void OnBnClickedCheckFavorite();
 };
 
 int ConfigureInsertedFilter(IBaseFilter *filter);

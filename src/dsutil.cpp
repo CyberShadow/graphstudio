@@ -200,6 +200,8 @@ namespace DSUtil
 
 	FilterTemplate::FilterTemplate() :
 		name(_T("")),
+		moniker_name(_T("")),
+		type(FilterTemplate::FT_FILTER),
 		file(_T("")),
 		file_exists(false),
 		clsid(GUID_NULL),
@@ -212,6 +214,8 @@ namespace DSUtil
 
 	FilterTemplate::FilterTemplate(const FilterTemplate &ft) :
 		name(ft.name),
+		moniker_name(ft.moniker_name),
+		type(ft.type),
 		file(ft.file),
 		file_exists(ft.file_exists),
 		clsid(ft.clsid),
@@ -251,12 +255,14 @@ namespace DSUtil
 		output_pins.Append(ft.output_pins);
 
 		name = ft.name;
+		moniker_name = ft.moniker_name;
 		file = ft.file;
 		file_exists = ft.file_exists;
 		clsid = ft.clsid;
 		category = ft.category;
 		version = ft.version;
 		merit = ft.merit;
+		type = ft.type;
 		return *this;
 	}
 
@@ -377,6 +383,23 @@ namespace DSUtil
 
 		// inak skusime klasicky
 		return CoCreateInstance(clsid, NULL, CLSCTX_INPROC_SERVER, IID_IBaseFilter, (void**)filter);
+	}
+
+	int FilterTemplate::ParseMonikerName()
+	{
+		if (moniker_name == _T("")) {
+			type = FilterTemplate::FT_FILTER;
+			return 0;
+		}
+
+		// we parse out the filter type
+		if (moniker_name.Find(_T(":sw:")) >= 0)		type = FilterTemplate::FT_FILTER; else
+		if (moniker_name.Find(_T(":dmo:")) >= 0)	type = FilterTemplate::FT_DMO; else
+		if (moniker_name.Find(_T(":cm:")) >= 0)		type = FilterTemplate::FT_ACM_ICM; else
+		if (moniker_name.Find(_T(":pnp:")) >= 0)		type = FilterTemplate::FT_PNP; else
+			type = FilterTemplate::FT_KSPROXY;
+
+		return 0;
 	}
 
 	FilterCategory::FilterCategory() :
@@ -706,7 +729,25 @@ namespace DSUtil
 						case 1:		can_go = IsVideoRenderer(filter); break;
 						}
 
+						// moniker name
+						LPOLESTR	moniker_name;
+						hr = moniker->GetDisplayName(NULL, NULL, &moniker_name);
+						if (SUCCEEDED(hr)) {
+							filter.moniker_name = CString(moniker_name);
+
+							IMalloc *alloc = NULL;
+							hr = CoGetMalloc(1, &alloc);
+							if (SUCCEEDED(hr)) {
+								alloc->Free(moniker_name);
+								alloc->Release();
+							}
+						} else {
+							filter.moniker_name = _T("");
+						}
+						filter.ParseMonikerName();
+
 						filter.category = category;
+
 						if (can_go == 0) filters.Add(filter);
 					}
 				}

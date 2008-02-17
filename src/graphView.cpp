@@ -46,6 +46,7 @@ BEGIN_MESSAGE_MAP(CGraphView, GraphStudio::DisplayView)
 	ON_COMMAND_RANGE(ID_LIST_MRU_FILE0, ID_LIST_MRU_FILE0+10, &CGraphView::OnMRUClick)
 	ON_COMMAND_RANGE(ID_AUDIO_RENDERER0, ID_AUDIO_RENDERER0+100, &CGraphView::OnAudioRendererClick)
 	ON_COMMAND_RANGE(ID_VIDEO_RENDERER0, ID_VIDEO_RENDERER0+100, &CGraphView::OnVideoRendererClick)
+	ON_COMMAND_RANGE(ID_FAVORITE_FILTER, ID_FAVORITE_FILTER+500, &CGraphView::OnFavoriteFilterClick)
 
 	ON_WM_KEYDOWN()
 	ON_WM_DESTROY()
@@ -221,6 +222,15 @@ void CGraphView::OnInit()
 
 	UpdateGraphState();
 	UpdateMRUMenu();
+
+	// load favorites
+	GraphStudio::Favorites	*favorites = GraphStudio::Favorites::GetInstance();
+
+	form_favorites = new CFavoritesForm();
+	form_favorites->view = this;
+	favorites->Load();
+	form_favorites->DoCreateDialog();
+
 
 	// trick to refresh menu in a while...
 	SetTimer(1001, 20, NULL);
@@ -1024,6 +1034,67 @@ void CGraphView::OnVideoRendererClick(UINT nID)
 	InsertFilterFromTemplate(video_renderers.filters[n]);
 }
 
+void CGraphView::OnFavoriteFilterClick(UINT nID)
+{
+	CMenu	*mainmenu = GetParentFrame()->GetMenu();
+	CMenu	*filtersmenu = mainmenu->GetSubMenu(3);
+
+	MENUITEMINFO	info;
+	memset(&info, 0, sizeof(info));
+	info.cbSize = sizeof(info);
+	info.fMask = MIIM_DATA;
+	filtersmenu->GetMenuItemInfo(nID, &info);
+
+	// let's insert the filter
+	GraphStudio::FavoriteFilter	*filter = (GraphStudio::FavoriteFilter *)info.dwItemData;
+	InsertFilterFromFavorite(filter);
+}
+
+int CGraphView::InsertFilterFromFavorite(GraphStudio::FavoriteFilter *filter)
+{
+	CComPtr<IMoniker>		moniker;
+	CComPtr<IBaseFilter>	instance;
+	CComPtr<IBindCtx>		bind;
+
+	HRESULT					hr;
+	ULONG					eaten = 0;
+
+	hr = CreateBindCtx(0, &bind);
+	if (FAILED(hr)) return -1;
+
+	hr = MkParseDisplayName(bind, filter->moniker_name, &eaten, &moniker);
+	if (hr != NOERROR) {
+		bind = NULL;
+		return -1;
+	}
+
+	hr = moniker->BindToObject(NULL, NULL, IID_IBaseFilter, (void**)&instance);
+	if (SUCCEEDED(hr)) {
+
+		// now check for a few interfaces
+		int ret = ConfigureInsertedFilter(instance);
+		if (ret < 0) {
+			instance = NULL;
+		}
+
+		if (instance) {
+			// add the filter to graph
+			hr = graph.AddFilter(instance, filter->name);
+			if (FAILED(hr)) {
+				// display error message
+			} else {
+				graph.SmartPlacement();
+				Invalidate();
+			}
+		}
+	}
+
+	bind = NULL;
+	instance = NULL;
+	moniker = NULL;
+	return 0;
+}
+
 int CGraphView::InsertFilterFromTemplate(DSUtil::FilterTemplate &filter)
 {
 	// now create an instance of this filter
@@ -1065,11 +1136,5 @@ void CGraphView::OnFiltersDouble()
 
 void CGraphView::OnFiltersManageFavorites()
 {
-	if (!form_favorites) {	
-		form_favorites = new CFavoritesForm();
-		form_favorites->DoCreateDialog();
-	}
-
-	// display the form
 	form_favorites->ShowWindow(SW_SHOW);
 }

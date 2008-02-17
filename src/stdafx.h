@@ -44,7 +44,7 @@
 
 #include <afxdisp.h>        // MFC Automation classes
 
-
+#include <atlbase.h>
 
 #ifndef _AFX_NO_OLE_SUPPORT
 #include <afxdtctl.h>		// MFC support for Internet Explorer 4 Common Controls
@@ -80,6 +80,7 @@
 #include "FileSrcForm.h"
 #include "FileSinkForm.h"
 #include "PropertyForm.h"
+#include "NewGroupForm.h"
 #include "graphView.h"
 
 

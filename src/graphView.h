@@ -86,7 +86,9 @@ public:
 
 	void OnAudioRendererClick(UINT nID);
 	void OnVideoRendererClick(UINT nID);
+	void OnFavoriteFilterClick(UINT nID);
 	int InsertFilterFromTemplate(DSUtil::FilterTemplate &filter);
+	int InsertFilterFromFavorite(GraphStudio::FavoriteFilter *filter);
 
 	// keyboard events
 	void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);

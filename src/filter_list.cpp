@@ -31,6 +31,12 @@ namespace GraphStudio
 		color_selected = RGB(178, 201, 211);
 		color_error = RGB(255, 0, 0);
 
+		type_colors[0] = RGB(0,0,0);		// Filter
+		type_colors[1] = RGB(0,128,0);		// DMO
+		type_colors[2] = RGB(128,0,0);		// KSProxy
+		type_colors[3] = RGB(0,0,128);		// ACM/ICM
+		type_colors[4] = RGB(128,0,128);	// PNP
+
 		callback = NULL;
 	}
 
@@ -73,7 +79,20 @@ namespace GraphStudio
 		CRect	rcText = item->rcItem;
 		rcText.left += 3;
 		rcText.right -= 3;
-		dc.SetTextColor(color_font);
+
+		CString		type_text = _T("");
+		int			idx       = 0;
+
+		switch (filter->type) {
+		case DSUtil::FilterTemplate::FT_PNP:		idx = 4; type_text = _T("PNP"); break;
+		case DSUtil::FilterTemplate::FT_ACM_ICM:	idx = 3; type_text = _T("ACM/ICM"); break;
+		case DSUtil::FilterTemplate::FT_KSPROXY:	idx = 2; type_text = _T("KS"); break;
+		case DSUtil::FilterTemplate::FT_DMO:		idx = 1; type_text = _T("DMO"); break;
+		case DSUtil::FilterTemplate::FT_FILTER:		idx = 0; type_text = _T(""); break;
+		}
+		dc.SetTextColor(type_colors[idx]);
+
+
 		dc.SelectObject(&font_filter);
 		dc.DrawText(filter->name, &rcText, DT_VCENTER | DT_SINGLELINE);
 
@@ -94,6 +113,14 @@ namespace GraphStudio
 			dc.SetTextColor(color_error);
 			dc.DrawText(error_text, &rcText, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
 		}
+
+		// draw type text
+		int		rx   = rcText.left;
+		rcText.left	 = rx - 60;
+		rcText.right = rx;
+		dc.SelectObject(&font_filter);
+		dc.SetTextColor(type_colors[idx]);
+		dc.DrawText(type_text, &rcText, DT_RIGHT | DT_VCENTER | DT_SINGLELINE);
 
 		dc.Detach();
 		return ;

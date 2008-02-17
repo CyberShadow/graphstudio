@@ -254,6 +254,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\NewGroupForm.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\PropertyForm.cpp"
 				>
 			</File>
@@ -333,6 +337,10 @@
 			</File>
 			<File
 				RelativePath=".\src\mru_list.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\NewGroupForm.h"
 				>
 			</File>
 			<File

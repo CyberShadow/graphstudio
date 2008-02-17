@@ -69,6 +69,7 @@ namespace DSUtil
 	{
 	public:
 		CString		name;
+		CString		moniker_name;
 		GUID		clsid;
 		GUID		category;
 		DWORD		version;
@@ -79,6 +80,15 @@ namespace DSUtil
 
 		CArray<PinTemplate>		input_pins;
 		CArray<PinTemplate>		output_pins;
+
+		enum {
+			FT_FILTER	= 0,
+			FT_DMO		= 1,
+			FT_KSPROXY	= 2,
+			FT_ACM_ICM	= 3,
+			FT_PNP		= 4
+		};
+		int			type;
 
 	public:
 		FilterTemplate();
@@ -91,6 +101,7 @@ namespace DSUtil
 		HRESULT FindFilename();
 
 		int Load(char *buf, int size);
+		int ParseMonikerName();
 	};
 
 	class FilterCategory
@@ -186,6 +197,7 @@ namespace DSUtil
 	HRESULT ConnectFilters(IGraphBuilder *gb, IBaseFilter *output, IBaseFilter *input, bool direct=false);
 	HRESULT ConnectPin(IGraphBuilder *gb, IPin *output, IBaseFilter *input, bool direct=false);
 
+	CString get_next_token(CString &str, CString separator);
 
 };
 

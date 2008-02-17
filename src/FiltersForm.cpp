@@ -24,6 +24,7 @@ BEGIN_MESSAGE_MAP(CFiltersForm, CDialog)
 	ON_CBN_SELCHANGE(IDC_COMBO_MERIT, &CFiltersForm::OnComboMeritChange)
 	ON_NOTIFY(LVN_ITEMCHANGED, IDC_LIST_FILTERS, &CFiltersForm::OnFilterItemClick)
 	ON_BN_CLICKED(IDC_BUTTON_PROPERTYPAGE, &CFiltersForm::OnBnClickedButtonPropertypage)
+	ON_BN_CLICKED(IDC_CHECK_FAVORITE, &CFiltersForm::OnBnClickedCheckFavorite)
 END_MESSAGE_MAP()
 
 //-----------------------------------------------------------------------------
@@ -278,41 +279,36 @@ void CFiltersForm::OnItemDblClk(int item)
 
 void CFiltersForm::OnBnClickedButtonInsert()
 {
-	// now we try to add a filter
-	POSITION pos = list_filters.GetFirstSelectedItemPosition();
-	if (pos) {
-		int item = list_filters.GetNextSelectedItem(pos);
-		DSUtil::FilterTemplate *filter = (DSUtil::FilterTemplate*)list_filters.GetItemData(item);
-		if (filter) {
+	DSUtil::FilterTemplate *filter = GetSelected();
+	if (filter) {
 
-			// now create an instance of this filter
-			CComPtr<IBaseFilter>	instance;
-			HRESULT					hr;
+		// now create an instance of this filter
+		CComPtr<IBaseFilter>	instance;
+		HRESULT					hr;
 
-			hr = filter->CreateInstance(&instance);
-			if (FAILED(hr)) {
-				// display error message
-			} else {
-				
-				// now check for a few interfaces
-				int ret = ConfigureInsertedFilter(instance);
-				if (ret < 0) {
-					instance = NULL;
-				}
+		hr = filter->CreateInstance(&instance);
+		if (FAILED(hr)) {
+			// display error message
+		} else {
+			
+			// now check for a few interfaces
+			int ret = ConfigureInsertedFilter(instance);
+			if (ret < 0) {
+				instance = NULL;
+			}
 
-				if (instance) {
-					// add the filter to graph
-					hr = view->graph.AddFilter(instance, filter->name);
-					if (FAILED(hr)) {
-						// display error message
-					} else {
-						view->graph.SmartPlacement();
-						view->Invalidate();
-					}
+			if (instance) {
+				// add the filter to graph
+				hr = view->graph.AddFilter(instance, filter->name);
+				if (FAILED(hr)) {
+					// display error message
+				} else {
+					view->graph.SmartPlacement();
+					view->Invalidate();
 				}
 			}
-			instance = NULL;
 		}
+		instance = NULL;
 	}
 }
 
@@ -349,9 +345,58 @@ void CFiltersForm::OnFilterItemClick(NMHDR *pNMHDR, LRESULT *pResult)
 			CString		m;
 			m.Format(_T("0x%08X"), filter->merit);
 			ni = list_details.InsertItem(3, _T("Merit"));	list_details.SetItemText(ni, 1, m);
+
+			// favorite filter ?
+			GraphStudio::Favorites	*favorites = GraphStudio::Favorites::GetInstance();
+			if (favorites->IsFavorite(*filter)) {
+				check_favorite.SetCheck(TRUE);
+			} else {
+				check_favorite.SetCheck(FALSE);
+			}
 		}
 	}
 
+}
+
+void CFiltersForm::OnBnClickedCheckFavorite()
+{
+	DSUtil::FilterTemplate *filter = GetSelected();
+	if (filter) {
+
+		BOOL					check		= check_favorite.GetCheck();
+		GraphStudio::Favorites	*favorites	= GraphStudio::Favorites::GetInstance();
+
+		if (check) {
+			favorites->AddFavorite(*filter);
+			if (view && view->form_favorites) {
+				view->form_favorites->UpdateTree();
+			}
+		} else {
+			HTREEITEM item = favorites->RemoveFavorite(*filter);
+			if (item != NULL) {
+				// remove this item
+				if (view && view->form_favorites) {
+					view->form_favorites->RemoveFilter(item);
+					view->form_favorites->UpdateFavoriteMenu();
+				}
+			}
+		}
+
+		// todo: update tree
+		favorites->Save();
+	}
+}
+
+DSUtil::FilterTemplate *CFiltersForm::GetSelected()
+{
+	POSITION pos = list_filters.GetFirstSelectedItemPosition();
+	if (pos) {
+		int item = list_filters.GetNextSelectedItem(pos);
+		DSUtil::FilterTemplate *filter = (DSUtil::FilterTemplate*)list_filters.GetItemData(item);
+		return filter;
+	}
+
+	return NULL;
 }
 
 void CFiltersForm::OnBnClickedButtonPropertypage()
@@ -360,37 +405,34 @@ void CFiltersForm::OnBnClickedButtonPropertypage()
 	// it's property page.
 	// the filter will be destroyed once the page is closed
 	// now we try to add a filter
-	POSITION pos = list_filters.GetFirstSelectedItemPosition();
-	if (pos) {
-		int item = list_filters.GetNextSelectedItem(pos);
-		DSUtil::FilterTemplate *filter = (DSUtil::FilterTemplate*)list_filters.GetItemData(item);
-		if (filter) {
 
-			// now create an instance of this filter
-			CComPtr<IBaseFilter>	instance;
-			HRESULT					hr;
+	DSUtil::FilterTemplate *filter = GetSelected();
+	if (filter) {
 
-			hr = filter->CreateInstance(&instance);
-			if (FAILED(hr)) {
-				// display error message
-			} else {
+		// now create an instance of this filter
+		CComPtr<IBaseFilter>	instance;
+		HRESULT					hr;
+
+		hr = filter->CreateInstance(&instance);
+		if (FAILED(hr)) {
+			// display error message
+		} else {
 
 
-				CString			title = filter->name + _T(" Properties");
-				CPropertyForm	*page = new CPropertyForm();
-				int ret = page->DisplayPages(instance, instance, title, view);
-				if (ret < 0) {
-					delete page;
-					return ;
-				}
-
-				// add to the list
-				view->property_pages.Add(page);
-
-
+			CString			title = filter->name + _T(" Properties");
+			CPropertyForm	*page = new CPropertyForm();
+			int ret = page->DisplayPages(instance, instance, title, view);
+			if (ret < 0) {
+				delete page;
+				return ;
 			}
-			instance = NULL;
+
+			// add to the list
+			view->property_pages.Add(page);
+
+
 		}
+		instance = NULL;
 	}
 
 }

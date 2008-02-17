@@ -35,6 +35,8 @@ namespace GraphStudio
 		COLORREF		color_selected;
 		COLORREF		color_error;
 
+		COLORREF		type_colors[5];
+
 		FilterListCallback	*callback;
 
 	public:

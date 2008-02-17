@@ -10,23 +10,34 @@
 namespace GraphStudio
 {
 
+	class FavoriteItem
+	{
+	public:
+		int			type;
+		CString			name;				// filter name
+	public:
+		FavoriteItem() : type(0), name(_T("")) { }
+		virtual ~FavoriteItem() { }
+	};
+
+	void SortFavoriteItems(CArray<FavoriteItem*> *ar);
+
+	class FavoriteGroup;
+
 	//-------------------------------------------------------------------------
 	//
 	//	FavoriteFilter class
 	//
 	//-------------------------------------------------------------------------
-	class FavoriteFilter
+	class FavoriteFilter : public FavoriteItem
 	{
 	public:
-		CString		type;				// sw, dmo
-		CString		name;				// filter name
-		GUID		clsid_category;
-		GUID		clsid_filter;
+		CString			moniker_name;
+		HTREEITEM		item;				// helper
+		FavoriteGroup	*parent;			// parent group
 	public:
 		FavoriteFilter();
-		FavoriteFilter(const FavoriteFilter &f);
-		~FavoriteFilter();
-		FavoriteFilter &operator =(const FavoriteFilter &f);
+		virtual ~FavoriteFilter();
 
 		// helpers
 		void FromTemplate(DSUtil::FilterTemplate &ft);
@@ -37,18 +48,75 @@ namespace GraphStudio
 	//	FavoriteGroup class
 	//
 	//-------------------------------------------------------------------------
-	class FavoriteGroup
+	class FavoriteGroup : public FavoriteItem
 	{
 	public:
-		CString					name;
-		CArray<FavoriteFilter>	filters;
+		CArray<FavoriteFilter*>	filters;
+		HTREEITEM				item;
 	public:
 		FavoriteGroup();
-		FavoriteGroup(const FavoriteGroup &g);
-		~FavoriteGroup();
-		FavoriteGroup &operator =(const FavoriteGroup &g);
+		virtual ~FavoriteGroup();
+
+		// removing favorite filte
+		HTREEITEM RemoveFavorite(DSUtil::FilterTemplate &ft);
+		bool IsFavorite(DSUtil::FilterTemplate &ft);
+		void RemoveFilter(FavoriteFilter *filter);
 	};
 
+	//-------------------------------------------------------------------------
+	//
+	//	Favorites
+	//
+	//-------------------------------------------------------------------------
+	class Favorites
+	{
+	public:
+		CArray<FavoriteGroup*>	groups;			// our groups
+		CArray<FavoriteFilter*>	filters;		// our filters
+	public:
+		Favorites();
+		virtual ~Favorites();
+		static Favorites *GetInstance();
+
+		// load/save from registry
+		int Load();
+		int Save();
+		void Clear();
+
+		// I/O on favorite filters
+		int AddFavorite(DSUtil::FilterTemplate &ft);
+		HTREEITEM RemoveFavorite(DSUtil::FilterTemplate &ft);
+		bool IsFavorite(DSUtil::FilterTemplate &ft);
+		void RemoveFilter(FavoriteFilter *filter);
+
+		FavoriteGroup *AddGroup(CString name);
+		void Sort();
+	};
+
+	//-------------------------------------------------------------------------
+	//
+	//	FavoritesTree
+	//
+	//-------------------------------------------------------------------------
+
+	class FavoritesTree : public CTreeCtrl
+	{
+	protected:
+		DECLARE_MESSAGE_MAP()
+
+	protected:
+		CImageList*	m_pDragImage;
+		BOOL		m_bLDragging;
+		HTREEITEM	m_hitemDrag,m_hitemDrop;
+
+	public:
+		FavoritesTree();
+		~FavoritesTree();
+
+		void OnBeginDrag(NMHDR *pNMHDR, LRESULT *pResult);
+		void OnMouseMove(UINT nFlags, CPoint point);
+		void OnLButtonUp(UINT nFlags, CPoint point);
+	};
 
 };
 
@@ -68,8 +136,10 @@ protected:
 public:
 
 	GraphStudio::TitleBar		title;
-	CTreeCtrl					tree;
+	GraphStudio::FavoritesTree	tree;
 	CImageList					image_list;
+	CGraphView					*view;
+	HTREEITEM					menu_fired_item;
 
 public:
 	CFavoritesForm(CWnd* pParent = NULL);   // standard constructor
@@ -82,5 +152,15 @@ public:
 	void OnInitialize();
 	void OnSize(UINT nType, int cx, int cy);
 
+	// update favorite filters
+	void UpdateTree();
+	void UpdateFavoriteMenu();
+	void RemoveFilter(HTREEITEM item);
+
+	afx_msg void OnNMRclickTreeFavorites(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnMenuCreategroup();
+	afx_msg void OnBeginDrag(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnMenuRemovegroup();
+	afx_msg void OnMenuRemovefilter();
 };
 
