@@ -57,7 +57,7 @@
 #include <streams.h>
 #include <initguid.h>
 #include <dvdmedia.h>
-
+#include <dmodshow.h>
 
 #include "..\resource.h"
 

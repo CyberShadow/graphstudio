@@ -848,6 +848,14 @@ namespace GraphStudio
 		// this will be okay for now...
 		filter_type = Filter::FILTER_STANDARD;
 
+		// if it's a DMO Wrapper we'll identify it as DMO
+		if (clsid == CLSID_DMOWrapperFilter) {
+			filter_type = Filter::FILTER_DMO;
+		} else
+		if (clsid == DSUtil::CLSID_KSProxy) {
+			filter_type = Filter::FILTER_WDM;
+		}
+
 		//---------------------------------------------------------------------
 		// calculate size
 		//---------------------------------------------------------------------		
