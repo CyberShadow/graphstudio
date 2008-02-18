@@ -66,7 +66,7 @@
 #define ID_LIST_MRU_FILE0               5000
 #define ID_AUDIO_RENDERER0              6000
 #define ID_VIDEO_RENDERER0              6100
-#define ID_FAVORITE_FILTER				6200
+#define ID_FAVORITE_FILTER              6200
 #define ID_Menu                         32771
 #define ID_FILE_RENDERURL               32772
 #define ID_FILE_RENDERDVD               32773
@@ -101,13 +101,21 @@
 #define ID_MENU_CREATEGROUP             32819
 #define ID_MENU_REMOVEGROUP             32820
 #define ID_MENU_REMOVEFILTER            32821
+#define ID_OPTIONS_AUTOMATICRESTART     32822
+#define ID_AUTOMATICRESTART_DISABLED    32823
+#define ID_AUTOMATICRESTART_EVERYHOUR   32824
+#define ID_AUTOMATICRESTART_EVERYTWOHOURS 32825
+#define ID_AUTOMATICRESTART_EVERY4HOURS 32826
+#define ID_AUTOMATICRESTART_AT04        32827
+#define ID_AUTORESTART                  32828
+#define ID_AUTORESTART_DISABLED         32829
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        147
-#define _APS_NEXT_COMMAND_VALUE         32822
+#define _APS_NEXT_COMMAND_VALUE         32830
 #define _APS_NEXT_CONTROL_VALUE         1033
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

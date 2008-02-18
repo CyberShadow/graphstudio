@@ -37,11 +37,17 @@ public:
 
 	// most recently used list
 	GraphStudio::MRUList		mru;
+	GraphStudio::AutoRestart	auto_restart;
 
 	// enumerated audio & video renderers
 	DSUtil::FilterTemplates		audio_renderers;
 	DSUtil::FilterTemplates		video_renderers;
 
+	enum {
+		TIMER_GRAPH_STATE = 1,
+		TIMER_REMOTE_GRAPH_STATE = 2,
+		TIMER_AUTO_RESTART = 3
+	};
 
 	CString						filename;
 	bool						can_save;
@@ -109,6 +115,8 @@ public:
 	void OnDropFiles(HDROP hDropInfo);
 	int TryOpenFile(CString fn);
 
+	virtual BOOL OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT *pResult);
+
 	// property pages
 	virtual void OnDisplayPropertyPage(IUnknown *object, IUnknown *filter, CString title);
 	virtual void OnFilterRemoved(GraphStudio::DisplayGraph *sender, GraphStudio::Filter *filter);
@@ -124,7 +132,7 @@ public:
 	void OnGraphInsertFileSource();
 	void OnGraphInsertFileSink();
 
-	afx_msg void OnDestroy();
+	void OnDestroy();
 	
 	void OnView50();
 	void OnView75();
@@ -133,16 +141,20 @@ public:
 	void OnView200();
 	void DoZoom(int z);
 	void SelectZoomItem(int idc);
-	afx_msg void OnUpdateView50(CCmdUI *pCmdUI);
-	afx_msg void OnUpdateView75(CCmdUI *pCmdUI);
-	afx_msg void OnUpdateView100(CCmdUI *pCmdUI);
-	afx_msg void OnUpdateView150(CCmdUI *pCmdUI);
-	afx_msg void OnUpdateView200(CCmdUI *pCmdUI);
-	afx_msg void OnFileAddmediafile();
-	afx_msg void OnFiltersDouble();
-	afx_msg void OnViewDecreasezoomlevel();
-	afx_msg void OnViewIncreasezoomlevel();
-	afx_msg void OnFiltersManageFavorites();
+	void OnUpdateView50(CCmdUI *pCmdUI);
+	void OnUpdateView75(CCmdUI *pCmdUI);
+	void OnUpdateView100(CCmdUI *pCmdUI);
+	void OnUpdateView150(CCmdUI *pCmdUI);
+	void OnUpdateView200(CCmdUI *pCmdUI);
+	void OnFileAddmediafile();
+	void OnFiltersDouble();
+	void OnViewDecreasezoomlevel();
+	void OnViewIncreasezoomlevel();
+	void OnFiltersManageFavorites();
+	afx_msg void OnAutorestart();
+	afx_msg void OnAutorestartDisabled();
+	afx_msg void OnUpdateAutorestart(CCmdUI *pCmdUI);
+	afx_msg void OnUpdateAutorestartDisabled(CCmdUI *pCmdUI);
 };
 
 #ifndef _DEBUG  // debug version in graphView.cpp

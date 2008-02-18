@@ -72,6 +72,7 @@
 #include "mru_list.h"
 #include "MainFrm.h"
 #include "graphDoc.h"
+#include "auto_restart.h"
 #include "FiltersForm.h"
 #include "FavoritesForm.h"
 #include "EventsForm.h"

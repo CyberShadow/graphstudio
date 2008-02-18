@@ -78,6 +78,10 @@ BEGIN_MESSAGE_MAP(CGraphView, GraphStudio::DisplayView)
 	ON_COMMAND(ID_VIEW_DECREASEZOOMLEVEL, &CGraphView::OnViewDecreasezoomlevel)
 	ON_COMMAND(ID_VIEW_INCREASEZOOMLEVEL, &CGraphView::OnViewIncreasezoomlevel)
 	ON_COMMAND(ID_FILTERS_MANAGEFAVORITES, &CGraphView::OnFiltersManageFavorites)
+	ON_COMMAND(ID_AUTORESTART, &CGraphView::OnAutorestart)
+	ON_COMMAND(ID_AUTORESTART_DISABLED, &CGraphView::OnAutorestartDisabled)
+	ON_UPDATE_COMMAND_UI(ID_AUTORESTART, &CGraphView::OnUpdateAutorestart)
+	ON_UPDATE_COMMAND_UI(ID_AUTORESTART_DISABLED, &CGraphView::OnUpdateAutorestartDisabled)
 END_MESSAGE_MAP()
 
 //-----------------------------------------------------------------------------
@@ -223,6 +227,10 @@ void CGraphView::OnInit()
 	UpdateGraphState();
 	UpdateMRUMenu();
 
+	// auto restart
+	auto_restart.hwndTarget = *this;
+	auto_restart.Enable(false);
+
 	// load favorites
 	GraphStudio::Favorites	*favorites = GraphStudio::Favorites::GetInstance();
 
@@ -238,6 +246,21 @@ void CGraphView::OnInit()
 
 void CGraphView::OnFileRenderdvd()
 {
+}
+
+BOOL CGraphView::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT *pResult)
+{
+	if (message == WM_AUTORESTART) {
+
+		// restart the graph
+		OnStopClick();
+		OnPlayClick();
+
+		// schedule next restart
+		auto_restart.Schedule();
+
+	}
+	return __super::OnWndMsg(message, wParam, lParam, pResult);
 }
 
 void CGraphView::UpdateRenderersMenu()
@@ -295,6 +318,10 @@ void CGraphView::OnPlayClick()
 {
 	if (graph.mc) {
 		graph.mc->Run();
+
+		if (!graph.is_remote) {
+			SetTimer(CGraphView::TIMER_AUTO_RESTART, 1000, NULL);
+		}
 	}
 	UpdateGraphState();
 }
@@ -304,6 +331,7 @@ void CGraphView::OnStopClick()
 	if (graph.mc) {
 		graph.Seek(0);
 		graph.mc->Stop();
+		KillTimer(CGraphView::TIMER_AUTO_RESTART);
 	}
 	UpdateGraphState();
 }
@@ -318,7 +346,8 @@ void CGraphView::OnPauseClick()
 
 void CGraphView::OnNewClick()
 {
-	KillTimer(2);
+	KillTimer(CGraphView::TIMER_REMOTE_GRAPH_STATE);
+	KillTimer(CGraphView::TIMER_AUTO_RESTART);
 
 	if (!graph.is_remote) {
 		OnStopClick();
@@ -584,7 +613,7 @@ void CGraphView::UpdateGraphState()
 	} else
 	if (ret == VFW_S_STATE_INTERMEDIATE) {
 		// schedule timer
-		SetTimer(1, 50, NULL);
+		SetTimer(CGraphView::TIMER_GRAPH_STATE, 50, NULL);
 		state_ready = false;
 	}
 }
@@ -592,15 +621,20 @@ void CGraphView::UpdateGraphState()
 void CGraphView::OnTimer(UINT_PTR nIDEvent)
 {
 	switch (nIDEvent) {
-	case 1:
+	case CGraphView::TIMER_GRAPH_STATE:
 		{
-			KillTimer(1);
+			KillTimer(CGraphView::TIMER_GRAPH_STATE);
 			UpdateGraphState();
 		}
 		break;
-	case 2:
+	case CGraphView::TIMER_REMOTE_GRAPH_STATE:
 		{
 			UpdateGraphState();
+		}
+		break;
+	case CGraphView::TIMER_AUTO_RESTART:
+		{
+			auto_restart.OnTimer();
 		}
 		break;
 	case 1001:
@@ -909,7 +943,7 @@ void CGraphView::OnConnectRemote()
 
 					ret = graph.ConnectToRemote(fg);
 					if (ret == 0) {
-						SetTimer(2, 200, NULL);
+						SetTimer(CGraphView::TIMER_REMOTE_GRAPH_STATE, 200, NULL);
 					}
 
 					// get all filters
@@ -1137,4 +1171,24 @@ void CGraphView::OnFiltersDouble()
 void CGraphView::OnFiltersManageFavorites()
 {
 	form_favorites->ShowWindow(SW_SHOW);
+}
+
+void CGraphView::OnAutorestart()
+{
+	auto_restart.Enable(true);
+}
+
+void CGraphView::OnAutorestartDisabled()
+{
+	auto_restart.Enable(false);
+}
+
+void CGraphView::OnUpdateAutorestart(CCmdUI *pCmdUI)
+{
+	pCmdUI->SetCheck(auto_restart.enabled);
+}
+
+void CGraphView::OnUpdateAutorestartDisabled(CCmdUI *pCmdUI)
+{
+	pCmdUI->SetCheck(!auto_restart.enabled);
 }
