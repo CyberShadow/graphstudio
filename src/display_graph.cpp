@@ -320,6 +320,201 @@ namespace GraphStudio
 		return NOERROR;
 	}
 
+	int DisplayGraph::LoadXML(CString fn)
+	{
+		XML::XMLFile			xml;
+		int						ret;
+
+		ret = xml.LoadFromFile(fn);
+		if (ret < 0) {
+			return -1;
+		}
+
+		// load graph
+		XML::XMLNode			*root = xml.root;
+		XML::XMLIterator		it;
+		if (root->Find(_T("graph"), &it) < 0) return -1;
+
+		XML::XMLNode			*gn = *it;
+		for (it = gn->nodes.begin(); it != gn->nodes.end(); it++) {
+			XML::XMLNode	*node = *it;
+
+			if (node->name == _T("filter"))	ret = LoadXML_Filter(node); else
+			if (node->name == _T("render")) ret = LoadXML_Render(node); else
+			if (node->name == _T("connect")) ret = LoadXML_Connect(node); else
+			{
+				ret = -1;
+			}
+
+			// is everything okay ?
+			if (ret < 0) {
+				return -1;
+			}
+		}
+
+		return 0;
+	}
+
+	int DisplayGraph::LoadXML_Render(XML::XMLNode *node)
+	{
+		CString		pin_path = node->GetValue(_T("pin"));
+		Pin			*pin = FindPin(pin_path);
+		if (!pin) return -1;
+
+		// try to render
+		HRESULT		hr = gb->Render(pin->pin);
+		if (FAILED(hr)) return -1;
+
+		// reload newly added filters
+		RefreshFilters();
+		return 0;
+	}
+
+	int DisplayGraph::LoadXML_Connect(XML::XMLNode *node)
+	{
+		CString		opin_path = node->GetValue(_T("out"));
+		CString		ipin_path = node->GetValue(_T("in"));
+
+		CString		direct    = node->GetValue(_T("direct"));
+		if (direct == _T("")) direct = _T("false");
+
+		Pin			*opin = FindPin(opin_path);
+		Pin			*ipin = FindPin(ipin_path);
+
+		if (!opin || !ipin) return -1;
+
+		HRESULT hr;
+		if (direct == _T("false")) {
+			hr = gb->Connect(opin->pin, ipin->pin);
+		} else {
+			hr = gb->ConnectDirect(opin->pin, ipin->pin, NULL);
+		}
+		if (FAILED(hr)) return -1;
+
+		// reload newly added filters
+		RefreshFilters();
+		return 0;
+	}
+
+	int DisplayGraph::LoadXML_Filter(XML::XMLNode *node)
+	{
+		CString					name		= node->GetValue(_T("name"));
+		CString					clsid_str	= node->GetValue(_T("clsid"));
+		CString					dn			= node->GetValue(_T("displayname"));
+		GUID					clsid;
+		CComPtr<IBaseFilter>	instance;
+		HRESULT					hr = NOERROR;
+		int						filter_id_type = -1, ret = 0;
+		bool					is_configured = false;
+
+		// detect how the filter is described
+		if (clsid_str != _T("")) {
+			filter_id_type = 0;
+			if (FAILED(CLSIDFromString((LPOLESTR)clsid_str.GetBuffer(), &clsid))) return -1;
+		} else
+		if (dn != _T("")) {
+			filter_id_type = 1;
+		}
+
+		// create the filter
+		switch (filter_id_type) {
+		case 0:
+			{
+				// create by CLSID
+				hr = CoCreateInstance(clsid, NULL, CLSCTX_INPROC_SERVER, IID_IBaseFilter, (void**)&instance);
+			}
+			break;
+		case 1:
+			{
+				// create by display name
+				CComPtr<IMoniker>		moniker;
+				CComPtr<IBindCtx>		bind;
+				ULONG					eaten = 0;
+
+				hr = CreateBindCtx(0, &bind);
+				if (SUCCEEDED(hr)) {
+					hr = MkParseDisplayName(bind, dn, &eaten, &moniker);
+					if (SUCCEEDED(hr)) {
+						hr = moniker->BindToObject(NULL, NULL, IID_IBaseFilter, (void**)&instance);
+					}
+				}
+
+				if (FAILED(hr)) instance = NULL;
+				bind = NULL;
+				moniker = NULL;
+			}
+			break;
+		default:
+			{
+				hr = E_FAIL;
+			}
+			break;
+		}
+
+		// add the filter instance
+		if (SUCCEEDED(hr) && instance) {
+			// add the filter to graph
+			hr = AddFilter(instance, name);
+			if (FAILED(hr)) {
+				// display error message
+				ret = -1;
+			} else {
+				SmartPlacement();
+			}
+		}
+
+		// check for known interfaces
+		if (SUCCEEDED(hr)) {
+			ret = LoadXML_Interfaces(node, instance);
+			is_configured = (ret == 0 ? true : false);
+		}
+
+		if (ret == 0 && instance != NULL && !is_configured) {
+
+			// now check for a few interfaces
+			int r = ConfigureInsertedFilter(instance);
+			if (r < 0) {
+				instance = NULL;
+			}
+		}
+
+		RefreshFilters();
+
+		// we're done
+		instance = NULL;
+		return ret;
+	}
+
+	int DisplayGraph::LoadXML_Interfaces(XML::XMLNode *node, IBaseFilter *filter)
+	{
+		/*
+			Returns 0 if configured and 1 if untouched
+		*/
+		int		ret = 1;
+		HRESULT	hr;
+
+		XML::XMLIterator		it;
+		for (it = node->nodes.begin(); it != node->nodes.end(); it++) {
+			XML::XMLNode	*iface = *it;
+
+			if (iface->name == _T("ifilesourcefilter")) {
+
+				CComPtr<IFileSourceFilter>		fsource;
+				hr = filter->QueryInterface(IID_IFileSourceFilter, (void**)&fsource);
+				if (SUCCEEDED(hr)) {
+					// load the file
+					CString	source = iface->GetValue(_T("source"));
+					hr = fsource->Load((LPCOLESTR)source.GetBuffer(), NULL);
+					if (FAILED(hr)) return -1;			// cannot open file
+					ret = 0;
+				}
+			}
+
+		}
+
+		return ret;
+	}
+
 	int DisplayGraph::LoadGRF(CString fn)
 	{
 		IStorage *pStorage = 0;
@@ -389,6 +584,27 @@ namespace GraphStudio
 		}
 
 		return 0;
+	}
+
+	Pin *DisplayGraph::FindPin(CString pin_path)
+	{
+		// find the filter
+		CString	filter_name = DSUtil::get_next_token(pin_path, _T("/"));
+		Filter	*filter = FindFilter(filter_name);
+		if (!filter) return NULL;
+
+		// try to find the pin
+		return filter->FindPin(pin_path);
+	}
+
+	Filter *DisplayGraph::FindFilter(CString name)
+	{
+		for (int i=0; i<filters.GetCount(); i++) {
+			if (filters[i]->name == name) {
+				return filters[i];
+			}
+		}
+		return NULL;
 	}
 
 	Filter *DisplayGraph::FindFilter(IBaseFilter *filter)
@@ -1187,6 +1403,19 @@ namespace GraphStudio
 		int i;
 		for (i=0; i<input_pins.GetCount(); i++) input_pins[i]->Select(select);
 		for (i=0; i<output_pins.GetCount(); i++) output_pins[i]->Select(select);
+	}
+
+	Pin *Filter::FindPin(CString name)
+	{
+		int i;
+		for (i=0; i<output_pins.GetCount(); i++) {
+			if (output_pins[i]->name == name) return output_pins[i];
+		}
+		for (i=0; i<input_pins.GetCount(); i++) {
+			Pin *pin = input_pins[i];
+			if (pin->name == name) return pin;
+		}
+		return NULL;
 	}
 
 	Pin *Filter::FindPinByPos(CPoint p, bool not_connected)

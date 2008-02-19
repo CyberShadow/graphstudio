@@ -82,6 +82,7 @@ BEGIN_MESSAGE_MAP(CGraphView, GraphStudio::DisplayView)
 	ON_COMMAND(ID_AUTORESTART_DISABLED, &CGraphView::OnAutorestartDisabled)
 	ON_UPDATE_COMMAND_UI(ID_AUTORESTART, &CGraphView::OnUpdateAutorestart)
 	ON_UPDATE_COMMAND_UI(ID_AUTORESTART_DISABLED, &CGraphView::OnUpdateAutorestartDisabled)
+	ON_COMMAND(ID_FILE_OPENFROMXML, &CGraphView::OnFileOpenfromxml)
 END_MESSAGE_MAP()
 
 //-----------------------------------------------------------------------------
@@ -439,6 +440,15 @@ int CGraphView::TryOpenFile(CString fn)
 			can_save = true;
 		}
 
+	} else 
+	if (ext == _T(".xml")) {
+		OnNewClick();
+		ret = graph.LoadXML(fn);
+		if (ret == 0) {
+			filename = fn;
+			can_save = false;
+		}
+
 	} else {
 		OnNewClick();
 		ret = graph.RenderFile(fn);
@@ -460,6 +470,26 @@ int CGraphView::TryOpenFile(CString fn)
 	graph.SmartPlacement();
 	Invalidate();
 	return 0;
+}
+
+void CGraphView::OnFileOpenfromxml()
+{
+	// nabrowsujeme subor
+	CString		filter;
+	CString		filename;
+
+	filter = _T("GraphStudio XML Files|*.xml|");
+
+	CFileDialog dlg(TRUE,NULL,NULL,OFN_OVERWRITEPROMPT|OFN_ENABLESIZING|OFN_FILEMUSTEXIST,filter);
+    int ret = dlg.DoModal();
+
+	filename = dlg.GetPathName();
+	if (ret == IDOK) {
+		ret = TryOpenFile(filename);
+		if (ret < 0) {
+			MessageBox(_T("Cannot open file"));
+		}
+	}
 }
 
 void CGraphView::OnFileOpenClick()
@@ -751,22 +781,9 @@ void CGraphView::OnGraphInsertFileSource()
 		return ;
 	} else {
 		
-		// now check for a few interfaces
-		CComPtr<IFileSourceFilter>	fs;
-		hr = instance->QueryInterface(IID_IFileSourceFilter, (void**)&fs);
-		if (SUCCEEDED(hr)) {
-			CFileSrcForm		src_form;
-			int ret = src_form.DoModal();
-			if (ret == IDOK) {
-				hr = fs->Load((LPCOLESTR)src_form.result_file, NULL);
-				if (FAILED(hr)) {
-					MessageBox(_T("Cannot load specified file"), _T("Error"), MB_ICONERROR);
-				}
-			} else {
-				// cancel the filter
-				instance = NULL;
-			}
-			fs = NULL;
+		int ret = ConfigureInsertedFilter(instance);
+		if (ret < 0) {
+			instance = NULL;
 		}
 
 		if (instance) {
@@ -796,22 +813,9 @@ void CGraphView::OnGraphInsertFileSink()
 		return ;
 	} else {
 		
-		// now check for a few interfaces
-		CComPtr<IFileSinkFilter>	fs;
-		hr = instance->QueryInterface(IID_IFileSinkFilter, (void**)&fs);
-		if (SUCCEEDED(hr)) {
-			CFileSinkForm		sink_form;
-			int ret = sink_form.DoModal();
-			if (ret == IDOK) {
-				hr = fs->SetFileName((LPCOLESTR)sink_form.result_file, NULL);
-				if (FAILED(hr)) {
-					MessageBox(_T("Cannot write specified file"), _T("Error"), MB_ICONERROR);
-				}
-			} else {
-				// cancel the filter
-				instance = NULL;
-			}
-			fs = NULL;
+		int ret = ConfigureInsertedFilter(instance);
+		if (ret < 0) {
+			instance = NULL;
 		}
 
 		if (instance) {

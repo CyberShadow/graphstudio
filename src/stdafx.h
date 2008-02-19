@@ -40,10 +40,7 @@
 
 #include <afxwin.h>         // MFC core and standard components
 #include <afxext.h>         // MFC extensions
-
-
 #include <afxdisp.h>        // MFC Automation classes
-
 #include <atlbase.h>
 
 #ifndef _AFX_NO_OLE_SUPPORT
@@ -60,6 +57,17 @@
 #include <dmodshow.h>
 
 #include "..\resource.h"
+
+#include <list>
+#include <vector>
+using namespace std;
+
+
+#include <xmllite.h>
+#pragma comment(lib, "xmllite.lib")
+#pragma comment(lib, "Version.lib")
+#include "xml_parser.h"
+
 
 #include "title_bar.h"
 #include "seeking_bar.h"

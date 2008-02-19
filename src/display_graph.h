@@ -146,6 +146,7 @@ namespace GraphStudio
 		void LoadPin(IPin *pin, PIN_DIRECTION dir);
 		Pin *FindPin(IPin *pin);
 		Pin *FindPinByPos(CPoint p, bool not_connected=true);
+		Pin *FindPin(CString name);
 		bool HasPin(IPin *pin);
 		void LoadPeers();
 		void DeleteSelectedConnections();
@@ -218,14 +219,23 @@ namespace GraphStudio
 		int SaveGRF(CString fn);
 		int ConnectToRemote(IFilterGraph *remote_graph);
 
+		// XML-based graph construction
+		int LoadXML(CString fn);
+		int LoadXML_Filter(XML::XMLNode *node);
+		int LoadXML_Render(XML::XMLNode *node);
+		int LoadXML_Connect(XML::XMLNode *node);
+		int LoadXML_Interfaces(XML::XMLNode *node, IBaseFilter *filter);
+
 		// adding filters
 		HRESULT AddFilter(IBaseFilter *filter, CString proposed_name);
 
 		void RefreshFilters();
 		void ZeroTags();
 		Filter *FindFilter(IBaseFilter *filter);
+		Filter *FindFilter(CString name);
 		Filter *FindParentFilter(IPin *pin);
 		Pin *FindPin(IPin *pin);
+		Pin *FindPin(CString pin_path);
 		void RemoveUnusedFilters();
 		void RemoveAllFilters();
 		void SmartPlacement();

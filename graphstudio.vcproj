@@ -281,6 +281,10 @@
 				RelativePath=".\src\title_bar.cpp"
 				>
 			</File>
+			<File
+				RelativePath=".\src\xml_parser.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -377,6 +381,10 @@
 			</File>
 			<File
 				RelativePath=".\src\title_bar.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\xml_parser.h"
 				>
 			</File>
 		</Filter>

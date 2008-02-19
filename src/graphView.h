@@ -114,6 +114,7 @@ public:
 	void OnUpdateRenderMediaFile(CCmdUI *ui);
 	void OnDropFiles(HDROP hDropInfo);
 	int TryOpenFile(CString fn);
+	int TryOpenXML(CString fn);
 
 	virtual BOOL OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT *pResult);
 
@@ -155,6 +156,7 @@ public:
 	afx_msg void OnAutorestartDisabled();
 	afx_msg void OnUpdateAutorestart(CCmdUI *pCmdUI);
 	afx_msg void OnUpdateAutorestartDisabled(CCmdUI *pCmdUI);
+	afx_msg void OnFileOpenfromxml();
 };
 
 #ifndef _DEBUG  // debug version in graphView.cpp
