@@ -430,6 +430,14 @@
 				>
 			</File>
 		</Filter>
+		<Filter
+			Name="interfaces"
+			>
+			<File
+				RelativePath=".\interfaces\monofilters.h"
+				>
+			</File>
+		</Filter>
 	</Files>
 	<Globals>
 		<Global
