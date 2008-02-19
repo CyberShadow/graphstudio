@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<graph name="Testing Graph">
+
+    <filter name="source" clsid="{E436EBB5-524F-11CE-9F53-0020AF0BA770}">
+        <ifilesourcefilter source="d:\sga.avi"/>
+    </filter>
+    
+    <filter name="AVI Splitter" clsid="{1B544C20-FD0B-11CE-8C63-00AA0044B51E}"/>
+
+    <connect out="source/Output" in="AVI Splitter/input pin"/>
+
+    <render pin="AVI Splitter/Stream 00"/>
+    <render pin="AVI Splitter/Stream 01"/>
+
+</graph>
