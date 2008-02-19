@@ -1,6 +1,7 @@
 [0.1.9.0 - Alpha   xx/Feb/2008]
 + added automatic graph restart schedule (currently only for 04:00 AM :) - don't ask why)
 + added capability to construct graphs from XML files
++ added extension filters for opening dialogs
 
 [0.1.8.0 - Alpha   17/Feb/2008]
 + favorite filters and managing form now work

@@ -478,7 +478,9 @@ void CGraphView::OnFileOpenfromxml()
 	CString		filter;
 	CString		filename;
 
-	filter = _T("GraphStudio XML Files|*.xml|");
+	filter =  _T("");
+	filter += _T("GraphStudio XML Files (xml)|*.xml|");
+	filter += _T("All Files|*.*|");
 
 	CFileDialog dlg(TRUE,NULL,NULL,OFN_OVERWRITEPROMPT|OFN_ENABLESIZING|OFN_FILEMUSTEXIST,filter);
     int ret = dlg.DoModal();
@@ -498,7 +500,10 @@ void CGraphView::OnFileOpenClick()
 	CString		filter;
 	CString		filename;
 
-	filter = _T("GraphEdit Files|*.grf|");
+	filter =  _T("");
+	filter += _T("GraphEdit Files (grf)|*.grf|");
+	filter += _T("GraphStudio XML Files (xml)|*.xml|");
+	filter += _T("All Files|*.*|");
 
 	CFileDialog dlg(TRUE,NULL,NULL,OFN_OVERWRITEPROMPT|OFN_ENABLESIZING|OFN_FILEMUSTEXIST,filter);
     int ret = dlg.DoModal();
@@ -519,7 +524,10 @@ void CGraphView::OnFileAddmediafile()
 	CString		filter;
 	CString		filename;
 
-	filter = _T("All Files|*.*|");
+	filter =  _T("");
+	filter += _T("Video Files (avi,mp4,mpg,mpeg,ts,mkv,ogg,ogm,pva)|*.avi;*.mp4;*.mpg;*.mpeg;*.ts;*.mkv;*.ogg;*.ogm;*.pva|");
+	filter += _T("Audio Files (aac,ac3,mp3,wma,mka,ogg,ogm,mpc,flac,ape,wav)|*.aac;*.ac3;*.mp3;*.wma;*.mka;*.ogg;*.ogm;*.mpc;*.flac;*.ape;*.wav|");
+	filter += _T("All Files|*.*|");
 
 	CFileDialog dlg(TRUE,NULL,NULL,OFN_OVERWRITEPROMPT|OFN_ENABLESIZING|OFN_FILEMUSTEXIST,filter);
     int ret = dlg.DoModal();
@@ -549,7 +557,10 @@ void CGraphView::OnRenderFileClick()
 	CString		filter;
 	CString		filename;
 
-	filter = _T("All Files|*.*|");
+	filter =  _T("");
+	filter += _T("Video Files (avi,mp4,mpg,mpeg,ts,mkv,ogg,ogm,pva)|*.avi;*.mp4;*.mpg;*.mpeg;*.ts;*.mkv;*.ogg;*.ogm;*.pva|");
+	filter += _T("Audio Files (aac,ac3,mp3,wma,mka,ogg,ogm,mpc,flac,ape,wav)|*.aac;*.ac3;*.mp3;*.wma;*.mka;*.ogg;*.ogm;*.mpc;*.flac;*.ape;*.wav|");
+	filter += _T("All Files|*.*|");
 
 	CFileDialog dlg(TRUE,NULL,NULL,OFN_OVERWRITEPROMPT|OFN_ENABLESIZING|OFN_FILEMUSTEXIST,filter);
     int ret = dlg.DoModal();
