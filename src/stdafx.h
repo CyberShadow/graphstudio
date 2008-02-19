@@ -92,7 +92,7 @@ using namespace std;
 #include "NewGroupForm.h"
 #include "graphView.h"
 
-
+#include "..\interfaces\monofilters.h"
 
 
 

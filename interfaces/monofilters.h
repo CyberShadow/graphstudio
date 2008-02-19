@@ -13,6 +13,7 @@ namespace Monogram
 		These are interfaces for the most of monogram filters
 	*/
 
+	typedef __int64			int64;
 	
 	// {BE0783E3-8A4B-4d1b-BCAF-27A78FEB20D2}
 	static const GUID CLSID_MonogramMultigraphSink = 
