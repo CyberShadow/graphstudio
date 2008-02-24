@@ -1096,8 +1096,9 @@ namespace GraphStudio
 			}
 			fsink = NULL;
 		}
+		file_name = url_name;
 
-		if (url_name != _T("")) {
+		if (params->display_file_name && url_name != _T("")) {
 			CPath		path(url_name);
 			int fstart = path.FindFileName();
 			if (fstart >= 0) {
@@ -1796,6 +1797,8 @@ namespace GraphStudio
 		def_pin_spacing = 27;
 		def_filter_text_size = 10;
 		def_pin_text_size = 7;
+
+		display_file_name = true;
 
 		Zoom(1.0);
 	}

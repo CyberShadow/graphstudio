@@ -266,6 +266,17 @@ namespace DSUtil
 		return *this;
 	}
 
+	void DoReplace(CString &str, CString old_str, CString new_str)
+	{
+		CString	temp = str;
+		temp.MakeUpper();
+		int p = temp.Find(old_str);
+		if (p >= 0) {
+			str.Delete(p, old_str.GetLength());
+			str.Insert(p, new_str);
+		}
+	}
+
 	HRESULT FilterTemplate::FindFilename()
 	{
 		// HKEY_CLASSES_ROOT\CLSID\{07C9CB2C-F51C-47EA-B551-7DA02541D586}
@@ -283,22 +294,36 @@ namespace DSUtil
 		}
 
 		TCHAR		temp[4*1024];
+		TCHAR		fullpath[4*1024];
+		LPWSTR		fn;
 		ULONG		chars=4*1024;
 
 		key.QueryStringValue(_T(""), temp, &chars);
 		temp[chars]=0;
 		file = temp;
-
 		key.Close();
 
-		// now we try this file
-		CPath	path(file);
-		if (path.FileExists()) {
-			file_exists = true;
-		} else {
-			file_exists = true; //false;
-		}
+		// replace characters
+		CString		progfiles, sysdir, windir;
 
+		SHGetSpecialFolderPath(NULL, temp, CSIDL_PROGRAM_FILES, FALSE);	progfiles = temp;
+		SHGetSpecialFolderPath(NULL, temp, CSIDL_SYSTEM, FALSE);		sysdir = temp;
+		SHGetSpecialFolderPath(NULL, temp, CSIDL_WINDOWS, FALSE);		windir = temp;
+		
+		DoReplace(file, _T("%PROGRAMFILES%"), progfiles);
+
+		DWORD ret = SearchPath(NULL, file.GetBuffer(), NULL, 4*1024, fullpath, &fn);
+		if (ret > 0) {
+			file_exists = true;
+			file = fullpath;
+		} else {
+			CPath	path(file);
+			if (path.FileExists()) {
+				file_exists = true;
+			} else {
+				file_exists = false;
+			}
+		}
 		return NOERROR;
 	}
 
@@ -767,6 +792,12 @@ namespace DSUtil
 
 	int FilterTemplates::IsVideoRenderer(FilterTemplate &filter)
 	{
+		// manually accept these
+		if (filter.clsid == CLSID_OverlayMixer) return 0;
+		
+		// manually reject these
+		if (filter.name == _T("Windows Media Update Filter")) return -1;
+
 		// video renderer must have no output pins
 		if (filter.output_pins.GetCount() > 0) return -1;
 

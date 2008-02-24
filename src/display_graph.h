@@ -50,6 +50,9 @@ namespace GraphStudio
 		int				def_filter_text_size;
 		int				def_pin_text_size;
 
+		// display as file name
+		bool			display_file_name;
+
 	public:
 		RenderParameters();
 		virtual ~RenderParameters();
@@ -105,6 +108,7 @@ namespace GraphStudio
 		DisplayGraph			*graph;
 		RenderParameters		*params;
 		CString					name;				// name of the filter
+		CString					file_name;			// file name from IFileSourceFilter or IFileSinkFilter
 		CString					display_name;		// name as it appears
 		CLSID					clsid;				// it's CLASS_ID
 		CString					clsid_str;			// string version

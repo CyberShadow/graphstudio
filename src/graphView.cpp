@@ -83,6 +83,10 @@ BEGIN_MESSAGE_MAP(CGraphView, GraphStudio::DisplayView)
 	ON_UPDATE_COMMAND_UI(ID_AUTORESTART, &CGraphView::OnUpdateAutorestart)
 	ON_UPDATE_COMMAND_UI(ID_AUTORESTART_DISABLED, &CGraphView::OnUpdateAutorestartDisabled)
 	ON_COMMAND(ID_FILE_OPENFROMXML, &CGraphView::OnFileOpenfromxml)
+	ON_COMMAND(ID_OPTIONS_DISPLAYASFILENAME, &CGraphView::OnOptionsDisplayFileName)
+	ON_COMMAND(ID_OPTIONS_DISPLAYFILTERNAME, &CGraphView::OnOptionsDisplayName)
+	ON_UPDATE_COMMAND_UI(ID_OPTIONS_DISPLAYASFILENAME, &CGraphView::OnUpdateOptionsDisplayFileName)
+	ON_UPDATE_COMMAND_UI(ID_OPTIONS_DISPLAYFILTERNAME, &CGraphView::OnUpdateOptionsDisplayName)
 END_MESSAGE_MAP()
 
 //-----------------------------------------------------------------------------
@@ -503,6 +507,8 @@ void CGraphView::OnFileOpenClick()
 	filter =  _T("");
 	filter += _T("GraphEdit Files (grf)|*.grf|");
 	filter += _T("GraphStudio XML Files (xml)|*.xml|");
+	filter += _T("Video Files (avi,mp4,mpg,mpeg,ts,mkv,ogg,ogm,pva)|*.avi;*.mp4;*.mpg;*.mpeg;*.ts;*.mkv;*.ogg;*.ogm;*.pva|");
+	filter += _T("Audio Files (aac,ac3,mp3,wma,mka,ogg,ogm,mpc,flac,ape,wav)|*.aac;*.ac3;*.mp3;*.wma;*.mka;*.ogg;*.ogm;*.mpc;*.flac;*.ape;*.wav|");
 	filter += _T("All Files|*.*|");
 
 	CFileDialog dlg(TRUE,NULL,NULL,OFN_OVERWRITEPROMPT|OFN_ENABLESIZING|OFN_FILEMUSTEXIST,filter);
@@ -1207,3 +1213,36 @@ void CGraphView::OnUpdateAutorestartDisabled(CCmdUI *pCmdUI)
 {
 	pCmdUI->SetCheck(!auto_restart.enabled);
 }
+
+void CGraphView::OnOptionsDisplayName()
+{
+	render_params.display_file_name = false;
+	graph.RefreshFilters();
+	graph.SmartPlacement();
+	graph.Dirty();
+	Invalidate();
+}
+
+void CGraphView::OnOptionsDisplayFileName()
+{
+	render_params.display_file_name = true;
+	graph.RefreshFilters();
+	graph.SmartPlacement();
+	graph.Dirty();
+	Invalidate();
+}
+
+void CGraphView::OnUpdateOptionsDisplayName(CCmdUI *pCmdUI)
+{
+	pCmdUI->SetCheck(render_params.display_file_name ? false : true);
+}
+
+void CGraphView::OnUpdateOptionsDisplayFileName(CCmdUI *pCmdUI)
+{
+	pCmdUI->SetCheck(render_params.display_file_name ? true : false);
+}
+
+
+
+
+

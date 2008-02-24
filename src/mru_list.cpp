@@ -82,7 +82,7 @@ namespace GraphStudio
 	{
 		// we insert our items just before the last item (Exit)
 		int	cn = menu->GetMenuItemCount();
-		while (cn > 20) {
+		while (cn > 21) {
 			menu->DeleteMenu(cn-2, MF_BYPOSITION);
 			cn--;
 		}

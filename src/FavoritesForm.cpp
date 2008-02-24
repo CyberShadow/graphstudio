@@ -18,11 +18,14 @@ IMPLEMENT_DYNAMIC(CFavoritesForm, CDialog)
 
 BEGIN_MESSAGE_MAP(CFavoritesForm, CDialog)
 	ON_WM_SIZE()
+	ON_WM_KEYDOWN()
 	ON_NOTIFY(NM_RCLICK, IDC_TREE_FAVORITES, &CFavoritesForm::OnNMRclickTreeFavorites)
 	ON_COMMAND(ID_MENU_CREATEGROUP, &CFavoritesForm::OnMenuCreategroup)
 	ON_NOTIFY(TVN_BEGINDRAG, IDC_TREE_FAVORITES, &CFavoritesForm::OnBeginDrag)
 	ON_COMMAND(ID_MENU_REMOVEGROUP, &CFavoritesForm::OnMenuRemovegroup)
 	ON_COMMAND(ID_MENU_REMOVEFILTER, &CFavoritesForm::OnMenuRemovefilter)
+	ON_NOTIFY(TVN_KEYDOWN, IDC_TREE_FAVORITES, &CFavoritesForm::OnTvnKeydownTreeFavorites)
+	ON_COMMAND(ID_BUTTON_ADD_FILTERS, &CFavoritesForm::OnAddFilters)
 END_MESSAGE_MAP()
 
 //-----------------------------------------------------------------------------
@@ -67,6 +70,12 @@ BOOL CFavoritesForm::DoCreateDialog()
 	tree.SetImageList(&image_list, TVSIL_STATE);
 	tree.SetItemHeight(20);
 
+	// create buttons
+	CRect	rc;
+	rc.SetRect(0, 0, 80, 25);
+	btn_add_filters.Create(_T("Add Filter(s)"), WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, rc, &title, ID_BUTTON_ADD_FILTERS);
+	btn_add_filters.SetFont(GetFont());
+
 	OnInitialize();
 
 	SetWindowPos(NULL, 0, 0, 400, 300, SWP_NOMOVE);
@@ -78,6 +87,10 @@ void CFavoritesForm::OnInitialize()
 	UpdateTree();
 }
 
+void CFavoritesForm::OnAddFilters()
+{
+	view->OnGraphInsertfilter();
+}
 
 void CFavoritesForm::OnSize(UINT nType, int cx, int cy)
 {
@@ -94,10 +107,16 @@ void CFavoritesForm::OnSize(UINT nType, int cx, int cy)
 		title.GetClientRect(&rc2);
 		title.SetWindowPos(NULL, 0, 0, cx, rc2.Height(), SWP_SHOWWINDOW);
 
+		btn_add_filters.SetWindowPos(NULL, cx - 1*(80+6), 4, 80, 25, SWP_SHOWWINDOW);
+
 		tree.SetWindowPos(NULL, 0, rc2.Height(), cx, rc.Height() - rc2.Height(), SWP_SHOWWINDOW);
 
 		// invalidate all controls
 		title.Invalidate();
+
+		title.GetClientRect(&rc2);
+
+		btn_add_filters.Invalidate();
 
 	}
 }
@@ -405,6 +424,77 @@ void CFavoritesForm::OnBeginDrag(NMHDR *pNMHDR, LRESULT *pResult)
 	// just redirect the event
 	tree.OnBeginDrag(pNMHDR, pResult);
 }
+
+void CFavoritesForm::OnTvnKeydownTreeFavorites(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	LPNMTVKEYDOWN pTVKeyDown = reinterpret_cast<LPNMTVKEYDOWN>(pNMHDR);
+	*pResult = 0;
+
+	if (pTVKeyDown->wVKey == VK_DELETE) {
+		OnKeyDown(VK_DELETE, 1, 0);
+	}
+}
+
+void CFavoritesForm::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
+{
+	// handle DEL key
+	if (nChar == VK_DELETE) {
+	
+		HTREEITEM	item = tree.GetSelectedItem();
+		if (item != NULL) {
+
+			// delete this item
+			GraphStudio::Favorites		*favorites = GraphStudio::Favorites::GetInstance();
+			GraphStudio::FavoriteItem	*it = (GraphStudio::FavoriteItem*)tree.GetItemData(item);
+			if (it->type == 0) {
+				// it's a filter
+				GraphStudio::FavoriteFilter	*filter = (GraphStudio::FavoriteFilter*)it;
+
+				// if it has no parent it's a top group filter
+				if (filter->parent == NULL) {					
+					favorites->RemoveFilter(filter);
+					tree.DeleteItem(item);
+				} else {
+					filter->parent->RemoveFilter(filter);
+					tree.DeleteItem(item);
+				}
+
+				// delete instance
+				delete filter;
+
+				favorites->Save();
+				UpdateTree();
+
+			} else 
+			if (it->type == 1) {
+				// it's a group
+				int i;
+				GraphStudio::FavoriteGroup	*group = (GraphStudio::FavoriteGroup*)it;
+				for (i=0; i<group->filters.GetCount(); i++) {
+					GraphStudio::FavoriteFilter	*filter = group->filters[i];
+					if (filter->item) {
+						tree.DeleteItem(filter->item);
+						filter->item = NULL;
+					}
+				}
+
+				for (i=0; i<favorites->groups.GetCount(); i++) {
+					if (favorites->groups[i] == group) {
+						favorites->groups.RemoveAt(i);
+						break;
+					}
+				}
+
+				if (group->item) tree.DeleteItem(group->item);
+				delete group;
+				favorites->Save();
+				UpdateTree();
+			}
+
+		}
+	}
+}
+
 
 namespace GraphStudio
 {

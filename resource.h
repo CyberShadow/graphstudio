@@ -90,6 +90,7 @@
 #define ID_VIEW_100                     32796
 #define ID_VIEW_150                     32797
 #define ID_VIEW_200                     32798
+#define ID_BUTTON_ADD_FILTERS			32799
 #define ID_GRAPH_INSERTFILEWRITER       32805
 #define ID_GRAPH_INSERTVIDEORENDERER    32806
 #define ID_GRAPH_INSERTAUDIORENDERER    32807
@@ -110,13 +111,16 @@
 #define ID_AUTORESTART                  32828
 #define ID_AUTORESTART_DISABLED         32829
 #define ID_FILE_OPENFROMXML             32830
+#define ID_FILE_SAVEASXML               32831
+#define ID_OPTIONS_DISPLAYFILTERNAME    32832
+#define ID_OPTIONS_DISPLAYASFILENAME    32833
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        147
-#define _APS_NEXT_COMMAND_VALUE         32831
+#define _APS_NEXT_COMMAND_VALUE         32834
 #define _APS_NEXT_CONTROL_VALUE         1033
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

@@ -108,6 +108,7 @@ BEGIN
         MENUITEM "Open From XML...",            ID_FILE_OPENFROMXML
         MENUITEM "&Save Graph (.GRF)\tCtrl+S",  ID_FILE_SAVE
         MENUITEM "Save &As Graph (.GRF)...",    ID_FILE_SAVE_AS
+        MENUITEM "Save As XML...",              ID_FILE_SAVEASXML
         MENUITEM SEPARATOR
         MENUITEM "Render Media File...\tCtrl+R", ID_FILE_RENDERFILE
         MENUITEM "Add Media File...",           ID_FILE_ADDMEDIAFILE
@@ -167,6 +168,9 @@ BEGIN
             MENUITEM SEPARATOR
             MENUITEM "04:00 AM",                    ID_AUTORESTART
         END
+        MENUITEM SEPARATOR
+        MENUITEM "Display Filter Name",         ID_OPTIONS_DISPLAYFILTERNAME
+        MENUITEM "Display As File Name",        ID_OPTIONS_DISPLAYASFILENAME
     END
     POPUP "&Help"
     BEGIN

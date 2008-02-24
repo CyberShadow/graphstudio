@@ -138,6 +138,7 @@ public:
 	GraphStudio::TitleBar		title;
 	GraphStudio::FavoritesTree	tree;
 	CImageList					image_list;
+	CButton						btn_add_filters;
 	CGraphView					*view;
 	HTREEITEM					menu_fired_item;
 
@@ -157,10 +158,13 @@ public:
 	void UpdateFavoriteMenu();
 	void RemoveFilter(HTREEITEM item);
 
-	afx_msg void OnNMRclickTreeFavorites(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void OnMenuCreategroup();
-	afx_msg void OnBeginDrag(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void OnMenuRemovegroup();
-	afx_msg void OnMenuRemovefilter();
+	void OnNMRclickTreeFavorites(NMHDR *pNMHDR, LRESULT *pResult);
+	void OnMenuCreategroup();
+	void OnBeginDrag(NMHDR *pNMHDR, LRESULT *pResult);
+	void OnMenuRemovegroup();
+	void OnMenuRemovefilter();
+	void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
+	void OnTvnKeydownTreeFavorites(NMHDR *pNMHDR, LRESULT *pResult);
+	void OnAddFilters();
 };
 

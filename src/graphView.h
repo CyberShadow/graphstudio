@@ -152,11 +152,16 @@ public:
 	void OnViewDecreasezoomlevel();
 	void OnViewIncreasezoomlevel();
 	void OnFiltersManageFavorites();
-	afx_msg void OnAutorestart();
-	afx_msg void OnAutorestartDisabled();
-	afx_msg void OnUpdateAutorestart(CCmdUI *pCmdUI);
-	afx_msg void OnUpdateAutorestartDisabled(CCmdUI *pCmdUI);
-	afx_msg void OnFileOpenfromxml();
+	void OnAutorestart();
+	void OnAutorestartDisabled();
+	void OnUpdateAutorestart(CCmdUI *pCmdUI);
+	void OnUpdateAutorestartDisabled(CCmdUI *pCmdUI);
+	void OnFileOpenfromxml();
+	void OnOptionsDisplayName();
+	void OnOptionsDisplayFileName();
+	void OnUpdateOptionsDisplayName(CCmdUI *pCmdUI);
+	void OnUpdateOptionsDisplayFileName(CCmdUI *pCmdUI);
+
 };
 
 #ifndef _DEBUG  // debug version in graphView.cpp

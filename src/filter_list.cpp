@@ -97,7 +97,7 @@ namespace GraphStudio
 		dc.DrawText(filter->name, &rcText, DT_VCENTER | DT_SINGLELINE);
 
 		// draw merit
-		rcText.left = rcText.right - 80;
+		rcText.left = rcText.right - 70;
 		dc.SetTextColor(color_info);
 		dc.SelectObject(&font_info);
 		CString info;
@@ -109,15 +109,15 @@ namespace GraphStudio
 			CSize	extent = dc.GetTextExtent(error_text);
 
 			rcText.right = rcText.left;
-			rcText.left = rcText.right - extent.cx - 2*4;
+			rcText.left = rcText.right - extent.cx - 2*2;
 			dc.SetTextColor(color_error);
 			dc.DrawText(error_text, &rcText, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
 		}
 
 		// draw type text
 		int		rx   = rcText.left;
-		rcText.left	 = rx - 60;
-		rcText.right = rx;
+		rcText.left	 = rx - 66;
+		rcText.right = rx - 16;
 		dc.SelectObject(&font_filter);
 		dc.SetTextColor(type_colors[idx]);
 		dc.DrawText(type_text, &rcText, DT_RIGHT | DT_VCENTER | DT_SINGLELINE);

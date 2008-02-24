@@ -1,7 +1,11 @@
-[0.1.9.0 - Alpha   xx/Feb/2008]
+[0.1.9.0 - Alpha   24/Feb/2008]
 + added automatic graph restart schedule (currently only for 04:00 AM :) - don't ask why)
 + added capability to construct graphs from XML files
 + added extension filters for opening dialogs
++ added option to display filter name instead of filename of a source/sink filter
++ added link to filters form into the favorites form
++ added DEL keyboard shortcut to delete filters and groups
++ non-existing filters are marked with a red "(!)"
 
 [0.1.8.0 - Alpha   17/Feb/2008]
 + favorite filters and managing form now work
