@@ -181,7 +181,7 @@ void CFavoritesForm::UpdateFavoriteMenu()
 		int		c=0;
 		
 		// add groups
-		id = 0;
+		id = 1;
 		for (i=0; i<favorites->groups.GetCount(); i++) {
 			GraphStudio::FavoriteGroup	*group = favorites->groups[i];
 
