@@ -198,6 +198,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\CustomPage.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\display_graph.cpp"
 				>
 			</File>
@@ -230,6 +234,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\FilterDetailsPage.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\FiltersForm.cpp"
 				>
 			</File>
@@ -259,6 +267,10 @@
 			</File>
 			<File
 				RelativePath=".\src\NewGroupForm.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\prop_tree.cpp"
 				>
 			</File>
 			<File
@@ -296,6 +308,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\CustomPage.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\display_graph.h"
 				>
 			</File>
@@ -328,6 +344,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\FilterDetailsPage.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\FiltersForm.h"
 				>
 			</File>
@@ -353,6 +373,10 @@
 			</File>
 			<File
 				RelativePath=".\src\NewGroupForm.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\prop_tree.h"
 				>
 			</File>
 			<File

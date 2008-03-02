@@ -6,6 +6,7 @@
 #define IDP_OLE_INIT_FAILED             100
 #define IDD_DIALOGBAR                   103
 #define IDD_BAR_SEEKING                 103
+#define IDD_DIALOG_FILTERDETAILS        105
 #define IDR_MAINFRAME                   128
 #define IDR_graphstudioTYPE             129
 #define IDB_BITMAP_LOGO                 130
@@ -62,6 +63,8 @@
 #define IDC_TREE_FAVORITES              1030
 #define IDC_EDIT1                       1031
 #define IDC_EDIT_NAME                   1031
+#define IDC_TREE1                       1033
+#define IDC_TREE                        1033
 #define ID_LIST_MRU_CLEAR               4999
 #define ID_LIST_MRU_FILE0               5000
 #define ID_AUDIO_RENDERER0              6000
@@ -90,7 +93,7 @@
 #define ID_VIEW_100                     32796
 #define ID_VIEW_150                     32797
 #define ID_VIEW_200                     32798
-#define ID_BUTTON_ADD_FILTERS			32799
+#define ID_BUTTON_ADD_FILTERS           32799
 #define ID_GRAPH_INSERTFILEWRITER       32805
 #define ID_GRAPH_INSERTVIDEORENDERER    32806
 #define ID_GRAPH_INSERTAUDIORENDERER    32807
@@ -119,9 +122,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        147
+#define _APS_NEXT_RESOURCE_VALUE        148
 #define _APS_NEXT_COMMAND_VALUE         32834
-#define _APS_NEXT_CONTROL_VALUE         1033
+#define _APS_NEXT_CONTROL_VALUE         1034
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

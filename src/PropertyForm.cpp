@@ -231,6 +231,33 @@ int CPropertyForm::AnalyzeObject(IUnknown *obj)
 		}
 		specify = NULL;
 	}
+
+	if (filter) {
+		// display the filter details page
+		CComPtr<IPropertyPage>	page;
+		CFilterDetailsPage		*details_page;
+		HRESULT					hr;
+
+		details_page = new CFilterDetailsPage(NULL, &hr);
+		if (details_page) {
+			details_page->AddRef();
+
+			hr = details_page->QueryInterface(IID_IPropertyPage, (void**)&page);
+			if (SUCCEEDED(hr)) {
+				// assign the object
+				hr = page->SetObjects(1, &obj);
+				if (SUCCEEDED(hr)) {
+					// and add the page to our container
+					container->AddPage(page);
+				}
+			}
+			page = NULL;
+
+			// don't care anymore
+			details_page->Release();
+		}
+
+	}
 	
 	filter = NULL;
 	return 0;

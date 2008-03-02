@@ -75,6 +75,7 @@ using namespace std;
 #include "display_view.h"
 #include "dsutil.h"
 #include "filter_list.h"
+#include "prop_tree.h"
 
 #include "graphstudio.h"
 #include "mru_list.h"
@@ -82,6 +83,10 @@ using namespace std;
 #include "graphDoc.h"
 #include "auto_restart.h"
 #include "FiltersForm.h"
+
+#include "CustomPage.h"
+#include "FilterDetailsPage.h"
+
 #include "FavoritesForm.h"
 #include "EventsForm.h"
 #include "RemoteGraphForm.h"
