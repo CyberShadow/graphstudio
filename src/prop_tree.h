@@ -64,12 +64,14 @@ namespace GraphStudio
 
 	class PropTreeCtrl : public CTreeCtrl
 	{
+	protected:
+		DECLARE_MESSAGE_MAP()
 	public:
-
-
 	public:
 		PropTreeCtrl();
 		~PropTreeCtrl();
+
+		void OnLButtonDown(UINT nFlags, CPoint point);
 	};
 
 	//-------------------------------------------------------------------------
@@ -115,7 +117,7 @@ namespace GraphStudio
 		void OnTreeCustomDraw(NMHDR* pNMHDR, LRESULT* pResult);
 
 		BOOL OnNotify(WPARAM wParam, LPARAM lParam, LRESULT *pResult);
-		void PaintItem(HTREEITEM item, NMCUSTOMDRAW *draw);
+		void PaintItem(HTREEITEM item, UINT state, NMCUSTOMDRAW *draw);
 
 		void BuildPropertyTree(PropItem *root);
 		void BuildNode(PropItem *node, HTREEITEM item);

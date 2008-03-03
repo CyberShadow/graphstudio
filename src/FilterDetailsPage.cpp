@@ -25,7 +25,8 @@ END_MESSAGE_MAP()
 //-----------------------------------------------------------------------------
 CFilterDetailsPage::CFilterDetailsPage(LPUNKNOWN pUnk, HRESULT *phr) :
 	CMFCPropertyPage(_T("FilterDetails"), pUnk, IDD, _T("Filter")),
-	info(_T("root"))
+	info(_T("root")),
+	filter(NULL)
 {
 	// retval
 	if (phr) *phr = NOERROR;
@@ -35,6 +36,20 @@ CFilterDetailsPage::CFilterDetailsPage(LPUNKNOWN pUnk, HRESULT *phr) :
 CFilterDetailsPage::~CFilterDetailsPage()
 {
 	// todo
+}
+
+
+HRESULT CFilterDetailsPage::OnConnect(IUnknown *pUnknown)
+{
+	HRESULT hr = pUnknown->QueryInterface(IID_IBaseFilter, (void**)&filter);
+	if (FAILED(hr)) return E_FAIL;
+	return NOERROR;
+}
+
+HRESULT CFilterDetailsPage::OnDisconnect()
+{
+	filter = NULL;
+	return NOERROR;
 }
 
 // overriden
@@ -51,19 +66,25 @@ BOOL CFilterDetailsPage::OnInitDialog()
 	if (!ok) return FALSE;
 
 	GraphStudio::PropItem	*group;
-	
-	group = info.AddItem(new GraphStudio::PropItem(_T("Test Group")));
-		group->AddItem(new GraphStudio::PropItem(_T("Hodnota"), 10));
-		group->AddItem(new GraphStudio::PropItem(_T("Hodnota2"), 10));
-		group->AddItem(new GraphStudio::PropItem(_T("Hodnota3"), _T("Stringova")));
-		group->AddItem(new GraphStudio::PropItem(_T("Hodnota4"), 10));
-		group->AddItem(new GraphStudio::PropItem(_T("Hodnota"), 10));
+	info.Clear();
 
-	group = info.AddItem(new GraphStudio::PropItem(_T("Podskupina")));
-		group->AddItem(new GraphStudio::PropItem(_T("GUID"), CLSID_FilterGraph));
-		group->AddItem(new GraphStudio::PropItem(_T("Hodnota2"), 10));
-		group->AddItem(new GraphStudio::PropItem(_T("Hodnota3"), _T("Stringova")));
-		group->AddItem(new GraphStudio::PropItem(_T("Hodnota"), true));
+	GraphStudio::Filter		gfilter(NULL);
+	int						ret;
+
+	gfilter.LoadFromFilter(filter);
+
+	group = info.AddItem(new GraphStudio::PropItem(_T("Filter Details")));
+		group->AddItem(new GraphStudio::PropItem(_T("Name"), gfilter.display_name));
+		group->AddItem(new GraphStudio::PropItem(_T("CLSID"), gfilter.clsid));
+
+		CString	type;
+		switch (gfilter.filter_type) {
+		case GraphStudio::Filter::FILTER_DMO:		type = _T("DMO"); break;
+		case GraphStudio::Filter::FILTER_WDM:		type = _T("WDM"); break;
+		case GraphStudio::Filter::FILTER_STANDARD:	type = _T("Standard"); break;
+		case GraphStudio::Filter::FILTER_UNKNOWN:	type = _T("Unknown"); break;
+		}	
+		group->AddItem(new GraphStudio::PropItem(_T("Type"), type));
 
 	tree.Initialize();
 	tree.BuildPropertyTree(&info);

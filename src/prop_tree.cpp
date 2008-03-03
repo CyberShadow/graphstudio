@@ -85,6 +85,10 @@ namespace GraphStudio
 	//
 	//-------------------------------------------------------------------------
 
+	BEGIN_MESSAGE_MAP(PropTreeCtrl, CTreeCtrl)
+		ON_WM_LBUTTONDOWN()
+	END_MESSAGE_MAP()
+
 	PropTreeCtrl::PropTreeCtrl() :
 		CTreeCtrl()
 	{
@@ -93,6 +97,29 @@ namespace GraphStudio
 	PropTreeCtrl::~PropTreeCtrl()
 	{
 	}
+
+	void PropTreeCtrl::OnLButtonDown(UINT nFlags, CPoint point)
+	{
+		HTREEITEM	item = HitTest(point);
+		if (item) {
+			if (!ItemHasChildren(item)) return ;
+
+			CRect	rc_check;
+			CRect	rc;
+			GetItemRect(item, &rc, FALSE);
+
+			rc_check.left = rc.left + 2;
+			rc_check.top  = rc.top  + 4;
+			rc_check.right = rc_check.left + 10;
+			rc_check.bottom = rc_check.top + 10;
+
+			// toggle item
+			if (rc_check.PtInRect(point)) {
+				Expand(item, TVE_TOGGLE);
+			}
+		}
+	}
+
 
 	//-------------------------------------------------------------------------
 	//
@@ -114,10 +141,10 @@ namespace GraphStudio
 
 		color_group = RGB(0,0,0);
 		color_item = RGB(0,0,0);
-		color_back_group = RGB(230, 230, 230);
+		color_back_group = RGB(241, 239, 226);
 		color_back_item = RGB(255, 255, 255);
 
-		left_offset = 12;
+		left_offset = 14;
 		left_width  = 100;
 	}
 
@@ -134,9 +161,8 @@ namespace GraphStudio
 		GetClientRect(&rcClient);
 
 		// create tree and header controls as children
-		tree.Create(WS_CHILD | WS_VISIBLE  | 
-					TVS_NOHSCROLL | TVS_NOTOOLTIPS | 
-					TVS_HASBUTTONS | TVS_LINESATROOT, 
+		tree.Create(WS_CHILD | WS_VISIBLE  | TVS_FULLROWSELECT |
+					TVS_NOHSCROLL | TVS_NOTOOLTIPS,				
 					CRect(), this, ID_TREE);
 
 		RepositionControls();
@@ -186,11 +212,12 @@ namespace GraphStudio
 
 		switch (pNMCustomDraw->dwDrawStage) {
 		case CDDS_PREPAINT:		*pResult = CDRF_NOTIFYITEMDRAW;	break;
+		case CDDS_PREERASE:		*pResult = CDRF_SKIPDEFAULT; break;
 		case CDDS_ITEMPREPAINT:	
 			{
 				// we paint the item manually
 				HTREEITEM hItem = (HTREEITEM)pNMCustomDraw->dwItemSpec;
-				PaintItem(hItem, pNMCustomDraw);				
+				PaintItem(hItem, pNMCustomDraw->uItemState, pNMCustomDraw);				
 
 				*pResult = CDRF_SKIPDEFAULT; 
 			}
@@ -200,7 +227,7 @@ namespace GraphStudio
 		}
 	}
 
-	void PropertyTree::PaintItem(HTREEITEM item, NMCUSTOMDRAW *draw)
+	void PropertyTree::PaintItem(HTREEITEM item, UINT state, NMCUSTOMDRAW *draw)
 	{
 		GraphStudio::PropItem	*prop = (GraphStudio::PropItem*)tree.GetItemData(item);
 		if (!prop) return ;
@@ -217,10 +244,44 @@ namespace GraphStudio
 
 		CBrush		*prev_brush = dc.SelectObject(&brush_back);
 		CPen		*prev_pen   = dc.SelectObject(&pen_back);
+		CFont		*prev_font	= dc.SelectObject(&font_group);
+
+		int			text_left = left_offset + 2;
+
+		dc.SetBkMode(TRANSPARENT);
 
 		if (prop->type == GraphStudio::PropItem::TYPE_STRUCT) {
 			// we paint the whole background
 			dc.Rectangle(rc);
+			dc.SetTextColor(color_group);
+
+			// draw the text
+			CRect	rc_text = rc;
+			rc_text.left += text_left;
+			rc_text.top += 1;
+			rc_text.bottom -= 1;
+			dc.DrawText(prop->name, &rc_text, DT_VCENTER | DT_SINGLELINE);
+
+			// draw the + mark
+			state = tree.GetItemState(item, TVIF_STATE);
+			BOOL expanded = (state & TVIS_EXPANDED ? TRUE : FALSE);
+			
+			CPen	black_pen(PS_SOLID, 1, RGB(0,0,0));
+			CRect	rc_mark;
+			dc.SelectObject(&black_pen);
+
+			rc_mark.left   = rc.left + 2;
+			rc_mark.top    = rc.top  + 4;
+			rc_mark.right  = rc_mark.left + 9;
+			rc_mark.bottom = rc_mark.top + 9;
+			dc.Rectangle(&rc_mark);
+
+			dc.MoveTo(rc_mark.left + 2, rc_mark.top + 4);
+			dc.LineTo(rc_mark.right - 2, rc_mark.top + 4);
+			if (!expanded) {
+				dc.MoveTo(rc_mark.left + 4, rc_mark.top + 2);
+				dc.LineTo(rc_mark.left + 4, rc_mark.bottom - 2);
+			}
 
 		} else {
 			// we paint just the left margin
@@ -230,22 +291,37 @@ namespace GraphStudio
 			dc.MoveTo(rc.left, rc.bottom);
 			dc.LineTo(rc.right, rc.bottom);
 
+			// middle line
+			int	mid_line = rc.left + left_offset + left_width;
+
+			dc.MoveTo(mid_line, rc.top);
+			dc.LineTo(mid_line, rc.bottom);
+
 			dc.SelectObject(&brush_item);
 			dc.SelectObject(&pen_item);
-			dc.Rectangle(rc_left.right, rc_left.top+1, rc.right, rc.bottom -1);
+			dc.Rectangle(rc_left.right, rc_left.top+1, mid_line, rc.bottom -2);
+			dc.Rectangle(mid_line+1, rc_left.top+1, rc.right, rc.bottom -2);
+
+			dc.SelectObject(&font_item);
+			text_left += 2;
+			dc.SetTextColor(color_item);
+
+			CRect	rc_text = rc;
+			rc_text.top += 1;
+			rc_text.bottom -= 1;
+
+			rc_text.left += text_left;
+			rc_text.right = mid_line - 2;
+			dc.DrawText(prop->name, &rc_text, DT_VCENTER | DT_SINGLELINE);
+
+			rc_text.left = mid_line + 4;
+			rc_text.right = rc.right - 2;
+			dc.DrawText(prop->value, &rc_text, DT_VCENTER | DT_SINGLELINE);			
 		}
-
-		CRect	rc_text = rc;
-		rc_text.left += left_offset +2;
-		rc_text.top += 1;
-		rc_text.bottom -= 1;
-
-		dc.SetBkMode(TRANSPARENT);
-		dc.DrawText(prop->name, &rc_text, DT_VCENTER | DT_SINGLELINE);
-
 
 		dc.SelectObject(prev_brush);
 		dc.SelectObject(prev_pen);
+		dc.SelectObject(prev_font);
 		dc.Detach();
 	}
 
@@ -276,7 +352,6 @@ namespace GraphStudio
 		pHdr->idFrom = GetWindowLong(GetSafeHwnd(),GWL_ID);
 		return (BOOL)GetParent()->SendMessage(WM_NOTIFY,wParam,lParam);			
 	}
-
 
 };
 

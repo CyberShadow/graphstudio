@@ -949,7 +949,7 @@ namespace GraphStudio
 	Filter::Filter(DisplayGraph *parent)
 	{
 		graph = parent;
-		params = graph->params;
+		params = (graph != NULL ? graph->params : NULL);
 		name = _T("");
 		clsid = CLSID_VideoMixingRenderer9;
 		clsid_str = _T("");
@@ -1048,8 +1048,11 @@ namespace GraphStudio
 
 			// keep a reference
 			f->QueryInterface(IID_IBaseFilter, (void**)&filter);
-			width = params->min_filter_width;
-			height = params->min_filter_height;
+
+			if (params) {
+				width = params->min_filter_width;
+				height = params->min_filter_height;
+			}
 		}
 		if (!filter || !f) return ;
 		
@@ -1098,13 +1101,15 @@ namespace GraphStudio
 		}
 		file_name = url_name;
 
-		if (params->display_file_name && url_name != _T("")) {
-			CPath		path(url_name);
-			int fstart = path.FindFileName();
-			if (fstart >= 0) {
-				url_name.Delete(0, fstart);
-				if (url_name != ""){
-					display_name = url_name;
+		if (params) {
+			if (params->display_file_name && url_name != _T("")) {
+				CPath		path(url_name);
+				int fstart = path.FindFileName();
+				if (fstart >= 0) {
+					url_name.Delete(0, fstart);
+					if (url_name != ""){
+						display_name = url_name;
+					}
 				}
 			}
 		}
@@ -1155,15 +1160,17 @@ namespace GraphStudio
 		//---------------------------------------------------------------------
 		// calculate size
 		//---------------------------------------------------------------------		
-		graph->dc->SelectObject(&params->font_filter);
-		CSize	size = graph->dc->GetTextExtent(display_name);
-		size.cx += 2 * 24;
-		width = (size.cx + 15) &~ 0x0f;		if (width < params->min_filter_width) width = params->min_filter_width;
-		height = (size.cy + 15) &~ 0x0f;	if (height < params->min_filter_height) height = params->min_filter_height;
+		if (graph) {
+			graph->dc->SelectObject(&params->font_filter);
+			CSize	size = graph->dc->GetTextExtent(display_name);
+			size.cx += 2 * 24;
+			width = (size.cx + 15) &~ 0x0f;		if (width < params->min_filter_width) width = params->min_filter_width;
+			height = (size.cy + 15) &~ 0x0f;	if (height < params->min_filter_height) height = params->min_filter_height;
 
-		int		maxpins = max(input_pins.GetCount(), output_pins.GetCount());
-		int		minsize = (((1 + maxpins)*params->pin_spacing) + (params->pin_spacing/2)) &~ 0x0f;
-		if (height < minsize) height = minsize;
+			int		maxpins = max(input_pins.GetCount(), output_pins.GetCount());
+			int		minsize = (((1 + maxpins)*params->pin_spacing) + (params->pin_spacing/2)) &~ 0x0f;
+			if (height < minsize) height = minsize;
+		}
 
 		// we don't need it anymore
 		if (info.pGraph) info.pGraph->Release();
