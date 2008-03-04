@@ -1,4 +1,4 @@
-[0.2.0.0 - Alpha   04/Mar/2008]
+[0.2.0.0 - Beta    04/Mar/2008]
 + added filter details form
 + added pin details form
 + WAVEFORMATEX, VIDEOINFOHEADER, VIDEOINFOHEADER2 and BITMAPINFOHEADER are supported
