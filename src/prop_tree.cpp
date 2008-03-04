@@ -43,6 +43,20 @@ namespace GraphStudio
 		value.Format(_T("%d"), val);
 	}
 
+	PropItem::PropItem(CString n, RECT rc) :
+		name(n),
+		type(TYPE_RECT)
+	{
+		value.Format(_T("[%d, %d, %d, %d]"), rc.left, rc.top, rc.right, rc.bottom);
+	}
+
+	PropItem::PropItem(CString n, __int64 i) :
+		name(n),
+		type(TYPE_INT)
+	{
+		value.Format(_T("%I64d"), i);
+	}
+
 	PropItem::PropItem(CString n, CString str) :
 		name(n),
 		type(TYPE_INT)

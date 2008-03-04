@@ -30,7 +30,8 @@ namespace GraphStudio
 			TYPE_INT		= 2,
 			TYPE_STRING		= 3,
 			TYPE_BOOL		= 4,
-			TYPE_GUID		= 5
+			TYPE_GUID		= 5,
+			TYPE_RECT		= 6
 		};
 
 		int					type;
@@ -44,6 +45,8 @@ namespace GraphStudio
 		PropItem(CString n, int val);
 		PropItem(CString n, CString str);
 		PropItem(CString n, bool val);
+		PropItem(CString n, RECT rc);
+		PropItem(CString n, __int64 i);
 
 		virtual ~PropItem();
 

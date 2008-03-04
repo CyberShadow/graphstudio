@@ -29,6 +29,10 @@ namespace GraphStudio
 	int GetMediaTypeDetails(CMediaType *pmt, PropItem *mtinfo);
 
 	int GetWaveFormatExDetails(WAVEFORMATEX *wfx, PropItem *wfxinfo);
+	int GetVideoInfoDetails(VIDEOINFOHEADER *vih, PropItem *vihinfo);
+	int GetVideoInfo2Details(VIDEOINFOHEADER2 *vih, PropItem *vihinfo);
+	int GetBitmapInfoDetails(BITMAPINFOHEADER *bih, PropItem *bihinfo);
+
 };
 
 

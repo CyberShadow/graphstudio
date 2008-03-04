@@ -1,5 +1,8 @@
 [0.2.0.0 - Alpha   xx/Mar/2008]
 + added filter details form
++ added pin details form
++ WAVEFORMATEX, VIDEOINFOHEADER, VIDEOINFOHEADER2 and BITMAPINFOHEADER are supported
++ property page drawing issues fixed
 + fixed bug with non-functional favorite filter links
 
 [0.1.9.0 - Alpha   24/Feb/2008]

@@ -285,9 +285,18 @@ namespace GraphStudio
 
 		if (pmt->formattype == FORMAT_WaveFormatEx) {
 			WAVEFORMATEX	*wfx = (WAVEFORMATEX*)pmt->pbFormat;
-
 			PropItem	*wfxinfo = mtinfo->AddItem(new PropItem(_T("WAVEFORMATEX")));
 			GetWaveFormatExDetails(wfx, wfxinfo);
+		} else
+		if (pmt->formattype == FORMAT_VideoInfo) {
+			VIDEOINFOHEADER	*vih = (VIDEOINFOHEADER*)pmt->pbFormat;
+			PropItem	*vihinfo = mtinfo->AddItem(new PropItem(_T("VIDEOINFOHEADER")));
+			GetVideoInfoDetails(vih, vihinfo);
+		} else
+		if (pmt->formattype == FORMAT_VideoInfo2) {
+			VIDEOINFOHEADER2	*vih = (VIDEOINFOHEADER2*)pmt->pbFormat;
+			PropItem	*vihinfo = mtinfo->AddItem(new PropItem(_T("VIDEOINFOHEADER2")));
+			GetVideoInfo2Details(vih, vihinfo);
 		}
 
 		return 0;
@@ -302,6 +311,60 @@ namespace GraphStudio
 		wfxinfo->AddItem(new PropItem(_T("nBlockAlign"), (int)wfx->nBlockAlign));
 		wfxinfo->AddItem(new PropItem(_T("wBitsPerSample"), (int)wfx->wBitsPerSample));
 		wfxinfo->AddItem(new PropItem(_T("cbSize"), (int)wfx->cbSize));
+		return 0;
+	}
+
+	int GetVideoInfoDetails(VIDEOINFOHEADER *vih, PropItem *vihinfo)
+	{
+		vihinfo->AddItem(new PropItem(_T("rcSource"), vih->rcSource));
+		vihinfo->AddItem(new PropItem(_T("rcTarget"), vih->rcTarget));
+		vihinfo->AddItem(new PropItem(_T("dwBitRate"), (int)vih->dwBitRate));
+		vihinfo->AddItem(new PropItem(_T("dwBitErrorRate"), (int)vih->dwBitErrorRate));
+		vihinfo->AddItem(new PropItem(_T("AvgTimePerFrame"), (__int64)vih->AvgTimePerFrame));
+
+		PropItem	*bihinfo = vihinfo->AddItem(new PropItem(_T("BITMAPINFOHEADER")));
+		GetBitmapInfoDetails(&vih->bmiHeader, bihinfo);
+		return 0;
+	}
+
+	int GetVideoInfo2Details(VIDEOINFOHEADER2 *vih, PropItem *vihinfo)
+	{
+		vihinfo->AddItem(new PropItem(_T("rcSource"), vih->rcSource));
+		vihinfo->AddItem(new PropItem(_T("rcTarget"), vih->rcTarget));
+		vihinfo->AddItem(new PropItem(_T("dwBitRate"), (int)vih->dwBitRate));
+		vihinfo->AddItem(new PropItem(_T("dwBitErrorRate"), (int)vih->dwBitErrorRate));
+		vihinfo->AddItem(new PropItem(_T("AvgTimePerFrame"), (__int64)vih->AvgTimePerFrame));
+
+		CString		v;
+		v.Format(_T("0x%08x"), vih->dwInterlaceFlags);		vihinfo->AddItem(new PropItem(_T("dwInterlaceFlags"), v));
+		v.Format(_T("0x%08x"), vih->dwCopyProtectFlags);	vihinfo->AddItem(new PropItem(_T("dwCopyProtectFlags"), v));
+		v.Format(_T("0x%08x"), vih->dwPictAspectRatioX);	vihinfo->AddItem(new PropItem(_T("dwPictAspectRatioX"), v));
+		v.Format(_T("0x%08x"), vih->dwPictAspectRatioY);	vihinfo->AddItem(new PropItem(_T("dwPictAspectRatioY"), v));
+		v.Format(_T("0x%08x"), vih->dwControlFlags);		vihinfo->AddItem(new PropItem(_T("dwControlFlags"), v));
+
+		PropItem	*bihinfo = vihinfo->AddItem(new PropItem(_T("BITMAPINFOHEADER")));
+		GetBitmapInfoDetails(&vih->bmiHeader, bihinfo);
+		return 0;
+	}
+
+	int GetBitmapInfoDetails(BITMAPINFOHEADER *bih, PropItem *bihinfo)
+	{
+		CString		v;
+
+		bihinfo->AddItem(new PropItem(_T("biSize"), (int)bih->biSize));
+		bihinfo->AddItem(new PropItem(_T("biWidth"), (int)bih->biWidth));
+		bihinfo->AddItem(new PropItem(_T("biHeight"), (int)bih->biHeight));
+		bihinfo->AddItem(new PropItem(_T("biPlanes"), (int)bih->biPlanes));
+		bihinfo->AddItem(new PropItem(_T("biBitCount"), (int)bih->biBitCount));
+
+		v.Format(_T("0x%08x"), bih->biCompression);		bihinfo->AddItem(new PropItem(_T("biCompression"), v));
+		bihinfo->AddItem(new PropItem(_T("biSizeImage"), (int)bih->biSizeImage));
+
+		bihinfo->AddItem(new PropItem(_T("biXPelsPerMeter"), (int)bih->biXPelsPerMeter));
+		bihinfo->AddItem(new PropItem(_T("biYPelsPerMeter"), (int)bih->biYPelsPerMeter));
+		bihinfo->AddItem(new PropItem(_T("biClrUsed"), (int)bih->biClrUsed));
+		bihinfo->AddItem(new PropItem(_T("biClrImportant"), (int)bih->biClrImportant));
+
 		return 0;
 	}
 

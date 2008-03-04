@@ -107,6 +107,10 @@ void CPropertyForm::OnSize(UINT nType, int cx, int cy)
 		button_ok.SetWindowPos(NULL, cx-bok_cx, cy-button_bottom_offset, 0, 0, SWP_NOSIZE);
 		button_close.SetWindowPos(NULL, cx-bcancel_cx, cy-button_bottom_offset, 0, 0, SWP_NOSIZE);
 		button_apply.SetWindowPos(NULL, cx-bapply_cx, cy-button_bottom_offset, 0, 0, SWP_NOSIZE);
+
+		button_ok.Invalidate();
+		button_close.Invalidate();
+		button_apply.Invalidate();
 	}
 }
 
@@ -519,6 +523,7 @@ STDMETHODIMP CPageSite::TranslateAccelerator(MSG *pMsg)
 int CPageSite::Deactivate()
 {
 	if (page) {
+		page->Show(SW_HIDE);
 		page->Deactivate();
 		active = false;
 	}
@@ -531,6 +536,7 @@ int CPageSite::Activate(HWND owner, CRect &rc)
 	if (page) {
 		HRESULT hr = page->Activate(owner, &rc, FALSE);
 		if (FAILED(hr)) return -1;
+		page->Show(SW_SHOW);
 		active = true;
 	}
 	return 0;
