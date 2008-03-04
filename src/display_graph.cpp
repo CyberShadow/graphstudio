@@ -1088,6 +1088,9 @@ namespace GraphStudio
 				CoTaskMemFree(url_name_ole);
 			}
 			fs = NULL;
+
+			// get from the registry
+			GetObjectName(clsid, display_name);
 		}
 		hr = f->QueryInterface(IID_IFileSinkFilter, (void**)&fsink);
 		if (SUCCEEDED(hr)) {
@@ -1098,6 +1101,9 @@ namespace GraphStudio
 				CoTaskMemFree(url_name_ole);
 			}
 			fsink = NULL;
+
+			// get from the registry
+			GetObjectName(clsid, display_name);
 		}
 		file_name = url_name;
 

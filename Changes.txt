@@ -1,9 +1,10 @@
-[0.2.0.0 - Alpha   xx/Mar/2008]
+[0.2.0.0 - Alpha   04/Mar/2008]
 + added filter details form
 + added pin details form
 + WAVEFORMATEX, VIDEOINFOHEADER, VIDEOINFOHEADER2 and BITMAPINFOHEADER are supported
 + property page drawing issues fixed
 + fixed bug with non-functional favorite filter links
++ better filter name detection
 
 [0.1.9.0 - Alpha   24/Feb/2008]
 + added automatic graph restart schedule (currently only for 04:00 AM :) - don't ask why)
