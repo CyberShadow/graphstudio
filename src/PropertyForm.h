@@ -114,6 +114,7 @@ public:
 	// activate property page for objects
 	int DisplayPages(IUnknown *obj, IUnknown *filt, CString title, CGraphView *view);
 	int AnalyzeObject(IUnknown *obj);
+	int LoadPinPage(IPin *pin);
 
 	void OnDestroy();
 	void ResizeToFit(CSize size);

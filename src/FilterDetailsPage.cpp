@@ -10,22 +10,75 @@
 
 //-----------------------------------------------------------------------------
 //
-//	CFilterDetailsPage class
+//	CDetailsPage class
 //
 //-----------------------------------------------------------------------------
 
-BEGIN_MESSAGE_MAP(CFilterDetailsPage, CMFCPropertyPage)
+BEGIN_MESSAGE_MAP(CDetailsPage, CMFCPropertyPage)
 	ON_WM_SIZE()
 END_MESSAGE_MAP()
 
 //-----------------------------------------------------------------------------
 //
+//	CDetailsPage class
+//
+//-----------------------------------------------------------------------------
+CDetailsPage::CDetailsPage(LPUNKNOWN pUnk, HRESULT *phr, LPCTSTR strTitle) :
+	CMFCPropertyPage(_T("FilterDetails"), pUnk, IDD, strTitle),
+	info(_T("root"))
+{
+	// retval
+	if (phr) *phr = NOERROR;
+
+}
+
+CDetailsPage::~CDetailsPage()
+{
+	// todo
+}
+
+
+// overriden
+BOOL CDetailsPage::OnInitDialog()
+{
+	BOOL ok = CMFCPropertyPage::OnInitDialog();
+	if (!ok) return FALSE;
+
+	// create the tree
+	CRect	rc;
+	GetClientRect(&rc);
+
+	ok = tree.Create(NULL, WS_CHILD | WS_VISIBLE, rc, this, IDC_TREE);
+	if (!ok) return FALSE;
+
+	info.Clear();
+	OnBuildTree();
+
+	tree.Initialize();
+	tree.BuildPropertyTree(&info);
+
+	return TRUE;
+}
+
+void CDetailsPage::OnBuildTree()
+{
+}
+
+void CDetailsPage::OnSize(UINT nType, int cx, int cy)
+{
+	if (IsWindow(tree)) tree.MoveWindow(0, 0, cx, cy);
+}
+
+
+
+//-----------------------------------------------------------------------------
+//
 //	CFilterDetailsPage class
 //
 //-----------------------------------------------------------------------------
+
 CFilterDetailsPage::CFilterDetailsPage(LPUNKNOWN pUnk, HRESULT *phr) :
-	CMFCPropertyPage(_T("FilterDetails"), pUnk, IDD, _T("Filter")),
-	info(_T("root")),
+	CDetailsPage(pUnk, phr, _T("Filter")),
 	filter(NULL)
 {
 	// retval
@@ -37,7 +90,6 @@ CFilterDetailsPage::~CFilterDetailsPage()
 {
 	// todo
 }
-
 
 HRESULT CFilterDetailsPage::OnConnect(IUnknown *pUnknown)
 {
@@ -52,31 +104,15 @@ HRESULT CFilterDetailsPage::OnDisconnect()
 	return NOERROR;
 }
 
-// overriden
-BOOL CFilterDetailsPage::OnInitDialog()
+void CFilterDetailsPage::OnBuildTree()
 {
-	BOOL ok = CMFCPropertyPage::OnInitDialog();
-	if (!ok) return FALSE;
-
-	// create the tree
-	CRect	rc;
-	GetClientRect(&rc);
-
-	ok = tree.Create(NULL, WS_CHILD | WS_VISIBLE, rc, this, IDC_TREE);
-	if (!ok) return FALSE;
-
 	GraphStudio::PropItem	*group;
-	info.Clear();
-
 	GraphStudio::Filter		gfilter(NULL);
 	int						ret;
 
 	gfilter.LoadFromFilter(filter);
 
 	group = info.AddItem(new GraphStudio::PropItem(_T("Filter Details")));
-		group->AddItem(new GraphStudio::PropItem(_T("Name"), gfilter.display_name));
-		group->AddItem(new GraphStudio::PropItem(_T("CLSID"), gfilter.clsid));
-
 		CString	type;
 		switch (gfilter.filter_type) {
 		case GraphStudio::Filter::FILTER_DMO:		type = _T("DMO"); break;
@@ -85,14 +121,51 @@ BOOL CFilterDetailsPage::OnInitDialog()
 		case GraphStudio::Filter::FILTER_UNKNOWN:	type = _T("Unknown"); break;
 		}	
 		group->AddItem(new GraphStudio::PropItem(_T("Type"), type));
-
-	tree.Initialize();
-	tree.BuildPropertyTree(&info);
-
-	return TRUE;
+		GraphStudio::GetFilterDetails(gfilter.clsid, group);
 }
 
-void CFilterDetailsPage::OnSize(UINT nType, int cx, int cy)
+//-----------------------------------------------------------------------------
+//
+//	CPinDetailsPage class
+//
+//-----------------------------------------------------------------------------
+
+CPinDetailsPage::CPinDetailsPage(LPUNKNOWN pUnk, HRESULT *phr, LPCTSTR strTitle) :
+	CDetailsPage(pUnk, phr, strTitle),
+	pin(NULL)
 {
-	if (IsWindow(tree)) tree.MoveWindow(0, 0, cx, cy);
+	// retval
+	if (phr) *phr = NOERROR;
+
 }
+
+CPinDetailsPage::~CPinDetailsPage()
+{
+	// todo
+}
+
+HRESULT CPinDetailsPage::OnConnect(IUnknown *pUnknown)
+{
+	HRESULT hr = pUnknown->QueryInterface(IID_IPin, (void**)&pin);
+	if (FAILED(hr)) return E_FAIL;
+	return NOERROR;
+}
+
+HRESULT CPinDetailsPage::OnDisconnect()
+{
+	pin = NULL;
+	return NOERROR;
+}
+
+void CPinDetailsPage::OnBuildTree()
+{
+	GraphStudio::PropItem	*group;
+	GraphStudio::Pin		gpin(NULL);
+	int						ret;
+
+	ret = gpin.Load(pin);
+	if (ret == 0) {
+		GetPinDetails(gpin.pin, &info);
+	}
+}
+

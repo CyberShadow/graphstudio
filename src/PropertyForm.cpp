@@ -257,6 +257,27 @@ int CPropertyForm::AnalyzeObject(IUnknown *obj)
 			details_page->Release();
 		}
 
+		// let's enumerate all pins
+		CComPtr<IEnumPins>		epins;
+		hr = filter->EnumPins(&epins);
+		if (SUCCEEDED(hr)) {
+			epins->Reset();
+
+			ULONG			f;
+			CComPtr<IPin>	pin;
+			while (epins->Next(1, &pin, &f) == NOERROR) {
+				LoadPinPage(pin);
+				pin = NULL;
+			}
+			epins = NULL;
+		}
+
+	}
+
+	CComPtr<IPin>	pin;
+	if (SUCCEEDED(obj->QueryInterface(IID_IPin, (void**)&pin))) {
+		LoadPinPage(pin);
+		pin = NULL;
 	}
 	
 	filter = NULL;
@@ -282,6 +303,40 @@ void CPropertyForm::OnBnClickedButtonApply()
 	button_apply.EnableWindow(FALSE);
 }
 
+int CPropertyForm::LoadPinPage(IPin *pin)
+{
+	PIN_INFO		info;
+	pin->QueryPinInfo(&info);
+	if (info.pFilter) info.pFilter->Release();
+
+	CString		title(info.achName);
+
+	// display the filter details page
+	CComPtr<IPropertyPage>	page;
+	CPinDetailsPage			*details_page;
+	HRESULT					hr;
+
+	details_page = new CPinDetailsPage(NULL, &hr, title);
+	if (details_page) {
+		details_page->AddRef();
+
+		hr = details_page->QueryInterface(IID_IPropertyPage, (void**)&page);
+		if (SUCCEEDED(hr)) {
+			// assign the object
+			hr = page->SetObjects(1, (IUnknown**)&pin);
+			if (SUCCEEDED(hr)) {
+				// and add the page to our container
+				container->AddPage(page);
+			}
+		}
+		page = NULL;
+
+		// don't care anymore
+		details_page->Release();
+	}
+
+	return 0;
+}
 
 //-----------------------------------------------------------------------------
 //

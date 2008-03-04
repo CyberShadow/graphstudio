@@ -1539,9 +1539,10 @@ namespace GraphStudio
 	Pin::Pin(Filter *parent) :
 		name(_T("")),
 		filter(parent),
-		id(_T(""))
+		id(_T("")),
+		params(NULL)
 	{
-		params = parent->params;
+		if (parent)	params = parent->params;
 		pin = NULL;
 		peer = NULL;
 		selected = false;

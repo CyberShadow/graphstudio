@@ -145,7 +145,7 @@ namespace GraphStudio
 		color_back_item = RGB(255, 255, 255);
 
 		left_offset = 14;
-		left_width  = 100;
+		left_width  = 130;
 	}
 
 	PropertyTree::~PropertyTree()

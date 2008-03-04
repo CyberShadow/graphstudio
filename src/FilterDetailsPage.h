@@ -10,10 +10,10 @@
 
 //-----------------------------------------------------------------------------
 //
-//	CFilterDetailsPage class
+//	CDetailsPage class
 //
 //-----------------------------------------------------------------------------
-class CFilterDetailsPage : public CMFCPropertyPage
+class CDetailsPage : public CMFCPropertyPage
 {
 protected:
 	DECLARE_MESSAGE_MAP()
@@ -23,18 +23,62 @@ public:
 	GraphStudio::PropertyTree		tree;
 	GraphStudio::PropItem			info;
 
+	enum { IDD = IDD_DIALOG_FILTERDETAILS };
+public:
+	CDetailsPage(LPUNKNOWN pUnk, HRESULT *phr, LPCTSTR strTitle);
+	virtual ~CDetailsPage();
+	
+	// overriden
+	virtual BOOL OnInitDialog();
+	virtual void OnBuildTree();
+
+	void OnSize(UINT nType, int cx, int cy);
+};
+
+
+//-----------------------------------------------------------------------------
+//
+//	CFilterDetailsPage class
+//
+//-----------------------------------------------------------------------------
+class CFilterDetailsPage : public CDetailsPage
+{
+public:
 	CComPtr<IBaseFilter>			filter;
 
-	enum { IDD = IDD_DIALOG_FILTERDETAILS };
 public:
 	CFilterDetailsPage(LPUNKNOWN pUnk, HRESULT *phr);
 	virtual ~CFilterDetailsPage();
 	
     virtual HRESULT OnConnect(IUnknown *pUnknown);
     virtual HRESULT OnDisconnect();
+	virtual void OnBuildTree();
 
-	// overriden
-	virtual BOOL OnInitDialog();
-
-	void OnSize(UINT nType, int cx, int cy);
 };
+
+//-----------------------------------------------------------------------------
+//
+//	CPinDetailsPage class
+//
+//-----------------------------------------------------------------------------
+class CPinDetailsPage : public CDetailsPage
+{
+public:
+	CComPtr<IPin>			pin;
+
+public:
+	CPinDetailsPage(LPUNKNOWN pUnk, HRESULT *phr, LPCTSTR strTitle);
+	virtual ~CPinDetailsPage();
+	
+    virtual HRESULT OnConnect(IUnknown *pUnknown);
+    virtual HRESULT OnDisconnect();
+	virtual void OnBuildTree();
+
+};
+
+
+
+
+
+
+

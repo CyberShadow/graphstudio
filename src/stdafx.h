@@ -42,6 +42,7 @@
 #include <afxext.h>         // MFC extensions
 #include <afxdisp.h>        // MFC Automation classes
 #include <atlbase.h>
+#include <atlpath.h>
 
 #ifndef _AFX_NO_OLE_SUPPORT
 #include <afxdtctl.h>		// MFC support for Internet Explorer 4 Common Controls
@@ -76,6 +77,8 @@ using namespace std;
 #include "dsutil.h"
 #include "filter_list.h"
 #include "prop_tree.h"
+
+#include "object_details.h"
 
 #include "graphstudio.h"
 #include "mru_list.h"
