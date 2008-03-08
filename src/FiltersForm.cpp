@@ -34,7 +34,8 @@ END_MESSAGE_MAP()
 //-----------------------------------------------------------------------------
 
 CFiltersForm::CFiltersForm(CWnd* pParent) : 
-	CDialog(CFiltersForm::IDD, pParent)
+	CDialog(CFiltersForm::IDD, pParent),
+	info(CString(_T("root")))
 {
 
 }
@@ -48,7 +49,6 @@ void CFiltersForm::DoDataExchange(CDataExchange* pDX)
 	CDialog::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_TITLEBAR, title);
 	DDX_Control(pDX, IDC_LIST_FILTERS, list_filters);
-	DDX_Control(pDX, IDC_LIST_DETAILS, list_details);
 	DDX_Control(pDX, IDC_BUTTON_INSERT, btn_insert);
 	DDX_Control(pDX, IDC_BUTTON_MEDIATYPES, btn_mediatypes);
 	DDX_Control(pDX, IDC_BUTTON_PROPERTYPAGE, btn_propertypage);
@@ -65,6 +65,7 @@ BOOL CFiltersForm::DoCreateDialog()
 	title.ModifyStyle(0, WS_CLIPCHILDREN);
 	title.ModifyStyleEx(0, WS_EX_CONTROLPARENT);
 
+
 	// create buttons
 	CRect	rc;
 	rc.SetRect(0, 0, 125, 23);
@@ -72,11 +73,15 @@ BOOL CFiltersForm::DoCreateDialog()
 	combo_merit.Create(WS_CHILD | WS_VISIBLE | CBS_DROPDOWNLIST, rc, &title, IDC_COMBO_MERIT);
 	btn_registry.Create(_T("Registry Check"), WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, rc, &title, IDC_BUTTON_REGISTRY);
 
+	tree_details.Create(NULL, WS_CHILD | WS_VISIBLE, rc, this, IDC_TREE);
+
 	combo_categories.SetFont(GetFont());
 	combo_merit.SetFont(GetFont());
 	btn_registry.SetFont(GetFont());
 
 	btn_registry.EnableWindow(FALSE);
+
+	tree_details.Initialize();
 
 	SetWindowPos(NULL, 0, 0, 700, 450, SWP_NOMOVE);
 
@@ -100,12 +105,6 @@ void CFiltersForm::OnInitialize()
 	DWORD	style = list_filters.GetExtendedStyle() | LVS_EX_DOUBLEBUFFER;
 	list_filters.SetExtendedStyle(style);
 	list_filters.InsertColumn(0, _T("Filter Name"), 0, rc.Width() - 20);
-
-	// details
-	style = list_details.GetExtendedStyle() | LVS_EX_DOUBLEBUFFER;
-	list_details.SetExtendedStyle(style);
-	list_details.InsertColumn(0, _T("Property"), 0, 65);
-	list_details.InsertColumn(1, _T("Value"), 0, 245);
 
 	// merits
 	merit_mode = CFiltersForm::MERIT_MODE_ALL;
@@ -218,7 +217,7 @@ void CFiltersForm::OnSize(UINT nType, int cx, int cy)
 	list_filters.SetColumnWidth(0, rc2.Width()-10);
 
 	// details
-	list_details.SetWindowPos(NULL, right_x, details_top, rc.Width()-right_x, rc.Height() - 100-details_top, SWP_SHOWWINDOW);
+	tree_details.SetWindowPos(NULL, right_x, details_top, rc.Width()-right_x, rc.Height() - 100-details_top, SWP_SHOWWINDOW);
 
 	check_favorite.GetWindowRect(&rc2);
 	check_favorite.SetWindowPos(NULL, right_x+8, rc.Height()-100+8, rc.Width()-16-right_x, rc2.Height(), SWP_SHOWWINDOW);
@@ -252,7 +251,7 @@ void CFiltersForm::OnSize(UINT nType, int cx, int cy)
 	btn_unregister.Invalidate();
 
 	list_filters.Invalidate();
-	list_details.Invalidate();
+	tree_details.Invalidate();
 
 }
 
@@ -325,13 +324,39 @@ void CFiltersForm::OnFilterItemClick(NMHDR *pNMHDR, LRESULT *pResult)
 
 	if (!(pNMLV->uOldState & ODS_SELECTED) &&
 		(pNMLV->uNewState & ODS_SELECTED)) {
-
-		// display information
-		list_details.DeleteAllItems();
-
 		DSUtil::FilterTemplate	*filter = (DSUtil::FilterTemplate*)list_filters.GetItemData(pNMLV->iItem);
 
 		if (filter) {
+
+			// display information
+			info.Clear();
+			GraphStudio::PropItem	*group;
+
+			group = info.AddItem(new GraphStudio::PropItem(_T("Filter Details")));
+				CString	type;
+				switch (filter->type) {
+				case DSUtil::FilterTemplate::FT_DMO:		type = _T("DMO"); break;
+				case DSUtil::FilterTemplate::FT_KSPROXY:	type = _T("WDM"); break;
+				case DSUtil::FilterTemplate::FT_FILTER:		type = _T("Standard"); break;
+				case DSUtil::FilterTemplate::FT_ACM_ICM:	type = _T("ACM/ICM"); break;
+				case DSUtil::FilterTemplate::FT_PNP:		type = _T("Plug && Play"); break;
+				}	
+				group->AddItem(new GraphStudio::PropItem(_T("Type"), type));
+				GraphStudio::GetFilterDetails(filter->clsid, group);
+
+			tree_details.BuildPropertyTree(&info);
+
+			// favorite filter ?
+			GraphStudio::Favorites	*favorites = GraphStudio::Favorites::GetInstance();
+			if (favorites->IsFavorite(*filter)) {
+				check_favorite.SetCheck(TRUE);
+			} else {
+				check_favorite.SetCheck(FALSE);
+			}
+		}
+		/*
+		list_details.DeleteAllItems();
+
 			int ni;
 			ni = list_details.InsertItem(0, _T("Name"));	list_details.SetItemText(ni, 1, filter->name);
 			ni = list_details.InsertItem(1, _T("File"));	list_details.SetItemText(ni, 1, filter->file);
@@ -346,14 +371,8 @@ void CFiltersForm::OnFilterItemClick(NMHDR *pNMHDR, LRESULT *pResult)
 			m.Format(_T("0x%08X"), filter->merit);
 			ni = list_details.InsertItem(3, _T("Merit"));	list_details.SetItemText(ni, 1, m);
 
-			// favorite filter ?
-			GraphStudio::Favorites	*favorites = GraphStudio::Favorites::GetInstance();
-			if (favorites->IsFavorite(*filter)) {
-				check_favorite.SetCheck(TRUE);
-			} else {
-				check_favorite.SetCheck(FALSE);
-			}
 		}
+		*/
 	}
 
 }

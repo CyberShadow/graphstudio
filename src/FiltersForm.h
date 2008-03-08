@@ -34,7 +34,8 @@ public:
 	CButton						check_favorite;
 	GraphStudio::FilterListCtrl	list_filters;
 	GraphStudio::TitleBar		title;
-	CListCtrl					list_details;
+	GraphStudio::PropertyTree	tree_details;
+	GraphStudio::PropItem		info;
 
 	// enumerated stuff
 	DSUtil::FilterCategories	categories;
