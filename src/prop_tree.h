@@ -103,7 +103,9 @@ namespace GraphStudio
 
 		DWORD				color_group;
 		DWORD				color_item;
+		DWORD				color_item_selected;
 		DWORD				color_back_item;
+		DWORD				color_back_item_selected;
 		DWORD				color_back_group;
 
 		int					left_offset;

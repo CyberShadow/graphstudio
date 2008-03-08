@@ -184,6 +184,9 @@ namespace GraphStudio
 		CLSIDToString(clsid, clsid_str);
 		clsid_str = _T("\\CLSID\\{083863F1-70DE-11d0-BD40-00A0C911CE86}\\Instance\\") + clsid_str;
 
+		DSUtil::FilterTemplate		temp;
+		bool						loaded = false;
+
 		CRegKey		reg;
 		if (reg.Open(HKEY_CLASSES_ROOT, clsid_str, KEY_READ) == ERROR_SUCCESS) {
 			
@@ -194,9 +197,9 @@ namespace GraphStudio
 				reg.QueryBinaryValue(_T("FilterData"), buf, &size);
 
 				// parse data
-				DSUtil::FilterTemplate		temp;
 				int ret = temp.Load((char*)buf, size);
 				if (ret == 0) {
+					loaded = true;
 
 					CString		val;
 					val.Format(_T("0x%08x"), temp.merit);
@@ -222,6 +225,60 @@ namespace GraphStudio
 			info->AddItem(fileinfo);
 		}
 
+		// registered pin details
+		if (loaded) {
+			PropItem	*pin_details = info->AddItem(new PropItem(_T("Registered Pins")));
+			int cnt = temp.input_pins.GetCount() + temp.output_pins.GetCount();
+			pin_details->AddItem(new PropItem(_T("Count"), cnt));
+
+			int i, c;
+			c = 0;
+			for (i=0; i<temp.input_pins.GetCount(); i++) {
+				DSUtil::PinTemplate	&pin = temp.input_pins[i];
+				CString		name;
+				name.Format(_T("Pin %d"), c);
+				PropItem	*pininfo = pin_details->AddItem(new PropItem(name));
+				GetPinTemplateDetails(&pin, pininfo);
+				c++;
+			}
+			for (i=0; i<temp.output_pins.GetCount(); i++) {
+				DSUtil::PinTemplate	&pin = temp.output_pins[i];
+				CString		name;
+				name.Format(_T("Pin %d"), c);
+				PropItem	*pininfo = pin_details->AddItem(new PropItem(name));
+				GetPinTemplateDetails(&pin, pininfo);
+				c++;
+			}
+		}
+
+		return 0;
+	}
+
+	int GetPinTemplateDetails(DSUtil::PinTemplate *pin, PropItem *info)
+	{
+		if (pin->dir == PINDIR_INPUT) {
+			info->AddItem(new PropItem(_T("Direction"), CString(_T("PINDIR_INPUT"))));
+		} else {
+			info->AddItem(new PropItem(_T("Direction"), CString(_T("PINDIR_OUTPUT"))));
+		}		
+		info->AddItem(new PropItem(_T("Rendered"), (bool)pin->rendered));
+		info->AddItem(new PropItem(_T("Many"), (bool)pin->many));
+		info->AddItem(new PropItem(_T("Media Types"), (int)pin->types));
+
+		if (pin->types > 0) {
+			PropItem	*types = info->AddItem(new PropItem(_T("Media Types")));
+			for (int i=0; i<pin->types; i++) {
+				CString		mn, sn, mv, sv;
+				mn.Format(_T("Major %d"), i);
+				sn.Format(_T("Subtype %d"), i);
+
+				GraphStudio::NameGuid(pin->major[i],mv);
+				GraphStudio::NameGuid(pin->minor[i],sv);
+
+				types->AddItem(new PropItem(mn, mv));
+				types->AddItem(new PropItem(sn, sv));
+			}
+		}
 		return 0;
 	}
 
@@ -297,6 +354,16 @@ namespace GraphStudio
 			VIDEOINFOHEADER2	*vih = (VIDEOINFOHEADER2*)pmt->pbFormat;
 			PropItem	*vihinfo = mtinfo->AddItem(new PropItem(_T("VIDEOINFOHEADER2")));
 			GetVideoInfo2Details(vih, vihinfo);
+		} else
+		if (pmt->formattype == FORMAT_MPEGVideo) {
+			MPEG1VIDEOINFO		*mvi = (MPEG1VIDEOINFO*)pmt->pbFormat;
+			PropItem	*mviinfo = mtinfo->AddItem(new PropItem(_T("MPEG1VIDEOINFO")));
+			GetMpeg1VideoInfoDetails(mvi, mviinfo);
+		} else
+		if (pmt->formattype == FORMAT_MPEG2Video) {
+			MPEG2VIDEOINFO		*mvi = (MPEG2VIDEOINFO*)pmt->pbFormat;
+			PropItem	*mviinfo = mtinfo->AddItem(new PropItem(_T("MPEG2VIDEOINFO")));
+			GetMpeg2VideoInfoDetails(mvi, mviinfo);
 		}
 
 		return 0;
@@ -344,6 +411,34 @@ namespace GraphStudio
 
 		PropItem	*bihinfo = vihinfo->AddItem(new PropItem(_T("BITMAPINFOHEADER")));
 		GetBitmapInfoDetails(&vih->bmiHeader, bihinfo);
+		return 0;
+	}
+
+	int GetMpeg1VideoInfoDetails(MPEG1VIDEOINFO *mvi, PropItem *mviinfo)
+	{
+		mviinfo->AddItem(new PropItem(_T("dwStartTimeCode"), (int)mvi->dwStartTimeCode));
+		mviinfo->AddItem(new PropItem(_T("cbSequenceHeader"), (int)mvi->cbSequenceHeader));
+
+		PropItem	*vihinfo = mviinfo->AddItem(new PropItem(_T("VIDEOINFOHEADER")));
+		GetVideoInfoDetails(&mvi->hdr, vihinfo);
+
+		// todo: sequence header
+
+		return 0;
+	}
+
+	int GetMpeg2VideoInfoDetails(MPEG2VIDEOINFO *mvi, PropItem *mviinfo)
+	{
+		mviinfo->AddItem(new PropItem(_T("dwStartTimeCode"), (int)mvi->dwStartTimeCode));
+		mviinfo->AddItem(new PropItem(_T("cbSequenceHeader"), (int)mvi->cbSequenceHeader));
+		mviinfo->AddItem(new PropItem(_T("dwProfile"), (int)mvi->dwProfile));
+		mviinfo->AddItem(new PropItem(_T("dwLevel"), (int)mvi->dwLevel));
+		mviinfo->AddItem(new PropItem(_T("dwFlags"), (int)mvi->dwFlags));
+
+		PropItem	*vihinfo = mviinfo->AddItem(new PropItem(_T("VIDEOINFOHEADER2")));
+		GetVideoInfo2Details(&mvi->hdr, vihinfo);
+
+		// todo: sequence header
 		return 0;
 	}
 

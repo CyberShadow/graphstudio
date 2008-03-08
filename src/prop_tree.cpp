@@ -116,6 +116,8 @@ namespace GraphStudio
 	{
 		HTREEITEM	item = HitTest(point);
 		if (item) {
+			SelectItem(item);
+
 			if (!ItemHasChildren(item)) return ;
 
 			CRect	rc_check;
@@ -155,8 +157,10 @@ namespace GraphStudio
 
 		color_group = RGB(0,0,0);
 		color_item = RGB(0,0,0);
+		color_item_selected = RGB(255,255,255);
 		color_back_group = RGB(241, 239, 226);
 		color_back_item = RGB(255, 255, 255);
+		color_back_item_selected = RGB(51,153,255);
 
 		left_offset = 14;
 		left_width  = 130;
@@ -253,8 +257,10 @@ namespace GraphStudio
 		// we either draw a node or a leaf
 		CBrush		brush_back(color_back_group);
 		CBrush		brush_item(color_back_item);
+		CBrush		brush_item_selected(color_back_item_selected);
 		CPen		pen_back(PS_SOLID, 1, color_back_group);
 		CPen		pen_item(PS_SOLID, 1, color_back_item);
+		CPen		pen_item_selected(PS_SOLID, 1, color_back_item_selected);
 
 		CBrush		*prev_brush = dc.SelectObject(&brush_back);
 		CPen		*prev_pen   = dc.SelectObject(&pen_back);
@@ -263,6 +269,7 @@ namespace GraphStudio
 		int			text_left = left_offset + 2;
 
 		dc.SetBkMode(TRANSPARENT);
+		state = tree.GetItemState(item, TVIF_STATE);
 
 		if (prop->type == GraphStudio::PropItem::TYPE_STRUCT) {
 			// we paint the whole background
@@ -277,7 +284,6 @@ namespace GraphStudio
 			dc.DrawText(prop->name, &rc_text, DT_VCENTER | DT_SINGLELINE);
 
 			// draw the + mark
-			state = tree.GetItemState(item, TVIF_STATE);
 			BOOL expanded = (state & TVIS_EXPANDED ? TRUE : FALSE);
 			
 			CPen	black_pen(PS_SOLID, 1, RGB(0,0,0));
@@ -297,13 +303,24 @@ namespace GraphStudio
 				dc.LineTo(rc_mark.left + 4, rc_mark.bottom - 2);
 			}
 
+			// draw the selection rectangle
+			if (state & TVIS_SELECTED) {
+				CSize		s = dc.GetTextExtent(prop->name);
+				CRect		rc_bound = rc_text;
+				rc_bound.left -= 2;
+				rc_bound.right = rc_bound.left + s.cx + 4;
+				rc_bound.bottom = rc_bound.top + s.cy + 3;
+				dc.SelectObject(&pen_item_selected);
+				dc.DrawFocusRect(&rc_bound);
+			}
+
 		} else {
 			// we paint just the left margin
 			CRect	rc_left = rc;
 			rc_left.right = rc_left.left + left_offset;
 			dc.Rectangle(&rc_left);
-			dc.MoveTo(rc.left, rc.bottom);
-			dc.LineTo(rc.right, rc.bottom);
+			dc.MoveTo(rc.left, rc.bottom-1);
+			dc.LineTo(rc.right, rc.bottom-1);
 
 			// middle line
 			int	mid_line = rc.left + left_offset + left_width;
@@ -313,12 +330,20 @@ namespace GraphStudio
 
 			dc.SelectObject(&brush_item);
 			dc.SelectObject(&pen_item);
-			dc.Rectangle(rc_left.right, rc_left.top+1, mid_line, rc.bottom -2);
-			dc.Rectangle(mid_line+1, rc_left.top+1, rc.right, rc.bottom -2);
+			dc.Rectangle(mid_line+1, rc_left.top, rc.right, rc.bottom -1);
+
+			// is the item selected /
+			if (state & TVIS_SELECTED) {
+				dc.SelectObject(&brush_item_selected);
+				dc.SelectObject(&pen_item_selected);
+				dc.SetTextColor(color_item_selected);
+			} else {
+				dc.SetTextColor(color_item);
+			}
+			dc.Rectangle(rc_left.right, rc_left.top, mid_line, rc.bottom -1);
 
 			dc.SelectObject(&font_item);
 			text_left += 2;
-			dc.SetTextColor(color_item);
 
 			CRect	rc_text = rc;
 			rc_text.top += 1;
@@ -330,6 +355,7 @@ namespace GraphStudio
 
 			rc_text.left = mid_line + 4;
 			rc_text.right = rc.right - 2;
+			dc.SetTextColor(color_item);
 			dc.DrawText(prop->value, &rc_text, DT_VCENTER | DT_SINGLELINE);			
 		}
 

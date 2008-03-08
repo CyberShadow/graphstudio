@@ -507,8 +507,8 @@ void CGraphView::OnFileOpenClick()
 	filter =  _T("");
 	filter += _T("GraphEdit Files (grf)|*.grf|");
 	filter += _T("GraphStudio XML Files (xml)|*.xml|");
-	filter += _T("Video Files (avi,mp4,mpg,mpeg,ts,mkv,ogg,ogm,pva)|*.avi;*.mp4;*.mpg;*.mpeg;*.ts;*.mkv;*.ogg;*.ogm;*.pva|");
-	filter += _T("Audio Files (aac,ac3,mp3,wma,mka,ogg,ogm,mpc,flac,ape,wav)|*.aac;*.ac3;*.mp3;*.wma;*.mka;*.ogg;*.ogm;*.mpc;*.flac;*.ape;*.wav|");
+	filter += _T("Video Files (avi,mp4,mpg,mpeg,ts,mkv,ogg,ogm,pva,evo,flv,mov,hdmov,ifo,vob,rm,rmvb,wmv,asf)|*.avi;*.mp4;*.mpg;*.mpeg;*.ts;*.mkv;*.ogg;*.ogm;*.pva;*.evo;*.flv;*.mov;*.hdmov;*.ifo;*.vob;*.rm;*.rmvb;*.wmv;*.asf|");
+	filter += _T("Audio Files (aac,ac3,mp3,wma,mka,ogg,mpc,flac,ape,wav,ra,wv,m4a,tta,dts,spx,mp2,ofr,ofs,mpa)|*.aac;*.ac3;*.mp3;*.wma;*.mka;*.ogg;*.mpc;*.flac;*.ape;*.wav;*.ra;*.wv;*.m4a;*.tta;*.dts;*.spx;*.mp2;*.ofr;*.ofs;*.mpa|");
 	filter += _T("All Files|*.*|");
 
 	CFileDialog dlg(TRUE,NULL,NULL,OFN_OVERWRITEPROMPT|OFN_ENABLESIZING|OFN_FILEMUSTEXIST,filter);
@@ -531,8 +531,8 @@ void CGraphView::OnFileAddmediafile()
 	CString		filename;
 
 	filter =  _T("");
-	filter += _T("Video Files (avi,mp4,mpg,mpeg,ts,mkv,ogg,ogm,pva)|*.avi;*.mp4;*.mpg;*.mpeg;*.ts;*.mkv;*.ogg;*.ogm;*.pva|");
-	filter += _T("Audio Files (aac,ac3,mp3,wma,mka,ogg,ogm,mpc,flac,ape,wav)|*.aac;*.ac3;*.mp3;*.wma;*.mka;*.ogg;*.ogm;*.mpc;*.flac;*.ape;*.wav|");
+	filter += _T("Video Files (avi,mp4,mpg,mpeg,ts,mkv,ogg,ogm,pva,evo,flv,mov,hdmov,ifo,vob,rm,rmvb,wmv,asf)|*.avi;*.mp4;*.mpg;*.mpeg;*.ts;*.mkv;*.ogg;*.ogm;*.pva;*.evo;*.flv;*.mov;*.hdmov;*.ifo;*.vob;*.rm;*.rmvb;*.wmv;*.asf|");
+	filter += _T("Audio Files (aac,ac3,mp3,wma,mka,ogg,mpc,flac,ape,wav,ra,wv,m4a,tta,dts,spx,mp2,ofr,ofs,mpa)|*.aac;*.ac3;*.mp3;*.wma;*.mka;*.ogg;*.mpc;*.flac;*.ape;*.wav;*.ra;*.wv;*.m4a;*.tta;*.dts;*.spx;*.mp2;*.ofr;*.ofs;*.mpa|");
 	filter += _T("All Files|*.*|");
 
 	CFileDialog dlg(TRUE,NULL,NULL,OFN_OVERWRITEPROMPT|OFN_ENABLESIZING|OFN_FILEMUSTEXIST,filter);
@@ -564,8 +564,8 @@ void CGraphView::OnRenderFileClick()
 	CString		filename;
 
 	filter =  _T("");
-	filter += _T("Video Files (avi,mp4,mpg,mpeg,ts,mkv,ogg,ogm,pva)|*.avi;*.mp4;*.mpg;*.mpeg;*.ts;*.mkv;*.ogg;*.ogm;*.pva|");
-	filter += _T("Audio Files (aac,ac3,mp3,wma,mka,ogg,ogm,mpc,flac,ape,wav)|*.aac;*.ac3;*.mp3;*.wma;*.mka;*.ogg;*.ogm;*.mpc;*.flac;*.ape;*.wav|");
+	filter += _T("Video Files (avi,mp4,mpg,mpeg,ts,mkv,ogg,ogm,pva,evo,flv,mov,hdmov,ifo,vob,rm,rmvb,wmv,asf)|*.avi;*.mp4;*.mpg;*.mpeg;*.ts;*.mkv;*.ogg;*.ogm;*.pva;*.evo;*.flv;*.mov;*.hdmov;*.ifo;*.vob;*.rm;*.rmvb;*.wmv;*.asf|");
+	filter += _T("Audio Files (aac,ac3,mp3,wma,mka,ogg,mpc,flac,ape,wav,ra,wv,m4a,tta,dts,spx,mp2,ofr,ofs,mpa)|*.aac;*.ac3;*.mp3;*.wma;*.mka;*.ogg;*.mpc;*.flac;*.ape;*.wav;*.ra;*.wv;*.m4a;*.tta;*.dts;*.spx;*.mp2;*.ofr;*.ofs;*.mpa|");
 	filter += _T("All Files|*.*|");
 
 	CFileDialog dlg(TRUE,NULL,NULL,OFN_OVERWRITEPROMPT|OFN_ENABLESIZING|OFN_FILEMUSTEXIST,filter);
