@@ -23,6 +23,7 @@
 #define IDB_BITMAP_TREE                 144
 #define IDR_MENU_FAVORITES              145
 #define IDD_DIALOG_NEWGROUP             146
+#define IDD_DIALOG_RENDERURL            147
 #define IDC_COMBO_CATEGORIES            1001
 #define IDC_LIST_FILTERS                1002
 #define IDC_COMBO_MERIT                 1003
@@ -117,13 +118,18 @@
 #define ID_FILE_SAVEASXML               32831
 #define ID_OPTIONS_DISPLAYFILTERNAME    32832
 #define ID_OPTIONS_DISPLAYASFILENAME    32833
+#define ID_BUTTON32834                  32834
+#define ID_BUTTON_DIRECT                32834
+#define ID_OPTIONS_DIRECTCONNECTMODE    32835
+#define IDC_OPTIONS_DIRECT              32836
+#define ID_OPTIONS_DIRECT               32837
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        148
-#define _APS_NEXT_COMMAND_VALUE         32834
+#define _APS_NEXT_COMMAND_VALUE         32838
 #define _APS_NEXT_CONTROL_VALUE         1034
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

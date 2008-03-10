@@ -96,6 +96,7 @@ using namespace std;
 #include "TextInfoForm.h"
 #include "FileSrcForm.h"
 #include "FileSinkForm.h"
+#include "RenderUrlForm.h"
 #include "PropertyForm.h"
 #include "NewGroupForm.h"
 #include "graphView.h"

@@ -91,6 +91,8 @@ BEGIN
     BUTTON      ID_BUTTON_PLAY
     BUTTON      ID_BUTTON_PAUSE
     BUTTON      ID_BUTTON_STOP
+    SEPARATOR
+    BUTTON      ID_BUTTON_DIRECT
 END
 
 
@@ -169,8 +171,8 @@ BEGIN
             MENUITEM "04:00 AM",                    ID_AUTORESTART
         END
         MENUITEM SEPARATOR
-        MENUITEM "Display Filter Name",         ID_OPTIONS_DISPLAYFILTERNAME
         MENUITEM "Display As File Name",        ID_OPTIONS_DISPLAYASFILENAME
+        MENUITEM "DirectConnect Mode",          ID_OPTIONS_DIRECT
     END
     POPUP "&Help"
     BEGIN
@@ -363,6 +365,19 @@ BEGIN
     LTEXT           "Group name",IDC_STATIC,12,30,40,8
 END
 
+IDD_DIALOG_RENDERURL DIALOGEX 0, 0, 336, 82
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Render URL..."
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,222,60,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,276,60,50,14
+    CONTROL         "URL",IDC_RADIO_URL,"Button",BS_AUTORADIOBUTTON,6,38,29,10
+    COMBOBOX        IDC_COMBO_URL,42,36,282,132,CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "Clear",IDC_BUTTON_CLEAR,42,60,50,14
+    CONTROL         "",IDC_TITLEBAR,"Static",SS_OWNERDRAW,0,0,336,24
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -488,6 +503,14 @@ BEGIN
         RIGHTMARGIN, 221
         TOPMARGIN, 7
         BOTTOMMARGIN, 81
+    END
+
+    IDD_DIALOG_RENDERURL, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 329
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 75
     END
 END
 #endif    // APSTUDIO_INVOKED
@@ -615,6 +638,25 @@ END
 STRINGTABLE 
 BEGIN
     AFX_IDS_PREVIEW_CLOSE   "Close print preview mode\nCancel Preview"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_FILE_RENDERURL       "Render media from URL"
+    ID_BUTTON_PLAY          "Start the graph"
+    ID_BUTTON_PAUSE         "Pause the graph"
+    ID_BUTTON_STOP          "Stop the graph and seek to start"
+    ID_FILE_RENDERFILE      "Render media from file"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_FILE_ADDMEDIAFILE    "Add media from file"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_BUTTON_DIRECT        "DirectConnect mode toggle"
 END
 
 #endif    // Slovak resources

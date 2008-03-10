@@ -32,11 +32,14 @@ BEGIN_MESSAGE_MAP(CGraphView, GraphStudio::DisplayView)
 	ON_COMMAND(ID_BUTTON_PLAY, &CGraphView::OnPlayClick)
 	ON_COMMAND(ID_BUTTON_PAUSE, &CGraphView::OnPauseClick)
 	ON_COMMAND(ID_BUTTON_STOP, &CGraphView::OnStopClick)
+	ON_COMMAND(ID_BUTTON_DIRECT, &CGraphView::OnDirectConnectClick)
+	ON_COMMAND(ID_OPTIONS_DIRECT, &CGraphView::OnOptionsDirectConnectClick)
 	ON_COMMAND(ID_FILE_NEW, &CGraphView::OnNewClick)
 	ON_COMMAND(ID_FILE_OPEN, &CGraphView::OnFileOpenClick)
 	ON_COMMAND(ID_FILE_SAVE, &CGraphView::OnFileSaveClick)
 	ON_COMMAND(ID_FILE_SAVE_AS, &CGraphView::OnFileSaveAsClick)
 	ON_COMMAND(ID_FILE_RENDERFILE, &CGraphView::OnRenderFileClick)
+	ON_COMMAND(ID_FILE_RENDERURL, &CGraphView::OnRenderUrlClick)
 	ON_COMMAND(ID_FILE_CONNECTTOREMOTEGRAPH, &CGraphView::OnConnectRemote)
 	ON_COMMAND(ID_FILE_DISCONNECTFROMREMOTEGRAPH, &CGraphView::OnDisconnectRemote)
 	ON_COMMAND(ID_GRAPH_INSERTFILTER, &CGraphView::OnGraphInsertfilter)
@@ -53,6 +56,8 @@ BEGIN_MESSAGE_MAP(CGraphView, GraphStudio::DisplayView)
 	ON_WM_TIMER()
 	ON_WM_DROPFILES()
 
+	ON_UPDATE_COMMAND_UI(ID_BUTTON_DIRECT, &CGraphView::OnUpdateDirectConnect)
+	ON_UPDATE_COMMAND_UI(ID_OPTIONS_DIRECT, &CGraphView::OnUpdateOptionsDirectConnect)
 	ON_UPDATE_COMMAND_UI(ID_BUTTON_PLAY, &CGraphView::OnUpdatePlayButton)
 	ON_UPDATE_COMMAND_UI(ID_BUTTON_PAUSE, &CGraphView::OnUpdatePauseButton)
 	ON_UPDATE_COMMAND_UI(ID_BUTTON_STOP, &CGraphView::OnUpdateStopButton)
@@ -84,9 +89,7 @@ BEGIN_MESSAGE_MAP(CGraphView, GraphStudio::DisplayView)
 	ON_UPDATE_COMMAND_UI(ID_AUTORESTART_DISABLED, &CGraphView::OnUpdateAutorestartDisabled)
 	ON_COMMAND(ID_FILE_OPENFROMXML, &CGraphView::OnFileOpenfromxml)
 	ON_COMMAND(ID_OPTIONS_DISPLAYASFILENAME, &CGraphView::OnOptionsDisplayFileName)
-	ON_COMMAND(ID_OPTIONS_DISPLAYFILTERNAME, &CGraphView::OnOptionsDisplayName)
 	ON_UPDATE_COMMAND_UI(ID_OPTIONS_DISPLAYASFILENAME, &CGraphView::OnUpdateOptionsDisplayFileName)
-	ON_UPDATE_COMMAND_UI(ID_OPTIONS_DISPLAYFILTERNAME, &CGraphView::OnUpdateOptionsDisplayName)
 END_MESSAGE_MAP()
 
 //-----------------------------------------------------------------------------
@@ -557,6 +560,25 @@ void CGraphView::OnFileAddmediafile()
 	}
 }
 
+void CGraphView::OnRenderUrlClick()
+{
+	CRenderUrlForm		dlg;
+	int ret = dlg.DoModal();
+	if (ret == IDOK) {
+
+		OnNewClick();
+		int ret = graph.RenderFile(dlg.result_file);
+		if (ret < 0) {
+			MessageBox(_T("Cannot render URL"));
+		}
+
+		graph.RefreshFilters();
+		graph.SmartPlacement();
+		graph.Dirty();
+		Invalidate();
+	}
+}
+
 void CGraphView::OnRenderFileClick()
 {
 	// nabrowsujeme subor
@@ -988,11 +1010,7 @@ void CGraphView::OnDisconnectRemote()
 
 void CGraphView::OnUpdateConnectRemote(CCmdUI *ui)
 {
-	if (graph.is_remote) {
-		ui->Enable(FALSE);
-	} else {
-		ui->Enable(TRUE);
-	}
+	ui->Enable(TRUE);
 }
 
 void CGraphView::OnUpdateDisconnectRemote(CCmdUI *ui)
@@ -1214,27 +1232,13 @@ void CGraphView::OnUpdateAutorestartDisabled(CCmdUI *pCmdUI)
 	pCmdUI->SetCheck(!auto_restart.enabled);
 }
 
-void CGraphView::OnOptionsDisplayName()
-{
-	render_params.display_file_name = false;
-	graph.RefreshFilters();
-	graph.SmartPlacement();
-	graph.Dirty();
-	Invalidate();
-}
-
 void CGraphView::OnOptionsDisplayFileName()
 {
-	render_params.display_file_name = true;
+	render_params.display_file_name = !render_params.display_file_name;
 	graph.RefreshFilters();
 	graph.SmartPlacement();
 	graph.Dirty();
 	Invalidate();
-}
-
-void CGraphView::OnUpdateOptionsDisplayName(CCmdUI *pCmdUI)
-{
-	pCmdUI->SetCheck(render_params.display_file_name ? false : true);
 }
 
 void CGraphView::OnUpdateOptionsDisplayFileName(CCmdUI *pCmdUI)
@@ -1242,7 +1246,27 @@ void CGraphView::OnUpdateOptionsDisplayFileName(CCmdUI *pCmdUI)
 	pCmdUI->SetCheck(render_params.display_file_name ? true : false);
 }
 
+void CGraphView::OnDirectConnectClick()
+{
+	// toggle
+	render_params.direct_connect = !render_params.direct_connect;
+}
 
+void CGraphView::OnUpdateDirectConnect(CCmdUI *pCmdUI)
+{
+	pCmdUI->SetRadio(render_params.direct_connect);
+}
+
+void CGraphView::OnOptionsDirectConnectClick()
+{
+	// toggle
+	render_params.direct_connect = !render_params.direct_connect;
+}
+
+void CGraphView::OnUpdateOptionsDirectConnect(CCmdUI *pCmdUI)
+{
+	pCmdUI->SetCheck(render_params.direct_connect);
+}
 
 
 

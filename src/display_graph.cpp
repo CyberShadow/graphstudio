@@ -734,8 +734,12 @@ namespace GraphStudio
 			p2 = temp;
 		}
 
-		// TODO: DirectConnect / Intelligent Connect
-		HRESULT hr = gb->Connect(p1->pin, p2->pin);
+		HRESULT hr;
+		if (params->direct_connect) {
+			hr = gb->ConnectDirect(p1->pin, p2->pin, NULL);
+		} else {
+			hr = gb->Connect(p1->pin, p2->pin);
+		}
 		if (FAILED(hr)) return hr;
 
 		RefreshFilters();
@@ -776,25 +780,27 @@ namespace GraphStudio
 			return ;
 		}
 
-		gb->EnumFilters(&efilt);
-		efilt->Reset();
-		while (efilt->Next(1, &filt, &ff) == NOERROR) {
-			Filter	*filter = FindFilter(filt);
-			if (!filter) {
-				filter = new Filter(this);
-				filter->LoadFromFilter(filt);
-				filters.InsertAt(0, filter);
-			} else {
-				filter->Refresh();
-			}
+		HRESULT			hr = gb->EnumFilters(&efilt);
+		if (SUCCEEDED(hr) && efilt) {
+			efilt->Reset();
+			while (efilt->Next(1, &filt, &ff) == NOERROR) {
+				Filter	*filter = FindFilter(filt);
+				if (!filter) {
+					filter = new Filter(this);
+					filter->LoadFromFilter(filt);
+					filters.InsertAt(0, filter);
+				} else {
+					filter->Refresh();
+				}
 
-			// mark this one as active...
-			if (filter) {
-				filter->tag = 1;
+				// mark this one as active...
+				if (filter) {
+					filter->tag = 1;
+				}
+				filt->Release();
 			}
-			filt->Release();
+			efilt->Release();
 		}
-		efilt->Release();
 	
 		// kill those inactive
 		RemoveUnusedFilters();
@@ -1119,6 +1125,18 @@ namespace GraphStudio
 				}
 			}
 		}
+
+		// automatically rename the video window so it would be easy to
+		// recognize
+		CComPtr<IVideoWindow>		vw;
+		hr = f->QueryInterface(IID_IVideoWindow, (void**)&vw);
+		if (SUCCEEDED(hr)) {
+			CString		vw_name;
+			vw_name = _T("ActiveMovie Window: ") + display_name;
+			vw->put_Caption(vw_name.GetBuffer());
+			vw = NULL;
+		}
+
 
 		// now scan for pins
 		IEnumPins	*epins;
@@ -1813,6 +1831,7 @@ namespace GraphStudio
 		def_pin_text_size = 7;
 
 		display_file_name = true;
+		direct_connect = false;
 
 		Zoom(1.0);
 	}

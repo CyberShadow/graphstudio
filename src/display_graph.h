@@ -52,6 +52,7 @@ namespace GraphStudio
 
 		// display as file name
 		bool			display_file_name;
+		bool			direct_connect;
 
 	public:
 		RenderParameters();

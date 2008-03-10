@@ -286,6 +286,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\RenderUrlForm.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\seeking_bar.cpp"
 				>
 			</File>
@@ -393,6 +397,10 @@
 			</File>
 			<File
 				RelativePath=".\src\RemoteGraphForm.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\RenderUrlForm.h"
 				>
 			</File>
 			<File

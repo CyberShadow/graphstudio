@@ -2,7 +2,13 @@
 + more drawing fixes
 + added some more extensions into opendialog filters
 + added registered pin details and media types
++ added MPEG1VIDEOINFO and MPEG2VIDEOINFO structure details
 + property-tree integrated with the filters form
++ remote-graph bugfix (thanks to Christian Steindl)
++ Ctrl+G shortcut works also when connected to remote graph
++ added Render URL feature
++ added DirectConnect toggle
++ ActiveMovie Window now also contains filter name in the title
 
 [0.2.0.0 - Beta    04/Mar/2008]
 + added filter details form

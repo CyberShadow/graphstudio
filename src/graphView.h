@@ -74,6 +74,7 @@ public:
 	void OnFileOpenClick();
 	void OnFileSaveClick();
 	void OnFileSaveAsClick();
+	void OnRenderUrlClick();
 	void OnPlayClick();
 	void OnStopClick();
 	void OnPauseClick();
@@ -157,10 +158,12 @@ public:
 	void OnUpdateAutorestart(CCmdUI *pCmdUI);
 	void OnUpdateAutorestartDisabled(CCmdUI *pCmdUI);
 	void OnFileOpenfromxml();
-	void OnOptionsDisplayName();
 	void OnOptionsDisplayFileName();
-	void OnUpdateOptionsDisplayName(CCmdUI *pCmdUI);
 	void OnUpdateOptionsDisplayFileName(CCmdUI *pCmdUI);
+	void OnDirectConnectClick();
+	void OnUpdateDirectConnect(CCmdUI *pCmdUI);
+	void OnOptionsDirectConnectClick();
+	void OnUpdateOptionsDirectConnect(CCmdUI *pCmdUI);
 
 };
 
