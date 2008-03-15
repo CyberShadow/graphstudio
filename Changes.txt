@@ -1,4 +1,4 @@
-[0.2.1.0 - Beta	   xx/Mar/2008]
+[0.2.1.0 - Beta	   15/Mar/2008]
 + more drawing fixes
 + added some more extensions into opendialog filters
 + added registered pin details and media types
