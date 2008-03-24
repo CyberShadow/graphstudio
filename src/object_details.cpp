@@ -304,6 +304,47 @@ namespace GraphStudio
 		pin->ConnectedTo(&con_pin);
 		if (con_pin == NULL) {
 			group->AddItem(new PropItem(_T("IsConnected"), (bool)FALSE));
+
+			//-----------------------------------------------------------------
+			// enumerate available media types
+			//-----------------------------------------------------------------
+			PropItem	*mtypes = group->AddItem(new PropItem(_T("Offered MediaTypes")));
+
+			CComPtr<IEnumMediaTypes>	etypes;
+			ULONG						f;
+
+			hr = pin->EnumMediaTypes(&etypes);
+			if (FAILED(hr)) {
+				mtypes->AddItem(new PropItem(_T("Count"), (int)0));
+			} else {
+
+				int		count = 0;
+				etypes->Reset();
+				while (etypes->Skip(1) == NOERROR) count++;
+				mtypes->AddItem(new PropItem(_T("Count"), count));
+
+				etypes->Reset();
+				int		cur = 1;
+				AM_MEDIA_TYPE	*mt;
+				while (etypes->Next(1, &mt, &f) == NOERROR) {
+					CMediaType	mmt; mmt = *mt;
+					CString		mtname;
+					mtname.Format(_T("Type %d"), cur++);
+
+					// append major/sub
+					CString		maj_name, sub_name;
+					GraphStudio::NameGuid(mt->majortype, maj_name);
+					GraphStudio::NameGuid(mt->subtype,   sub_name);
+					mtname += CString(_T(" [")) + maj_name + CString(_T(" / ")) + sub_name + CString(_T("]"));
+
+					PropItem	*curmt = mtypes->AddItem(new PropItem(mtname));
+					GetMediaTypeDetails(&mmt, curmt);
+
+					DeleteMediaType(mt);
+				}
+
+			}
+
 		} else {
 			group->AddItem(new PropItem(_T("IsConnected"), (bool)TRUE));
 
