@@ -1,4 +1,4 @@
-[0.2.2.0 - Beta    xx/Mar/2008]
+[0.2.2.0 - Beta    24/Mar/2008]
 + added frame-step button
 + values in property pages can now be selected and put into clipboard
 + added key shortcuts (ESC = stop, Space = Play/Pause toggle, Right arrow = frame step)
