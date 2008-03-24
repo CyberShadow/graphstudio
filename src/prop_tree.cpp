@@ -101,15 +101,51 @@ namespace GraphStudio
 
 	BEGIN_MESSAGE_MAP(PropTreeCtrl, CTreeCtrl)
 		ON_WM_LBUTTONDOWN()
+		ON_WM_VSCROLL()
 	END_MESSAGE_MAP()
 
 	PropTreeCtrl::PropTreeCtrl() :
-		CTreeCtrl()
+		CTreeCtrl(),
+		edit(NULL)
 	{
 	}
 
 	PropTreeCtrl::~PropTreeCtrl()
 	{
+	}
+
+	void PropTreeCtrl::OnSelChanged()
+	{
+		// display an edit field for the current item
+		HTREEITEM	selitem = GetSelectedItem();
+		if (selitem) {
+			EditItem(selitem);
+		} else {
+			if (edit) { edit->DestroyWindow(); }
+		}
+	}
+
+	void PropTreeCtrl::CancelEdit()
+	{
+		if (edit) { edit->DestroyWindow(); }
+	}
+
+	void PropTreeCtrl::EditItem(HTREEITEM item)
+	{
+		if (edit) { edit->DestroyWindow(); }
+
+		PropItem	*pitem = (PropItem*)GetItemData(item);
+		// don't display edit fields for groups
+		if (!pitem) return ;
+		if (pitem->type == GraphStudio::PropItem::TYPE_STRUCT) return ;
+
+		CRect	rect(0,0,0,0);
+		GetItemRect(item, &rect, FALSE);
+		parent->AdjustTextRect(rect);
+
+		// new instane of the Edit control
+		PropTreeEdit	*edit_new = new PropTreeEdit(this, item, pitem, font_item);
+		edit_new->Create(WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL | ES_LEFT | ES_READONLY, rect, this, 1);
 	}
 
 	void PropTreeCtrl::OnLButtonDown(UINT nFlags, CPoint point)
@@ -134,6 +170,12 @@ namespace GraphStudio
 				Expand(item, TVE_TOGGLE);
 			}
 		}
+	}
+
+	void PropTreeCtrl::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar *pScrollBar)
+	{
+		CTreeCtrl::OnVScroll(nSBCode, nPos, pScrollBar);
+		if (edit) edit->UpdatePos();
 	}
 
 
@@ -170,7 +212,6 @@ namespace GraphStudio
 	{
 	}
 
-
 	void PropertyTree::Initialize()
 	{
 		if (tree.m_hWnd) return ;
@@ -182,6 +223,8 @@ namespace GraphStudio
 		tree.Create(WS_CHILD | WS_VISIBLE  | TVS_FULLROWSELECT |
 					TVS_NOHSCROLL | TVS_NOTOOLTIPS,				
 					CRect(), this, ID_TREE);
+		tree.parent = this;
+		tree.font_item = &font_item;
 
 		RepositionControls();
 	}
@@ -194,6 +237,7 @@ namespace GraphStudio
 	void PropertyTree::BuildPropertyTree(PropItem *root)
 	{
 		tree.DeleteAllItems();
+		tree.CancelEdit();
 		BuildNode(root, tree.GetRootItem());
 	}
 
@@ -243,6 +287,22 @@ namespace GraphStudio
 		default:
 			*pResult = CDRF_DODEFAULT;
 		}
+	}
+
+	void PropertyTree::AdjustTextRect(CRect &rc)
+	{
+		// borders
+		rc.top += 2;		rc.left += 0;
+		rc.bottom -= 2;		rc.right -= 1;
+
+		// left margin
+		rc.left += left_offset;
+
+		// left area width
+		rc.left += left_width;
+
+		// middle separator
+		rc.left += 1;
 	}
 
 	void PropertyTree::PaintItem(HTREEITEM item, UINT state, NMCUSTOMDRAW *draw)
@@ -383,14 +443,118 @@ namespace GraphStudio
 				return TRUE;
 			}
 			break;
-		case TVN_ITEMEXPANDING:			Invalidate();
-		case TVN_ITEMEXPANDED:			RepositionControls();
+		case TVN_SELCHANGED:	
+			{
+				tree.OnSelChanged();
+			}
+			break;
+		case TVN_ITEMEXPANDING:	Invalidate();
+		case TVN_ITEMEXPANDED:	RepositionControls();
 		}
 
 		// forward notifications from children to the control owner
 		pHdr->hwndFrom = GetSafeHwnd();
 		pHdr->idFrom = GetWindowLong(GetSafeHwnd(),GWL_ID);
 		return (BOOL)GetParent()->SendMessage(WM_NOTIFY,wParam,lParam);			
+	}
+
+	//-------------------------------------------------------------------------
+	//
+	//	PropTreeEdit class
+	//
+	//-------------------------------------------------------------------------
+
+	BEGIN_MESSAGE_MAP(PropTreeEdit, CEdit)
+		ON_WM_CREATE()
+		ON_WM_NCDESTROY()
+		ON_WM_CTLCOLOR_REFLECT()
+		ON_WM_KEYDOWN()
+	END_MESSAGE_MAP()
+
+	PropTreeEdit::PropTreeEdit(PropTreeCtrl *pParent, HTREEITEM htItem, PropItem *pitem, CFont *font) :
+		CEdit(),
+		parent(pParent),
+		item(pitem)
+	{
+		this->htItem = htItem;
+		this->font = font;
+
+		// assign a new edit field
+		parent->edit = this;
+
+		DWORD	back_color = RGB(255, 255, 255);
+		brush_back.CreateSolidBrush(back_color);
+	}
+
+	PropTreeEdit::~PropTreeEdit()
+	{
+		// cancel the edit field
+		parent->edit = NULL;
+	}
+
+	void PropTreeEdit::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
+	{
+		// we forward several keys to the parent
+		switch (nChar) {
+		case VK_UP:
+		case VK_DOWN:
+		case VK_NEXT:
+		case VK_PRIOR:
+		case VK_ESCAPE:
+			{
+				parent->PostMessage(WM_KEYDOWN, nChar, ((nFlags << 16) | nRepCnt));
+				return ;
+			}
+			break;
+		}
+		CEdit::OnKeyDown(nChar, nRepCnt, nFlags);
+	}
+
+	void PropTreeEdit::UpdatePos()
+	{
+		CRect		rc;
+		parent->GetItemRect(htItem, rc, FALSE);
+		parent->parent->AdjustTextRect(rc);
+		MoveWindow(&rc);
+		Invalidate();
+	}
+
+	int PropTreeEdit::OnCreate(LPCREATESTRUCT lpCreateStruct) 
+	{
+		if (CEdit::OnCreate(lpCreateStruct) == -1) return -1;
+		
+		SetFont(font);
+		SetFocus();
+
+		CString	val = _T("");
+		if (item) val = item->value;
+		SetWindowText(val);
+		SetSel(0, -1);
+		return 0;
+	}
+
+	BOOL PropTreeEdit::PreTranslateMessage(MSG* pMsg) 
+	{
+		if (pMsg->message == WM_KEYDOWN) {
+			if (pMsg->wParam == VK_RETURN || pMsg->wParam == VK_ESCAPE) {
+				::TranslateMessage(pMsg);
+				::DispatchMessage(pMsg);
+				return TRUE;				// koncime
+			}
+		}
+		return __super::PreTranslateMessage(pMsg);
+	}
+
+	void PropTreeEdit::OnNcDestroy() 
+	{
+		CEdit::OnNcDestroy();	
+		delete this;
+	}
+
+	HBRUSH PropTreeEdit::CtlColor(CDC *dc, UINT nCtlColor)
+	{
+		// override readonly background color
+		return brush_back;	
 	}
 
 };

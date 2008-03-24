@@ -9,6 +9,8 @@
 
 namespace GraphStudio
 {
+	class PropTreeCtrl;
+	class PropertyTree;
 
 	//-------------------------------------------------------------------------
 	//
@@ -61,6 +63,35 @@ namespace GraphStudio
 
 	//-------------------------------------------------------------------------
 	//
+	//	PropTreeEdit class
+	//
+	//-------------------------------------------------------------------------
+
+	class PropTreeEdit : public CEdit
+	{
+	protected:
+		HTREEITEM		htItem;
+		PropItem		*item;					// item we're displaying
+		CFont			*font;
+		PropTreeCtrl	*parent;
+		CBrush			brush_back;
+
+		virtual BOOL PreTranslateMessage(MSG* pMsg);
+		DECLARE_MESSAGE_MAP()
+
+	public:
+		PropTreeEdit(PropTreeCtrl *pParent, HTREEITEM htItem, PropItem *pitem, CFont *font);
+		virtual ~PropTreeEdit();
+
+		afx_msg void OnNcDestroy();
+		afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
+		afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
+		HBRUSH CtlColor(CDC *dc, UINT nCtlColor);
+		void UpdatePos();
+	};
+
+	//-------------------------------------------------------------------------
+	//
 	//	PropTreeCtrl class
 	//
 	//-------------------------------------------------------------------------
@@ -70,11 +101,20 @@ namespace GraphStudio
 	protected:
 		DECLARE_MESSAGE_MAP()
 	public:
+
+		PropertyTree		*parent;
+		PropTreeEdit		*edit;
+		CFont				*font_item;
+
 	public:
 		PropTreeCtrl();
 		~PropTreeCtrl();
 
 		void OnLButtonDown(UINT nFlags, CPoint point);
+		void OnSelChanged();
+		void EditItem(HTREEITEM item);
+		void CancelEdit();
+		void OnVScroll(UINT nSBCode, UINT nPos, CScrollBar *pScrollBar);
 	};
 
 	//-------------------------------------------------------------------------
@@ -118,6 +158,7 @@ namespace GraphStudio
 		virtual void Initialize();
 		virtual void RepositionControls();
 
+		void AdjustTextRect(CRect &rc);
 		void OnSize(UINT nType, int cx, int cy);
 		void OnTreeCustomDraw(NMHDR* pNMHDR, LRESULT* pResult);
 

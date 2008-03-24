@@ -197,6 +197,7 @@ namespace GraphStudio
 		CComPtr<IMediaControl>			mc;
 		CComPtr<IMediaEventEx>			me;
 		CComPtr<IMediaSeeking>			ms;
+		CComPtr<IVideoFrameStep>		fs;		
 
 		CArray<Filter*>					filters;
 		CDC								*dc;
@@ -211,6 +212,7 @@ namespace GraphStudio
 		HWND							wndEvents;
 		GraphCallback					*callback;
 		bool							is_remote;
+		bool							is_frame_stepping;
 		bool							dirty;
 
 	public:
@@ -265,6 +267,12 @@ namespace GraphStudio
 		// seeking helpers
 		int GetPositions(double &current_ms, double &duration_ms);
 		int Seek(double time_ms);
+
+		// control
+		void DoFrameStep();
+		HRESULT DoPlay();
+		HRESULT DoStop();
+		HRESULT DoPause();
 
 		// scrolling aid
 		CSize GetGraphSize();

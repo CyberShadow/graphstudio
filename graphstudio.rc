@@ -91,6 +91,7 @@ BEGIN
     BUTTON      ID_BUTTON_PLAY
     BUTTON      ID_BUTTON_PAUSE
     BUTTON      ID_BUTTON_STOP
+    BUTTON      ID_BUTTON_STEP
     SEPARATOR
     BUTTON      ID_BUTTON_DIRECT
 END
@@ -242,7 +243,7 @@ STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSM
 CAPTION "About MONOGRAM GraphStudio"
 FONT 8, "MS Shell Dlg", 0, 0, 0x1
 BEGIN
-    LTEXT           "MONOGRAM GraphStudio v0.2.1.0 Beta",IDC_STATIC,6,30,156,8,SS_NOPREFIX
+    LTEXT           "MONOGRAM GraphStudio v0.2.2.0 Beta",IDC_STATIC,6,30,156,8,SS_NOPREFIX
     DEFPUSHBUTTON   "OK",IDOK,198,78,50,16,WS_GROUP
     LTEXT           "This software is free under the GNU GPL license",IDC_STATIC,6,72,153,8
     LTEXT           "http://www.monogrammultimedia.com",IDC_STATIC,6,84,123,8
@@ -385,8 +386,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 0,2,1,0
- PRODUCTVERSION 0,2,1,0
+ FILEVERSION 0,2,2,0
+ PRODUCTVERSION 0,2,2,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -403,11 +404,11 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "MONOGRAM Mutimedia s.r.o."
             VALUE "FileDescription", "GraphStudio"
-            VALUE "FileVersion", "0.2.0.0"
+            VALUE "FileVersion", "0.2.2.0"
             VALUE "InternalName", "graphstudio.exe"
             VALUE "OriginalFilename", "graphstudio.exe"
             VALUE "ProductName", "MONOGRAM GraphStudio"
-            VALUE "ProductVersion", "0.2.0.0"
+            VALUE "ProductVersion", "0.2.2.0"
         END
     END
     BLOCK "VarFileInfo"
@@ -657,6 +658,7 @@ END
 STRINGTABLE 
 BEGIN
     ID_BUTTON_DIRECT        "DirectConnect mode toggle"
+    ID_BUTTON_STEP          "Frame Step"
 END
 
 #endif    // Slovak resources

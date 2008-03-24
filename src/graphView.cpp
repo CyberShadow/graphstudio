@@ -32,6 +32,7 @@ BEGIN_MESSAGE_MAP(CGraphView, GraphStudio::DisplayView)
 	ON_COMMAND(ID_BUTTON_PLAY, &CGraphView::OnPlayClick)
 	ON_COMMAND(ID_BUTTON_PAUSE, &CGraphView::OnPauseClick)
 	ON_COMMAND(ID_BUTTON_STOP, &CGraphView::OnStopClick)
+	ON_COMMAND(ID_BUTTON_STEP, &CGraphView::OnFrameStepClick)
 	ON_COMMAND(ID_BUTTON_DIRECT, &CGraphView::OnDirectConnectClick)
 	ON_COMMAND(ID_OPTIONS_DIRECT, &CGraphView::OnOptionsDirectConnectClick)
 	ON_COMMAND(ID_FILE_NEW, &CGraphView::OnNewClick)
@@ -322,11 +323,18 @@ void CGraphView::UpdateMRUMenu()
 	mru.GenerateMenu(filemenu);
 }
 
+void CGraphView::OnFrameStepClick()
+{
+	// do a frame step
+	graph.DoFrameStep();
+
+	// update the graph state timers
+	UpdateGraphState();
+}
+
 void CGraphView::OnPlayClick()
 {
-	if (graph.mc) {
-		graph.mc->Run();
-
+	if (SUCCEEDED(graph.DoPlay())) {
 		if (!graph.is_remote) {
 			SetTimer(CGraphView::TIMER_AUTO_RESTART, 1000, NULL);
 		}
@@ -336,9 +344,7 @@ void CGraphView::OnPlayClick()
 
 void CGraphView::OnStopClick()
 {
-	if (graph.mc) {
-		graph.Seek(0);
-		graph.mc->Stop();
+	if (SUCCEEDED(graph.DoStop())) {
 		KillTimer(CGraphView::TIMER_AUTO_RESTART);
 	}
 	UpdateGraphState();
@@ -346,9 +352,7 @@ void CGraphView::OnStopClick()
 
 void CGraphView::OnPauseClick()
 {
-	if (graph.mc) {
-		graph.mc->Pause();
-	}
+	graph.DoPause();
 	UpdateGraphState();
 }
 

@@ -43,7 +43,9 @@ namespace GraphStudio
 		ms = NULL;
 		gb = NULL;
 		dc = NULL;
+		fs = NULL;
 		is_remote = false;
+		is_frame_stepping = false;
 
 		MakeNew();
 
@@ -54,8 +56,9 @@ namespace GraphStudio
 	{
 		mc = NULL;
 		me = NULL;
-		gb = NULL;
+		fs = NULL;
 		if (ms) ms = NULL;
+		gb = NULL;
 
 		ZeroTags();
 		RemoveUnusedFilters();
@@ -69,6 +72,7 @@ namespace GraphStudio
 		// release graph objects
 		mc = NULL;
 		ms = NULL;
+		fs = NULL;
 		if (me) {
 			// clear events...
 			me->SetNotifyWindow(NULL, 0, NULL);
@@ -76,6 +80,7 @@ namespace GraphStudio
 		}
 		gb = NULL;
 		is_remote = false;
+		is_frame_stepping = false;
 
 		// attach remote graph
 		HRESULT hr;
@@ -85,6 +90,7 @@ namespace GraphStudio
 		// get hold of interfaces
 		gb->QueryInterface(IID_IMediaControl, (void**)&mc);
 		gb->QueryInterface(IID_IMediaSeeking, (void**)&ms);
+		gb->QueryInterface(IID_IVideoFrameStep, (void**)&fs);
 
 		// now we're a remote graph
 		is_remote = true;
@@ -94,6 +100,7 @@ namespace GraphStudio
 	int DisplayGraph::MakeNew()
 	{
 		if (ms) ms = NULL;
+		if (fs) fs = NULL;
 
 		// we only do this for our own graph so we don't mess up
 		// the host application when connected to remote graph
@@ -125,7 +132,7 @@ namespace GraphStudio
 		}
 
 		is_remote = false;
-
+		is_frame_stepping = false;
 
 		// create new instance of filter graph
 		HRESULT hr;
@@ -139,12 +146,16 @@ namespace GraphStudio
 			gb->QueryInterface(IID_IMediaEventEx, (void**)&me);
 			me->SetNotifyWindow((OAHWND)wndEvents, WM_GRAPH_EVENT, (LONG_PTR)this);
 			gb->QueryInterface(IID_IMediaSeeking, (void**)&ms);
+			gb->QueryInterface(IID_IVideoFrameStep, (void**)&fs);
 
 		} while (0);
 
 		if (FAILED(hr)) {
 			gb = NULL;
 			mc = NULL;
+			me = NULL;
+			ms = NULL;
+			fs = NULL;
 			return -1;
 		}
 
@@ -188,10 +199,65 @@ namespace GraphStudio
 			return -1;
 		}
 
+		// pretend we're in paused state
+		if (is_frame_stepping) {
+			state = State_Paused;
+			return NOERROR;
+		}
+
 		HRESULT hr = mc->GetState(timeout, (OAFilterState*)&state);
 		if (FAILED(hr)) return hr;
 
 		return hr;
+	}
+
+	void DisplayGraph::DoFrameStep()
+	{
+		if (fs) {
+			fs->Step(1, NULL);
+			is_frame_stepping = true;
+		}
+	}
+
+	HRESULT DisplayGraph::DoPlay()
+	{
+		if (is_frame_stepping) {
+			if (fs) fs->CancelStep();
+			if (mc) mc->Run();
+
+			// reset the frame stepping flag
+			is_frame_stepping = false;
+		} else {
+			if (mc) {
+				return mc->Run();
+			} else {
+				return E_NOINTERFACE;
+			}
+		}
+
+		return NOERROR;
+	}
+
+	HRESULT DisplayGraph::DoStop()
+	{
+		if (is_frame_stepping) {
+			if (fs) fs->CancelStep();
+			is_frame_stepping = false;
+		}
+
+		if (mc) {		
+			Seek(0);
+			mc->Stop();
+			return NOERROR;
+		}
+
+		return E_NOINTERFACE;
+	}
+
+	HRESULT DisplayGraph::DoPause()
+	{
+		if (mc) mc->Pause();
+		return NOERROR;
 	}
 
 	int DisplayGraph::Seek(double time_ms)
