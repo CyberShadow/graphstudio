@@ -198,6 +198,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\bits.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\CustomPage.cpp"
 				>
 			</File>
@@ -316,6 +320,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\bits.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\CustomPage.h"
 				>
 			</File>
@@ -377,6 +385,10 @@
 			</File>
 			<File
 				RelativePath=".\src\mru_list.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\mtypes_ext.h"
 				>
 			</File>
 			<File

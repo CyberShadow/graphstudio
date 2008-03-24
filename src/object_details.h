@@ -37,6 +37,9 @@ namespace GraphStudio
 	int GetMpeg1VideoInfoDetails(MPEG1VIDEOINFO *mvi, PropItem *mviinfo);
 	int GetMpeg2VideoInfoDetails(MPEG2VIDEOINFO *mvi, PropItem *mviinfo);
 
+	// Decoder Specific Information
+	int GetExtradata_AAC(CMediaType *pmt, PropItem *mtinfo);
+
 };
 
 

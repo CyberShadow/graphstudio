@@ -69,6 +69,8 @@ using namespace std;
 #pragma comment(lib, "Version.lib")
 #include "xml_parser.h"
 
+#include "bits.h"
+#include "mtypes_ext.h"
 
 #include "title_bar.h"
 #include "seeking_bar.h"

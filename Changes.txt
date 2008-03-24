@@ -5,6 +5,7 @@
 + GraphStudio now displays list of available media types for unconnected pins
 + GraphStudio can accept a filename to open via command line
 + added graph refresh feature (Ctrl+F5)
++ added AAC format parser
 
 [0.2.1.0 - Beta	   15/Mar/2008]
 + more drawing fixes

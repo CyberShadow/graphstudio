@@ -407,6 +407,18 @@ namespace GraphStudio
 			GetMpeg2VideoInfoDetails(mvi, mviinfo);
 		}
 
+		// we can also parse out decoder specific info in some cases
+		if (pmt->majortype == MEDIATYPE_Audio) {
+			if (pmt->subtype == MEDIASUBTYPE_AAC ||	pmt->subtype == MEDIASUBTYPE_LATM_AAC) {
+				GetExtradata_AAC(pmt, mtinfo);
+			}
+		} else
+		if (pmt->majortype == MEDIATYPE_MPEG2_PES) {
+			if (pmt->subtype == MEDIASUBTYPE_AAC ||	pmt->subtype == MEDIASUBTYPE_LATM_AAC) {
+				GetExtradata_AAC(pmt, mtinfo);
+			}
+		}
+
 		return 0;
 	}
 
@@ -504,6 +516,149 @@ namespace GraphStudio
 		return 0;
 	}
 
+	//-------------------------------------------------------------------------
+	//
+	//	AAC Format
+	//
+	//-------------------------------------------------------------------------
+
+	const int AAC_Sample_Rates[] = {
+			96000, 88200, 64000, 48000,
+			44100, 32000, 24000, 22050, 
+			16000, 12000, 11025, 8000,
+			7350, 0, 0, 0
+	};
+
+	const LPCTSTR AAC_Object_Types[] = {
+		_T("Unknown"),						// 0
+		_T("Main"),							// 1
+		_T("Low Complexity"),				// 2
+		_T("Scalable Sampling Rate"),		// 3
+		_T("Long Term Predictor"),			// 4
+		_T("High Efficiency"),				// 5
+		_T("Unknown"), _T("Unknown"), _T("Unknown"), _T("Unknown"),		// 6, 7, 8, 9
+		_T("Unknown"), _T("Unknown"), _T("Unknown"), _T("Unknown"),		// 10, 11, 12, 13
+		_T("Unknown"), _T("Unknown"), _T("Unknown"), 		// 14, 15, 16
+		_T("Error Resilient LC"),			// 17
+		_T("Unknown"),						// 18
+		_T("Error Resilient LTP"),			// 19,
+		_T("Unknown"), _T("Unknown"), _T("Unknown"), 		// 20, 21, 22
+		_T("Low Delay"),					// 23
+		_T("Unknown"), _T("Unknown"), _T("Unknown"),		// 24, 25, 26
+		_T("DRM ER LC"),					// 27
+		_T("Unknown"), _T("Unknown"), _T("Unknown"), _T("Unknown"), // 28, 29, 30, 31
+	};
+
+	int Parse_AAC_Raw(uint8 *buf, PropItem *aacinfo)
+	{
+		int sbr_present = -1;
+
+		Bitstream		b(buf);
+		b.NeedBits();
+
+		// object
+		int audioObjectType = b.UGetBits(5);
+		if (audioObjectType == 31) {
+			uint8 n = b.UGetBits(6);
+			audioObjectType = 32 + n;
+			b.NeedBits();
+		}
+		CString	ao;
+		if (audioObjectType > 31) {
+			ao.Format(_T("%d (Unknown)"), audioObjectType);
+		} else {
+			ao.Format(_T("%d (%s)"), audioObjectType, AAC_Object_Types[audioObjectType]);
+		}
+		aacinfo->AddItem(new PropItem(_T("Object Type"), ao));
+		
+		int samplingFrequencyIndex = b.UGetBits(4);	
+		aacinfo->AddItem(new PropItem(_T("Freq. Index"), samplingFrequencyIndex));
+
+		int samplingFrequency = AAC_Sample_Rates[samplingFrequencyIndex];
+		if (samplingFrequencyIndex == 0x0f) {
+			b.NeedBits24();
+			uint32 f = b.UGetBits(24);
+			samplingFrequency = f;	
+			b.NeedBits();
+		}
+		int channelConfiguration = b.UGetBits(4);
+		aacinfo->AddItem(new PropItem(_T("Channels"), channelConfiguration));
+
+		if (audioObjectType == 5) {
+			sbr_present = 1;
+
+			// TODO: parsing !!!!!!!!!!!!!!!!
+		}
+
+		switch (audioObjectType) {
+		case 1:
+		case 2:
+		case 3:
+		case 4:
+		case 6:
+		case 7:
+		case 17:
+		case 19:
+		case 20:
+		case 21:
+		case 22:
+		case 23:
+			// GASpecificConfig(b);
+			break;
+		}
+
+		if (sbr_present == -1) {
+			if (samplingFrequency <= 24000) {
+				samplingFrequency *= 2;
+			}			
+		}
+		aacinfo->AddItem(new PropItem(_T("Frequency"), samplingFrequency));
+
+		return 0;
+	}
+
+	int GetExtradata_AAC(CMediaType *pmt, PropItem *mtinfo)
+	{
+		if (pmt->formattype != FORMAT_WaveFormatEx) return 0;
+
+		WAVEFORMATEX	*wfx = (WAVEFORMATEX*)pmt->pbFormat;
+		int			extralen = wfx->cbSize;
+		uint8		  *extra = (uint8*)(wfx) + sizeof(WAVEFORMATEX);
+
+		// done with
+		if (extralen <= 0) return 0;
+
+		PropItem	*aacinfo = mtinfo->AddItem(new PropItem(_T("AAC Decoder Specific")));
+
+		int				i;
+		CString			extrabuf = _T("");
+		for (i=0; i<extralen; i++) {
+			CString	t;
+			t.Format(_T("%02x "), extra[i]);
+			extrabuf += t;
+		}
+		extrabuf = extrabuf.MakeUpper();
+		aacinfo->AddItem(new PropItem(_T("Length"), extralen));
+		aacinfo->AddItem(new PropItem(_T("Extradata"), extrabuf));
+
+		// let's try to parse the AAC type
+		Bitstream		b(extra);
+		b.NeedBits();
+
+		if (b.UBits(12) == 0xfff) {
+			// ADTS
+
+		} else 
+		if (b.UBits(11) == 0x2b7) {
+			// LATM
+
+		} else {
+			// RAW
+			Parse_AAC_Raw(extra, aacinfo);
+		}
+
+		return 0;
+	}
 
 };
 
