@@ -95,6 +95,12 @@ BOOL CgraphstudioApp::InitInstance()
 	m_pMainWnd->ShowWindow(SW_SHOW);
 	m_pMainWnd->UpdateWindow();
 
+	// if we've been started with a command line parameter
+	// do open the file
+	if (cmdInfo.m_strFileName != _T("")) {
+		view->TryOpenFile(cmdInfo.m_strFileName);
+	}
+
 	// call DragAcceptFiles only if there's a suffix
 	//  In an SDI app, this should occur after ProcessShellCommand
 	return TRUE;
