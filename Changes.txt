@@ -4,6 +4,7 @@
 + added key shortcuts (ESC = stop, Space = Play/Pause toggle, Right arrow = frame step)
 + GraphStudio now displays list of available media types for unconnected pins
 + GraphStudio can accept a filename to open via command line
++ added graph refresh feature (Ctrl+F5)
 
 [0.2.1.0 - Beta	   15/Mar/2008]
 + more drawing fixes

@@ -35,6 +35,7 @@ BEGIN_MESSAGE_MAP(CGraphView, GraphStudio::DisplayView)
 	ON_COMMAND(ID_BUTTON_STEP, &CGraphView::OnFrameStepClick)
 	ON_COMMAND(ID_BUTTON_PLAYPAUSE, &CGraphView::OnPlayPauseToggleClick)
 	ON_COMMAND(ID_BUTTON_DIRECT, &CGraphView::OnDirectConnectClick)
+	ON_COMMAND(ID_BUTTON_REFRESH, &CGraphView::OnRefreshFilters)
 	ON_COMMAND(ID_OPTIONS_DIRECT, &CGraphView::OnOptionsDirectConnectClick)
 	ON_COMMAND(ID_FILE_NEW, &CGraphView::OnNewClick)
 	ON_COMMAND(ID_FILE_OPEN, &CGraphView::OnFileOpenClick)
@@ -669,6 +670,13 @@ void CGraphView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 			break;
 		}
 	}
+}
+
+void CGraphView::OnRefreshFilters()
+{
+	graph.RefreshFilters();
+	graph.SmartPlacement();
+	Invalidate();
 }
 
 void CGraphView::OnViewGraphEvents()

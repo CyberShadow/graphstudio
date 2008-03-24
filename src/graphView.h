@@ -80,6 +80,7 @@ public:
 	void OnPauseClick();
 	void OnPlayPauseToggleClick();
 	void OnFrameStepClick();
+	void OnRefreshFilters();
 	void OnNewClick();
 	void OnRenderFileClick();
 	void OnGraphInsertfilter();
