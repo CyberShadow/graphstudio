@@ -33,6 +33,7 @@ BEGIN_MESSAGE_MAP(CGraphView, GraphStudio::DisplayView)
 	ON_COMMAND(ID_BUTTON_PAUSE, &CGraphView::OnPauseClick)
 	ON_COMMAND(ID_BUTTON_STOP, &CGraphView::OnStopClick)
 	ON_COMMAND(ID_BUTTON_STEP, &CGraphView::OnFrameStepClick)
+	ON_COMMAND(ID_BUTTON_PLAYPAUSE, &CGraphView::OnPlayPauseToggleClick)
 	ON_COMMAND(ID_BUTTON_DIRECT, &CGraphView::OnDirectConnectClick)
 	ON_COMMAND(ID_OPTIONS_DIRECT, &CGraphView::OnOptionsDirectConnectClick)
 	ON_COMMAND(ID_FILE_NEW, &CGraphView::OnNewClick)
@@ -354,6 +355,22 @@ void CGraphView::OnPauseClick()
 {
 	graph.DoPause();
 	UpdateGraphState();
+}
+
+void CGraphView::OnPlayPauseToggleClick()
+{
+	FILTER_STATE	state;
+	int ret = graph.GetState(state, 20);
+	if (ret < 0) {
+		return ;
+	}
+
+	// toggle state
+	if (state == State_Stopped || state == State_Paused) {
+		OnPlayClick();
+	} else {
+		OnPauseClick();
+	}
 }
 
 void CGraphView::OnNewClick()

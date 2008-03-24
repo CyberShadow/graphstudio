@@ -78,6 +78,7 @@ public:
 	void OnPlayClick();
 	void OnStopClick();
 	void OnPauseClick();
+	void OnPlayPauseToggleClick();
 	void OnFrameStepClick();
 	void OnNewClick();
 	void OnRenderFileClick();
