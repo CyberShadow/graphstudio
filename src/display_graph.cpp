@@ -409,6 +409,7 @@ namespace GraphStudio
 			if (node->name == _T("render")) ret = LoadXML_Render(node); else
 			if (node->name == _T("connect")) ret = LoadXML_Connect(node); else
 			if (node->name == _T("config")) ret = LoadXML_Config(node); else
+			if (node->name == _T("command")) ret = LoadXML_Command(node); else
 			{
 				//ret = -1;
 			}
@@ -419,6 +420,22 @@ namespace GraphStudio
 			}
 		}
 
+		return 0;
+	}
+
+	int DisplayGraph::LoadXML_Command(XML::XMLNode *node)
+	{
+		CString		msg = node->GetValue(_T("msg"));
+
+		if (msg == _T("run")) {
+			DoPlay();
+		} else
+		if (msg == _T("pause")) {
+			DoPause();
+		} else
+		if (msg == _T("stop")) {
+			DoStop();
+		}
 		return 0;
 	}
 
@@ -565,79 +582,6 @@ namespace GraphStudio
 
 		// we're done
 		instance = NULL;
-		return ret;
-	}
-
-	int DisplayGraph::LoadXML_ConfigInterface(XML::XMLNode *conf, IBaseFilter *filter)
-	{
-		int ret = 1;
-		HRESULT hr;
-		if (conf->name == _T("ifilesourcefilter")) {
-
-			CComPtr<IFileSourceFilter>		fsource;
-			hr = filter->QueryInterface(IID_IFileSourceFilter, (void**)&fsource);
-			if (SUCCEEDED(hr)) {
-				// load the file
-				CString	source = conf->GetValue(_T("source"));
-				hr = fsource->Load((LPCOLESTR)source.GetBuffer(), NULL);
-				if (FAILED(hr)) return -1;			// cannot open file
-				ret = 0;
-			}
-
-		} else
-		if (conf->name == _T("imonogramgraphsink")) {
-
-			CComPtr<Monogram::IMonogramMultigraphSink>	sink;
-			hr = filter->QueryInterface(Monogram::IID_IMonogramMultigraphSink, (void**)&sink);
-			if (SUCCEEDED(hr)) {
-				CString	sinkname = conf->GetValue(_T("name"));
-				hr = sink->SetName(sinkname.GetBuffer());
-				if (FAILED(hr)) return -1;
-				ret = 0;
-			}
-
-		} else
-		if (conf->name == _T("imonogramgraphsource")) {
-
-			CComPtr<Monogram::IMonogramMultigraphSource>	src;
-			hr = filter->QueryInterface(Monogram::IID_IMonogramMultigraphSource, (void**)&src);
-			if (SUCCEEDED(hr)) {
-				CString	srcname = conf->GetValue(_T("name"));
-				hr = src->SetName(srcname.GetBuffer());
-				if (FAILED(hr)) return -1;
-				ret = 0;
-			}
-
-		} else
-		if (conf->name == _T("imonogramaudioproc")) {
-
-			CComPtr<Monogram::IMonogramAudioProc>	proc;
-			hr = filter->QueryInterface(Monogram::IID_IMonogramAudioProc, (void**)&proc);
-			if (SUCCEEDED(hr)) {
-				int samplerate = conf->GetValue(_T("samplerate"), 44100);
-				int channels   = conf->GetValue(_T("channels"), 1);
-
-				proc->SetResampleEnabled(TRUE);
-				proc->SetResampleFreq(samplerate);
-
-				proc->SetMixingEnabled(TRUE);
-				int mode;
-				switch (channels) {
-				case 0:		mode = 1; break;
-				case 1:		mode = 1; break;
-				case 2:		mode = 2; break;
-				case 3:		mode = 3; break;
-				case 4:		mode = 4; break;
-				case 5:		mode = 4; break;
-				case 6:		mode = 5; break;
-				default:	mode = 2; break;
-				}
-				proc->SetMixingMode(mode);
-
-				ret = 0;
-			}
-		}
-
 		return ret;
 	}
 

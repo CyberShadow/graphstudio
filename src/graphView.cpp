@@ -495,6 +495,7 @@ int CGraphView::TryOpenFile(CString fn)
 	short_fn.Delete(0, pos);
 	doc->SetTitle(short_fn);
 
+	UpdateGraphState();
 	graph.RefreshFilters();
 	graph.SmartPlacement();
 	Invalidate();

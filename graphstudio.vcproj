@@ -246,6 +246,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\graph_config_xml.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\graphDoc.cpp"
 				>
 			</File>

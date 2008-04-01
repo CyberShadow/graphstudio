@@ -234,6 +234,7 @@ namespace GraphStudio
 		int LoadXML_Config(XML::XMLNode *node);
 		int LoadXML_Interfaces(XML::XMLNode *node, IBaseFilter *filter);
 		int LoadXML_ConfigInterface(XML::XMLNode *conf, IBaseFilter *filter);
+		int LoadXML_Command(XML::XMLNode *node);
 
 		// adding filters
 		HRESULT AddFilter(IBaseFilter *filter, CString proposed_name);

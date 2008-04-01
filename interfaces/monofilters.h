@@ -119,6 +119,10 @@ namespace Monogram
 	static const GUID IID_IMonogramPump = 
 	{ 0x69317abc, 0x93ef, 0x4304, { 0x99, 0x7a, 0x54, 0x14, 0x72, 0x72, 0x2e, 0x79 } };
 
+	// {DCAE2617-0091-4ce0-9C1E-ECEF0942D669}
+	static const GUID IID_IMonogramQueue = 
+	{ 0xdcae2617, 0x91, 0x4ce0, { 0x9c, 0x1e, 0xec, 0xef, 0x9, 0x42, 0xd6, 0x69 } };
+
 	// {067EFD5B-EFE2-42b3-B466-864F5027DBDA}
 	static const GUID CLSID_MonogramQueue = 
 	{ 0x67efd5b, 0xefe2, 0x42b3, { 0xb4, 0x66, 0x86, 0x4f, 0x50, 0x27, 0xdb, 0xda } };
@@ -179,17 +183,30 @@ namespace Monogram
 	static const GUID CLSID_MonogramNetworkSinkPropertyPage = 
 	{ 0x21bd9bdb, 0x6b69, 0x4049, { 0xa7, 0x6f, 0xec, 0x2, 0x34, 0xc4, 0x1f, 0x42 } };
 
-	// {672AF05E-D347-44b8-99E2-32FDEEE8291F}
-	static const GUID CLSID_MonogramRtpSink = 
-	{ 0x672af05e, 0xd347, 0x44b8, { 0x99, 0xe2, 0x32, 0xfd, 0xee, 0xe8, 0x29, 0x1f } };
+	// {EC8791C5-705F-45a3-B696-86330473E0E6}
+	static const GUID CLSID_MonogramRTPSink = 
+	{ 0xec8791c5, 0x705f, 0x45a3, { 0xb6, 0x96, 0x86, 0x33, 0x4, 0x73, 0xe0, 0xe6 } };
 
-	// {D8868988-DA30-46e8-8CF8-63AA6EB184B5}
-	static const GUID CLSID_MonogramRtpSinkPropertyPage = 
-	{ 0xd8868988, 0xda30, 0x46e8, { 0x8c, 0xf8, 0x63, 0xaa, 0x6e, 0xb1, 0x84, 0xb5 } };
+	// {99277A7D-8B13-4299-B736-E14055831B32}
+	static const GUID CLSID_MonogramRTPPropertyPage = 
+	{ 0x99277a7d, 0x8b13, 0x4299, { 0xb7, 0x36, 0xe1, 0x40, 0x55, 0x83, 0x1b, 0x32 } };
 
-	// {5667C198-A932-41fc-9424-258974E25149}
-	static const GUID IID_IMonogramRtpSink = 
-	{ 0x5667c198, 0xa932, 0x41fc, { 0x94, 0x24, 0x25, 0x89, 0x74, 0xe2, 0x51, 0x49 } };
+	// {99277A7D-8B13-4299-B736-E14055831B32}
+	static const GUID IID_IMonogramRTPSink = 
+	{ 0x99277a7d, 0x8b13, 0x4299, { 0xb7, 0x36, 0xe1, 0x40, 0x55, 0x83, 0x1b, 0x32 } };
+
+	// {24146FB0-F2B2-43f6-9F10-0D795E30D059}
+	static const GUID CLSID_MonogramMetaSource = 
+	{ 0x24146fb0, 0xf2b2, 0x43f6, { 0x9f, 0x10, 0xd, 0x79, 0x5e, 0x30, 0xd0, 0x59 } };
+
+	// {F18FBC02-7F0D-4800-8803-5E4FC18AEC01}
+	static const GUID CLSID_MonogramMetaSourcePage = 
+	{ 0xf18fbc02, 0x7f0d, 0x4800, { 0x88, 0x3, 0x5e, 0x4f, 0xc1, 0x8a, 0xec, 0x1 } };
+
+	// {6C6A69A3-FCAC-40b8-B6F4-1ED74619B587}
+	static const GUID IID_IMonogramMetaSource = 
+	{ 0x6c6a69a3, 0xfcac, 0x40b8, { 0xb6, 0xf4, 0x1e, 0xd7, 0x46, 0x19, 0xb5, 0x87 } };
+
 
 	//-------------------------------------------------------------------------
 	//
@@ -349,16 +366,176 @@ namespace Monogram
 	};
 
 
+
+	enum {
+		AVC_PROFILE_BASELINE		= 0,
+		AVC_PROFILE_MAIN			= 1,
+		AVC_PROFILE_HIGH			= 2,
+		AVC_PROFILE_HIGH_10			= 3,
+		AVC_PROFILE_HIGH_422		= 4,
+		AVC_PROFILE_HIGH_444		= 5
+	};
+
+	enum {
+		AVC_LEVEL_1					= 0,
+		AVC_LEVEL_1B				= 1,
+		AVC_LEVEL_1_1				= 2,
+		AVC_LEVEL_1_2				= 3,
+		AVC_LEVEL_1_3				= 4,
+		AVC_LEVEL_2					= 5,
+		AVC_LEVEL_2_1				= 6,
+		AVC_LEVEL_2_2				= 7,
+		AVC_LEVEL_3					= 8,
+		AVC_LEVEL_3_1				= 9,
+		AVC_LEVEL_3_2				= 10,
+		AVC_LEVEL_4					= 11,
+		AVC_LEVEL_4_1				= 12,
+		AVC_LEVEL_4_2				= 13,
+		AVC_LEVEL_5					= 14,
+		AVC_LEVEL_5_1				= 15
+	};
+
+	enum {
+		AVC_RC_MODE_VBR				= 0,
+		AVC_RC_MODE_CBR				= 1,
+		AVC_RC_MODE_CQ				= 2,
+		AVC_RC_MODE_REMOTE			= 3
+	};
+
+	enum {
+		AVC_I16x16					= 1,
+		AVC_I4x4					= 2,
+		AVC_P16x16					= 4,
+		AVC_P8x16					= 8,
+		AVC_P8x8					= 16,
+		AVC_P4x8					= 32,
+		AVC_P4x4					= 64
+	};
+
+	enum {
+		AVC_SUBPEL_DISABLED			= 0,
+		AVC_SUBPEL_1_STEP			= 1,
+		AVC_SUBPEL_2_STEP			= 2
+	};
+
+	enum {
+		AVC_DIRECTMV_SPATIAL		= 0,
+		AVC_DIRECTMV_TEMPORAL		= 1,
+		AVC_DIRECTMV_AUTO			= 2
+	};
+
+	enum {
+		AVC_SEARCH_DIAMOND			= 0,
+		AVC_SEARCH_THREE_STEP		= 1,
+		AVC_SEARCH_FULL				= 2
+	};
+
+	enum {
+		AVC_COMPARE_SAD				= 0,
+		AVC_COMPARE_SATD			= 1,
+		AVC_COMPARE_SSD				= 2
+	};
+	struct AVCConfig 
+	{
+		int			profile;
+		int			level;
+
+		// rate control
+		int			rc_mode;
+		int			min_qp;
+		int			max_qp;
+		BSTR		remote_host;			// ak je rc_mode AVC_RC_MODE_REMOTE
+		int			bitrate;				// ak je VBR / CBR
+		int			quality;				// ak je CQ -> toto je QP
+
+		// prediction
+		int			mode_flags;				// I16x16, I4x4, P16x16.....
+		int			hpel, qpel;				// half a quarter pixel precision
+		int			max_search_range;		// maximalna velkost MV vo full pixloch
+		int			direct_mv_prediction;
+		int			search_method;
+		int			compare_method;
+
+		// common
+		int			reference_frames;		// pocet referencnych framov
+		int			b_frames;				// pocet b framov
+		int			max_keyframe_interval;	
+		int			cabac;
+		int			annexb;
+		int			scene_change;
+		int			access_unit_delimiters;
+		int			mbaff;
+		int			two_pass_frame;
+		int			try_realtime;
+		int			interlaced;
+		int			deblocking;
+		int			transform_8x8;
+		int			decimate;
+		int			weighted_prediction;
+
+	};
+
+	struct AVCInfo
+	{
+		DWORD		input;
+		int			width;
+		int			height;
+		double		qp;
+		double		bitrate;
+		__int64		frames;
+	};
+
+	struct RTP_SINK_CONFIG
+	{
+		int		cfg_version;				// inkrementovat pri kazdej zmene
+		LPWSTR	session_name;				// meno sessionu
+		LPWSTR	session_info;				// info k sessionu
+		LPWSTR	ip_address;					// vystupna IP adresa
+		int		base_port;					// base port
+		LPWSTR	source_ip;					// IPcka, z ktorej sa vysiela
+		bool	sap;						// vysielat SAP ?
+		bool	blocking;					// blokovaci mod
+	};
+
+	struct RTP_STREAM
+	{
+		TCHAR	name[64];
+		TCHAR	format[512];
+		int		port;
+	};
+
+	struct RTP_STREAMS
+	{
+		int			count;
+		RTP_STREAM	streams[64];
+	};
+
+	struct META_CONFIG 
+	{
+		LPWSTR		host;
+		int			port;
+	};
+
+
 	//-------------------------------------------------------------------------
 	//
 	//	Interfaces
 	//
 	//-------------------------------------------------------------------------
 
+	DECLARE_INTERFACE_(IMonogramQueue, IUnknown)
+	{
+		STDMETHOD(SetBufferSize)(int max_samples);
+		STDMETHOD(GetBufferSize)(int *max_samples);
+		STDMETHOD(GetFullness)(float *fullness_perc);
+	};
+
 	DECLARE_INTERFACE_(IMonogramMultigraphSink, IUnknown)
 	{
 		STDMETHOD(GetName)(BSTR *name);
 		STDMETHOD(SetName)(LPWSTR name);
+		STDMETHOD(GetBlocking)(BOOL *blocking);
+		STDMETHOD(SetBlocking)(BOOL blocking);
 	};
 
 	DECLARE_INTERFACE_(IMonogramMultigraphSource, IUnknown)
@@ -377,9 +554,16 @@ namespace Monogram
 		STDMETHOD(GetConfig)(AACConfig *config) PURE;
 		STDMETHOD(SetConfig)(AACConfig *config) PURE;
 		STDMETHOD(GetInfo)(AACInfo *info) PURE;
-		STDMETHOD(SetPropertyPage)(IUnknown *pUnk) PURE;
 	};
 
+	DECLARE_INTERFACE_(IMonogramAVCEncoder, IUnknown)
+	{
+		STDMETHOD(GetSettings)(AVCConfig *config);
+		STDMETHOD(SetSettings)(AVCConfig *config);
+		STDMETHOD(GetInfo)(AVCInfo *info);
+		STDMETHOD(SetProcessor)(int i);
+	};
+	
 	DECLARE_INTERFACE_(IMonogramLiveMux, IUnknown)
 	{
 		STDMETHOD(SetBlockingMode)(BOOL blocking) PURE;
@@ -444,13 +628,20 @@ namespace Monogram
 		STDMETHOD(SetBlocking)(BOOL blocking) PURE;
 	};
 
-	DECLARE_INTERFACE_(IMonogramRtpSink, IUnknown)
+	DECLARE_INTERFACE_(IMonogramRTPSink, IUnknown)
 	{
-		STDMETHOD(SetHost)(LPWSTR host) PURE;
-		STDMETHOD(SetOwner)(LPWSTR owner) PURE;
-		STDMETHOD(SetName)(LPWSTR name) PURE;
-		STDMETHOD(IsStreaming)(BOOL& connected) PURE;
-		STDMETHOD(SetBasePort)(LPWSTR port) PURE;
+		STDMETHOD(SetConfig)(RTP_SINK_CONFIG *config);
+		STDMETHOD(GetConfig)(RTP_SINK_CONFIG *config);
+		STDMETHOD(GetSDP)(BSTR *sdp_text);
+		STDMETHOD(GetStreams)(RTP_STREAMS *streams);
 	};
+
+	DECLARE_INTERFACE_(IMonogramMetaSource, IUnknown)
+	{
+		STDMETHOD(SetConfig)(META_CONFIG *cfg);
+		STDMETHOD(GetConfig)(META_CONFIG *cfg);
+		STDMETHOD(GetXML)(void **xml_root, int *version);			// XMLNode z MonoBase
+	};
+
 
 };

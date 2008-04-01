@@ -69,7 +69,7 @@ BOOL CFiltersForm::DoCreateDialog()
 	// create buttons
 	CRect	rc;
 	rc.SetRect(0, 0, 125, 23);
-	combo_categories.Create(WS_CHILD | WS_VISIBLE | CBS_DROPDOWNLIST, rc, &title, IDC_COMBO_CATEGORIES);
+	combo_categories.Create(WS_CHILD | WS_VISIBLE | CBS_SORT | CBS_DROPDOWNLIST, rc, &title, IDC_COMBO_CATEGORIES);
 	combo_merit.Create(WS_CHILD | WS_VISIBLE | CBS_DROPDOWNLIST, rc, &title, IDC_COMBO_MERIT);
 	btn_registry.Create(_T("Registry Check"), WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, rc, &title, IDC_BUTTON_REGISTRY);
 
@@ -341,6 +341,7 @@ void CFiltersForm::OnFilterItemClick(NMHDR *pNMHDR, LRESULT *pResult)
 				case DSUtil::FilterTemplate::FT_ACM_ICM:	type = _T("ACM/ICM"); break;
 				case DSUtil::FilterTemplate::FT_PNP:		type = _T("Plug && Play"); break;
 				}	
+				group->AddItem(new GraphStudio::PropItem(_T("DisplayName"), filter->moniker_name));
 				group->AddItem(new GraphStudio::PropItem(_T("Type"), type));
 				GraphStudio::GetFilterDetails(filter->clsid, group);
 
