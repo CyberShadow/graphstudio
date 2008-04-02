@@ -194,10 +194,11 @@ namespace GraphStudio
 
 		// graph itself
 		CComPtr<IGraphBuilder>			gb;
+		CComPtr<ICaptureGraphBuilder2>	cgb;
 		CComPtr<IMediaControl>			mc;
 		CComPtr<IMediaEventEx>			me;
 		CComPtr<IMediaSeeking>			ms;
-		CComPtr<IVideoFrameStep>		fs;		
+		CComPtr<IVideoFrameStep>		fs;	
 
 		CArray<Filter*>					filters;
 		CDC								*dc;
@@ -225,6 +226,7 @@ namespace GraphStudio
 		int LoadGRF(CString fn);
 		int SaveGRF(CString fn);
 		int ConnectToRemote(IFilterGraph *remote_graph);
+		int AttachCaptureGraphBuilder();
 
 		// XML-based graph construction
 		int LoadXML(CString fn);
@@ -235,6 +237,10 @@ namespace GraphStudio
 		int LoadXML_Interfaces(XML::XMLNode *node, IBaseFilter *filter);
 		int LoadXML_ConfigInterface(XML::XMLNode *conf, IBaseFilter *filter);
 		int LoadXML_Command(XML::XMLNode *node);
+		int LoadXML_IAMGraphStreams(XML::XMLNode *node);
+
+		// IAMBufferNegotiation 
+		int LoadXML_IAMBufferNegotiation(XML::XMLNode *conf, IBaseFilter *filter);
 
 		// adding filters
 		HRESULT AddFilter(IBaseFilter *filter, CString proposed_name);

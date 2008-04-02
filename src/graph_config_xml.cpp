@@ -68,7 +68,7 @@ namespace GraphStudio
 			}
 
 		PRESET("imonogramgraphsink")
-			//	<imonogramgraphsink name="video" blocking="1"/>
+			// <imonogramgraphsink name="video" blocking="1"/>
 
 			CComPtr<Monogram::IMonogramMultigraphSink>	sink;
 			hr = filter->QueryInterface(Monogram::IID_IMonogramMultigraphSink, (void**)&sink);
@@ -337,6 +337,22 @@ namespace GraphStudio
 				metasrc->SetConfig(&config);
 				ret = 0;
 			}
+
+		PRESET("imonogramhttpsource")
+			// <imonogramhttpsource url="http://n04.joj.sk/stream/id4.live"/>
+
+			CComPtr<Monogram::IMonogramHttpSource>	httpsrc;
+			hr = filter->QueryInterface(Monogram::IID_IMonogramHttpSource, (void**)&httpsrc);
+			if (SUCCEEDED(hr)) {
+
+				CString		url = conf->GetValue(_T("url"));
+				hr = httpsrc->SetURL(url.GetBuffer());
+				ret = (SUCCEEDED(hr) ? 0 : -1);
+			}
+
+		PRESET("iambuffernegotiation")
+			// <iambuffernegotiation pin="Capture" latency="40"/>
+			ret = LoadXML_IAMBufferNegotiation(conf, filter);
 
 
 		PRESET_END()

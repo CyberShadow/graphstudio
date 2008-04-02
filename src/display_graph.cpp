@@ -42,6 +42,7 @@ namespace GraphStudio
 		me = NULL;
 		ms = NULL;
 		gb = NULL;
+		cgb = NULL;
 		dc = NULL;
 		fs = NULL;
 		is_remote = false;
@@ -58,6 +59,7 @@ namespace GraphStudio
 		me = NULL;
 		fs = NULL;
 		if (ms) ms = NULL;
+		cgb = NULL;
 		gb = NULL;
 
 		ZeroTags();
@@ -79,6 +81,7 @@ namespace GraphStudio
 			me = NULL;
 		}
 		gb = NULL;
+		cgb = NULL;
 		is_remote = false;
 		is_frame_stepping = false;
 
@@ -94,6 +97,17 @@ namespace GraphStudio
 
 		// now we're a remote graph
 		is_remote = true;
+		return 0;
+	}
+
+	int DisplayGraph::AttachCaptureGraphBuilder()
+	{
+		if (cgb) return 1;
+
+		HRESULT		hr = cgb.CoCreateInstance(CLSID_CaptureGraphBuilder2, NULL, CLSCTX_INPROC_SERVER);
+		if (FAILED(hr)) return -1;
+
+		cgb->SetFiltergraph(gb);
 		return 0;
 	}
 
@@ -121,6 +135,7 @@ namespace GraphStudio
 			RemoveUnusedFilters();
 			bins.RemoveAll();
 			gb = NULL;
+			cgb = NULL;
 		} else {
 			mc = NULL;
 			me = NULL;
@@ -129,6 +144,7 @@ namespace GraphStudio
 			RemoveUnusedFilters();
 			bins.RemoveAll();
 			gb = NULL;
+			cgb = NULL;
 		}
 
 		is_remote = false;
@@ -148,9 +164,11 @@ namespace GraphStudio
 			gb->QueryInterface(IID_IMediaSeeking, (void**)&ms);
 			gb->QueryInterface(IID_IVideoFrameStep, (void**)&fs);
 
+			AttachCaptureGraphBuilder();
 		} while (0);
 
 		if (FAILED(hr)) {
+			cgb = NULL;
 			gb = NULL;
 			mc = NULL;
 			me = NULL;
@@ -409,6 +427,7 @@ namespace GraphStudio
 			if (node->name == _T("render")) ret = LoadXML_Render(node); else
 			if (node->name == _T("connect")) ret = LoadXML_Connect(node); else
 			if (node->name == _T("config")) ret = LoadXML_Config(node); else
+			if (node->name == _T("iamgraphstreams")) ret = LoadXML_IAMGraphStreams(node); else
 			if (node->name == _T("command")) ret = LoadXML_Command(node); else
 			{
 				//ret = -1;
@@ -421,6 +440,97 @@ namespace GraphStudio
 		}
 
 		return 0;
+	}
+
+	int DisplayGraph::LoadXML_IAMBufferNegotiation(XML::XMLNode *conf, IBaseFilter *filter)
+	{
+        // <iambuffernegotiation pin="Capture" latency="40"/>
+		Filter		gf(this);
+
+		gf.LoadFromFilter(filter);
+
+		CString		pin_name = conf->GetValue(_T("pin"));
+		Pin			*pin = gf.FindPin(pin_name);
+		if (!pin) return -1;
+
+		// let's query for IAMBufferNegotiation
+		DSUtil::MediaTypes				mtlist;
+		CComPtr<IAMBufferNegotiation>	buf_neg;
+		HRESULT							hr;
+
+		hr = pin->pin->QueryInterface(IID_IAMBufferNegotiation, (void**)&buf_neg);
+		if (FAILED(hr)) return -1;
+
+		hr = DSUtil::EnumMediaTypes(pin->pin, mtlist);
+		if (FAILED(hr) || mtlist.GetCount() <= 0) return -1;
+
+		// if it's an audio pin, we need to calculate the buffer size
+		CMediaType		mt = mtlist[0];
+		if (mt.majortype == MEDIATYPE_Audio && 
+			mt.subtype == MEDIASUBTYPE_PCM &&
+			mt.formattype == FORMAT_WaveFormatEx
+			) {
+			int		latency_ms = conf->GetValue(_T("latency"), -1);
+			if (latency_ms > 0) {
+			
+				WAVEFORMATEX	*wfx = (WAVEFORMATEX*)mt.pbFormat;
+
+				// just like MSDN said: -1 = we don't care
+				ALLOCATOR_PROPERTIES		alloc;
+				alloc.cbAlign	= -1;
+				alloc.cbBuffer	= (wfx->nAvgBytesPerSec * latency_ms) / 1000;
+				alloc.cbPrefix	= -1;
+				alloc.cBuffers	= 20;
+
+				hr = buf_neg->SuggestAllocatorProperties(&alloc);
+				if (FAILED(hr)) {
+					MessageBox(0, _T("IAMBufferNegotiation::SuggestAllocatorProperties failed"), _T(""), 0);
+				}
+			}
+		} else {
+			// we'll see
+		}
+
+		return 0;
+	}
+
+	int DisplayGraph::LoadXML_IAMGraphStreams(XML::XMLNode *node)
+	{
+		if (!gb) return -1;
+
+		// <iamgraphstreams sync="1"/>
+		// <iamgraphstreams max_latency="800000"/>
+
+		int		sync    = node->GetValue(_T("sync"), -1);
+		int		latency = node->GetValue(_T("max_latency"), -1);
+
+		CComPtr<IAMGraphStreams>	gs;
+		HRESULT						hr;
+
+		hr = gb->QueryInterface(IID_IAMGraphStreams, (void**)&gs);
+		if (SUCCEEDED(hr)) {
+
+			// enable sync
+			if (sync >= 0) {
+				hr = gs->SyncUsingStreamOffset((sync == 1 ? TRUE : FALSE));
+				if (FAILED(hr)) {
+					MessageBox(0, _T("Failed to set IAMGraphStreams::SyncUsingStreamOffset"), _T("Error"), MB_ICONERROR);
+				}
+			}
+
+			// max latency
+			if (sync == 1 && latency >= 0) {
+				REFERENCE_TIME		rtMaxLatency = latency;
+				hr = gs->SetMaxGraphLatency(rtMaxLatency);
+				if (FAILED(hr)) {
+					MessageBox(0, _T("Failed to set IAMGraphStreams::SetMaxGraphLatency"), _T("Error"), MB_ICONERROR);
+				}
+			}
+
+			return 0;
+		}
+
+		return -1;
 	}
 
 	int DisplayGraph::LoadXML_Command(XML::XMLNode *node)

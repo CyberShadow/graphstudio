@@ -349,6 +349,31 @@ namespace GraphStudio
 			group->AddItem(new PropItem(_T("IsConnected"), (bool)TRUE));
 
 			//-----------------------------------------------------------------
+			// Allocator info
+			//-----------------------------------------------------------------
+			CComPtr<IMemInputPin>		input_pin;
+			hr = pin->QueryInterface(IID_IMemInputPin, (void**)&input_pin);
+			if (FAILED(hr)) {
+				hr = con_pin->QueryInterface(IID_IMemInputPin, (void**)&input_pin);
+			}
+
+			if (SUCCEEDED(hr)) {
+
+				CComPtr<IMemAllocator>	allocator;
+				hr = input_pin->GetAllocator(&allocator);
+				if (SUCCEEDED(hr)) {
+
+					// retrieve current allocator properties
+					ALLOCATOR_PROPERTIES	props;
+					hr = allocator->GetProperties(&props);
+					if (SUCCEEDED(hr)) {
+						PropItem		*apinfo = group->AddItem(new PropItem(_T("ALLOCATOR_PROPERTIES")));
+						GetAllocatorDetails(&props, apinfo);
+					}
+				}
+			}
+
+			//-----------------------------------------------------------------
 			// current media type
 			//-----------------------------------------------------------------
 			AM_MEDIA_TYPE	mt;
@@ -362,9 +387,19 @@ namespace GraphStudio
 				FreeMediaType(mt);
 			}
 
+
 		}
 		con_pin = NULL;
 
+		return 0;
+	}
+
+	int GetAllocatorDetails(ALLOCATOR_PROPERTIES *prop, PropItem *apinfo)
+	{
+		apinfo->AddItem(new PropItem(_T("cBuffers"), prop->cBuffers));
+		apinfo->AddItem(new PropItem(_T("cbBuffer"), prop->cbBuffer));
+		apinfo->AddItem(new PropItem(_T("cbAlign"), prop->cbAlign));
+		apinfo->AddItem(new PropItem(_T("cbPrefix"), prop->cbPrefix));
 		return 0;
 	}
 

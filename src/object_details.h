@@ -29,6 +29,7 @@ namespace GraphStudio
 	int GetPinTemplateDetails(DSUtil::PinTemplate *pin, PropItem *info);
 	int GetMediaTypeDetails(CMediaType *pmt, PropItem *mtinfo);
 
+	int GetAllocatorDetails(ALLOCATOR_PROPERTIES *prop, PropItem *apinfo);
 	int GetWaveFormatExDetails(WAVEFORMATEX *wfx, PropItem *wfxinfo);
 	int GetVideoInfoDetails(VIDEOINFOHEADER *vih, PropItem *vihinfo);
 	int GetVideoInfo2Details(VIDEOINFOHEADER2 *vih, PropItem *vihinfo);
