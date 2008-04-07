@@ -260,6 +260,16 @@ void CSeekingBar::UpdateGraphPosition()
 	cur = cur + _T(" / ") + dur;
 	label_time.SetText(cur);
 
+	// forward the time
+	if (view) {
+		view->OnUpdateTimeLabel(cur);
+		if ((int)dur_ms != 0) {
+			view->OnUpdateSeekbar(pos_ms / dur_ms);
+		} else {
+			view->OnUpdateSeekbar(0);
+		}
+	}
+
 	if ((int)dur_ms != 0) {
 		seekbar.SetChannelPos(pos_ms / dur_ms);
 	} else {

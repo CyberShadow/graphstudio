@@ -135,6 +135,8 @@ BEGIN
         MENUITEM "Seeking Bar",                 ID_VIEW_SEEKINGBAR
         MENUITEM "&Status Bar",                 ID_VIEW_STATUS_BAR
         MENUITEM SEPARATOR
+        MENUITEM "Progress view...\tF5",        ID_VIEW_PROGRESSVIEW
+        MENUITEM SEPARATOR
         MENUITEM "Graph Events\tCtrl+E",        ID_VIEW_GRAPHEVENTS
         MENUITEM "Text Information\tCtrl+T",    ID_VIEW_TEXTINFORMATION
         MENUITEM SEPARATOR
@@ -203,6 +205,7 @@ END
 IDR_MAINFRAME ACCELERATORS 
 BEGIN
     VK_SPACE,       ID_BUTTON_PLAYPAUSE,    VIRTKEY, NOINVERT
+    VK_F5,          ID_BUTTON_REFRESH,      VIRTKEY, CONTROL, NOINVERT
     VK_RIGHT,       ID_BUTTON_STEP,         VIRTKEY, NOINVERT
     VK_ESCAPE,      ID_BUTTON_STOP,         VIRTKEY, NOINVERT
     "C",            ID_EDIT_COPY,           VIRTKEY, CONTROL, NOINVERT
@@ -235,7 +238,7 @@ BEGIN
     "+",            ID_VIEW_INCREASEZOOMLEVEL, ASCII, NOINVERT
     "=",            ID_VIEW_INCREASEZOOMLEVEL, ASCII, NOINVERT
     "T",            ID_VIEW_TEXTINFORMATION, VIRTKEY, CONTROL, NOINVERT
-    VK_F5,          ID_BUTTON_REFRESH,      VIRTKEY, CONTROL, NOINVERT
+    VK_F5,          ID_VIEW_PROGRESSVIEW,   VIRTKEY, NOINVERT
 END
 
 
@@ -385,6 +388,20 @@ BEGIN
     CONTROL         "",IDC_TITLEBAR,"Static",SS_OWNERDRAW,0,0,336,24
 END
 
+IDD_DIALOG_PROGRESS DIALOGEX 0, 0, 258, 82
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Progress"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    CONTROL         "",IDC_TITLEBAR,"Static",SS_OWNERDRAW,0,0,258,20
+    LTEXT           "Capture graph",IDC_STATIC_CAPTION,6,30,156,8
+    CONTROL         "",IDC_PROGRESS_POSITION,"msctls_progress32",0x0,6,42,246,12
+    CONTROL         "Switch to graph view when done",IDC_CHECK_AUTOSWITCH,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,6,62,120,10
+    PUSHBUTTON      "Close",IDC_BUTTON_CLOSE,204,60,50,14
+    RTEXT           "00:00:00 / 00:00:00",IDC_STATIC_TIME,168,30,84,8
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -516,6 +533,14 @@ BEGIN
     BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 329
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 75
+    END
+
+    IDD_DIALOG_PROGRESS, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 251
         TOPMARGIN, 7
         BOTTOMMARGIN, 75
     END

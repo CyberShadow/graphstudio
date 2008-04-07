@@ -98,6 +98,7 @@ using namespace std;
 #include "TextInfoForm.h"
 #include "FileSrcForm.h"
 #include "FileSinkForm.h"
+#include "ProgressForm.h"
 #include "RenderUrlForm.h"
 #include "PropertyForm.h"
 #include "NewGroupForm.h"

@@ -216,6 +216,9 @@ namespace GraphStudio
 		bool							is_frame_stepping;
 		bool							dirty;
 
+		// helpers
+		CString							graph_name;
+
 	public:
 		DisplayGraph();
 		virtual ~DisplayGraph();

@@ -282,6 +282,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\ProgressForm.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\prop_tree.cpp"
 				>
 			</File>
@@ -401,6 +405,10 @@
 			</File>
 			<File
 				RelativePath=".\src\object_details.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\ProgressForm.h"
 				>
 			</File>
 			<File

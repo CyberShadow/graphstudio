@@ -31,6 +31,7 @@ public:
 	CEventsForm					*form_events;
 	CTextInfoForm				*form_textinfo;
 	CFavoritesForm				*form_favorites;
+	CProgressForm				*form_progress;
 
 	// active property pages
 	CArray<CPropertyForm*>		property_pages;
@@ -109,6 +110,8 @@ public:
 	void OnGraphRunning();
 	void OnGraphStopped();
 	void OnGraphPaused();
+	void OnUpdateTimeLabel(CString text);
+	void OnUpdateSeekbar(double pos);
 
 	void OnUpdateConnectRemote(CCmdUI *ui);
 	void OnUpdateDisconnectRemote(CCmdUI *ui);
@@ -168,6 +171,7 @@ public:
 	void OnOptionsDirectConnectClick();
 	void OnUpdateOptionsDirectConnect(CCmdUI *pCmdUI);
 
+	afx_msg void OnViewProgressview();
 };
 
 #ifndef _DEBUG  // debug version in graphView.cpp

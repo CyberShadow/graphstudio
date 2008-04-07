@@ -1,4 +1,2 @@
-
 - some sort of encoding wizards
-- clickable details page with editboxes
 - better filter placement algorithm

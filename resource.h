@@ -24,6 +24,7 @@
 #define IDR_MENU_FAVORITES              145
 #define IDD_DIALOG_NEWGROUP             146
 #define IDD_DIALOG_RENDERURL            147
+#define IDD_DIALOG_PROGRESS             148
 #define IDC_COMBO_CATEGORIES            1001
 #define IDC_LIST_FILTERS                1002
 #define IDC_COMBO_MERIT                 1003
@@ -49,6 +50,7 @@
 #define IDC_BUTTON1                     1018
 #define IDC_BUTTON_BROWSE               1018
 #define IDC_BUTTON_APPLY                1018
+#define IDC_BUTTON_CLOSE                1018
 #define IDC_EDIT_DETAILS                1019
 #define IDC_COMBO_REPORTTYPE            1020
 #define IDC_RADIO_FILE                  1021
@@ -66,6 +68,9 @@
 #define IDC_EDIT_NAME                   1031
 #define IDC_TREE1                       1033
 #define IDC_TREE                        1033
+#define IDC_PROGRESS_POSITION           1034
+#define IDC_CHECK_AUTOSWITCH            1035
+#define IDC_STATIC_CAPTION              1037
 #define ID_LIST_MRU_CLEAR               4999
 #define ID_LIST_MRU_FILE0               5000
 #define ID_AUDIO_RENDERER0              6000
@@ -127,14 +132,15 @@
 #define ID_BUTTON_PLAYPAUSE             32841
 #define ID_BUTTON_REFRESH               32843
 #define ID_GRAPH_REFRESHGRAPH           32844
+#define ID_VIEW_PROGRESSVIEW            32845
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        148
-#define _APS_NEXT_COMMAND_VALUE         32845
-#define _APS_NEXT_CONTROL_VALUE         1034
+#define _APS_NEXT_RESOURCE_VALUE        149
+#define _APS_NEXT_COMMAND_VALUE         32846
+#define _APS_NEXT_CONTROL_VALUE         1038
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

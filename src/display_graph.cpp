@@ -38,6 +38,8 @@ namespace GraphStudio
 	{
 		callback = NULL;
 
+		graph_name = _T("Graph");
+
 		mc = NULL;
 		me = NULL;
 		ms = NULL;
@@ -149,6 +151,8 @@ namespace GraphStudio
 
 		is_remote = false;
 		is_frame_stepping = false;
+
+		graph_name = _T("Graph");
 
 		// create new instance of filter graph
 		HRESULT hr;
@@ -413,6 +417,8 @@ namespace GraphStudio
 		if (ret < 0) {
 			return -1;
 		}
+
+		graph_name = fn;
 
 		// load graph
 		XML::XMLNode			*root = xml.root;
@@ -719,6 +725,8 @@ namespace GraphStudio
 		IStorage *pStorage = 0;
 		if (StgIsStorageFile(fn) != S_OK) return -1;
 
+		graph_name = fn;
+
 		HRESULT hr = StgOpenStorage(fn, 0, STGM_TRANSACTED | STGM_READ | STGM_SHARE_DENY_WRITE, 0, 0, &pStorage);
 		if (FAILED(hr)) return hr;
 
@@ -742,6 +750,8 @@ namespace GraphStudio
 		const WCHAR wszStreamName[] = L"ActiveMovieGraph"; 
 		HRESULT hr;
 		    
+		graph_name = fn;
+
 		IStorage *pStorage = NULL;
 		hr = StgCreateDocfile(fn, STGM_CREATE | STGM_TRANSACTED | STGM_READWRITE | STGM_SHARE_EXCLUSIVE, 0, &pStorage);
 		if (FAILED(hr)) return hr;
@@ -773,6 +783,8 @@ namespace GraphStudio
 
 			hr = gb->RenderFile(fn, NULL);
 			if (FAILED(hr)) break;
+
+			graph_name = fn;
 
 		} while (0);
 

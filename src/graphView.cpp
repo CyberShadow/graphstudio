@@ -93,6 +93,7 @@ BEGIN_MESSAGE_MAP(CGraphView, GraphStudio::DisplayView)
 	ON_COMMAND(ID_FILE_OPENFROMXML, &CGraphView::OnFileOpenfromxml)
 	ON_COMMAND(ID_OPTIONS_DISPLAYASFILENAME, &CGraphView::OnOptionsDisplayFileName)
 	ON_UPDATE_COMMAND_UI(ID_OPTIONS_DISPLAYASFILENAME, &CGraphView::OnUpdateOptionsDisplayFileName)
+	ON_COMMAND(ID_VIEW_PROGRESSVIEW, &CGraphView::OnViewProgressview)
 END_MESSAGE_MAP()
 
 //-----------------------------------------------------------------------------
@@ -108,12 +109,14 @@ CGraphView::CGraphView()
 	form_events = NULL;
 	form_textinfo = NULL;
 	form_favorites = NULL;
+	form_progress = NULL;
 	filename = _T("");
 	can_save = false;
 }
 
 CGraphView::~CGraphView()
 {
+	if (form_progress) { form_progress->DestroyWindow(); delete form_progress; }
 	if (form_filters) { form_filters->DestroyWindow(); delete form_filters; }
 	if (form_events) { form_events->DestroyWindow(); delete form_events; }
 	if (form_textinfo) { form_textinfo->DestroyWindow(); delete form_textinfo; }
@@ -216,6 +219,10 @@ void CGraphView::OnInit()
 	form_textinfo->Create(IDD_DIALOG_TEXTVIEW);
 	form_textinfo->view = this;
 	form_textinfo->OnInitialize();
+
+	form_progress = new CProgressForm(NULL);
+	form_progress->view = this;
+	form_progress->Create(IDD_DIALOG_PROGRESS);
 
 	graph.wndEvents = *form_events;
 	graph.MakeNew();
@@ -745,6 +752,20 @@ void CGraphView::OnTimer(UINT_PTR nIDEvent)
 	}
 }
 
+void CGraphView::OnUpdateTimeLabel(CString text)
+{
+	if (form_progress) {
+		form_progress->UpdateTimeLabel(text);
+	}
+}
+
+void CGraphView::OnUpdateSeekbar(double pos)
+{
+	if (form_progress) {
+		form_progress->UpdateProgress(pos);
+	}
+}
+
 void CGraphView::OnUpdateRenderMediaFile(CCmdUI *ui)
 {
 	if (state_ready) {
@@ -799,6 +820,11 @@ void CGraphView::OnGraphStopped()
 	toolbar.EnableButton(ID_BUTTON_PLAY, TRUE);
 	toolbar.EnableButton(ID_BUTTON_PAUSE, TRUE);
 	toolbar.EnableButton(ID_BUTTON_STOP, FALSE);
+
+	// send the event to the progress form
+	if (form_progress) {
+		form_progress->OnGraphStopped();
+	}
 }
 
 void CGraphView::OnGraphPaused()
@@ -1298,5 +1324,9 @@ void CGraphView::OnUpdateOptionsDirectConnect(CCmdUI *pCmdUI)
 	pCmdUI->SetCheck(render_params.direct_connect);
 }
 
-
-
+void CGraphView::OnViewProgressview()
+{
+	form_progress->UpdateCaption(graph.graph_name);
+	form_progress->ShowWindow(SW_SHOW);
+	AfxGetMainWnd()->ShowWindow(SW_HIDE);
+}
