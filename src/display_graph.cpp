@@ -426,6 +426,9 @@ namespace GraphStudio
 		if (root->Find(_T("graph"), &it) < 0) return -1;
 
 		XML::XMLNode			*gn = *it;
+		CString		gn_name = gn->GetValue(_T("name"));
+		if (gn_name != _T("")) graph_name = gn_name;
+
 		for (it = gn->nodes.begin(); it != gn->nodes.end(); it++) {
 			XML::XMLNode	*node = *it;
 
