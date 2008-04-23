@@ -90,6 +90,7 @@ public:
 	void OnGraphScreenshot();
 	void OnConnectRemote();
 	void OnDisconnectRemote();
+	void OnDummyEvent(UINT nID) { };
 
 	// menu
 	void UpdateMRUMenu();
@@ -124,6 +125,7 @@ public:
 	int TryOpenXML(CString fn);
 
 	virtual BOOL OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT *pResult);
+	virtual LRESULT OnWmCommand(WPARAM wParam, LPARAM lParam);
 
 	// property pages
 	virtual void OnDisplayPropertyPage(IUnknown *object, IUnknown *filter, CString title);

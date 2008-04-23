@@ -41,7 +41,7 @@ static UINT indicators[] =
 
 CMainFrame::CMainFrame()
 {
-	// TODO: add member initialization code here
+	view = NULL;
 }
 
 CMainFrame::~CMainFrame()
@@ -119,6 +119,17 @@ BOOL CMainFrame::PreCreateWindow(CREATESTRUCT& cs)
 	cs.x = GetSystemMetrics(SM_CXSCREEN);
 
 	return TRUE;
+}
+
+BOOL CMainFrame::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT *pResult)
+{
+	if (message == WM_COMMAND) {
+		if (view) {
+			// tricky bypass
+			view->OnWmCommand(wParam, lParam);
+		}
+	}
+	return __super::OnWndMsg(message, wParam, lParam, pResult);
 }
 
 

@@ -30,6 +30,9 @@ public:  // control bar embedded members
 	CSeekingBar		m_wndSeekingBar;
 	CReBar			m_wndReBar;
 
+	// view
+	CGraphView		*view;
+
 	// Overrides
 public:
 	virtual ~CMainFrame();
@@ -41,6 +44,7 @@ public:
 	virtual void Dump(CDumpContext& dc) const;
 #endif
 
+	virtual BOOL OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT *pResult);
 };
 
 

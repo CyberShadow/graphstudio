@@ -49,10 +49,10 @@ BEGIN_MESSAGE_MAP(CGraphView, GraphStudio::DisplayView)
 	ON_COMMAND(ID_VIEW_GRAPHEVENTS, &CGraphView::OnViewGraphEvents)
 	ON_COMMAND(ID_LIST_MRU_CLEAR, &CGraphView::OnClearMRUClick)
 	ON_COMMAND(ID_GRAPH_MAKEGRAPHSCREENSHOT, &CGraphView::OnGraphScreenshot)
-	ON_COMMAND_RANGE(ID_LIST_MRU_FILE0, ID_LIST_MRU_FILE0+10, &CGraphView::OnMRUClick)
-	ON_COMMAND_RANGE(ID_AUDIO_RENDERER0, ID_AUDIO_RENDERER0+100, &CGraphView::OnAudioRendererClick)
-	ON_COMMAND_RANGE(ID_VIDEO_RENDERER0, ID_VIDEO_RENDERER0+100, &CGraphView::OnVideoRendererClick)
-	ON_COMMAND_RANGE(ID_FAVORITE_FILTER, ID_FAVORITE_FILTER+500, &CGraphView::OnFavoriteFilterClick)
+	ON_COMMAND_RANGE(ID_LIST_MRU_FILE0, ID_LIST_MRU_FILE0+10, &CGraphView::OnDummyEvent)
+	ON_COMMAND_RANGE(ID_AUDIO_RENDERER0, ID_AUDIO_RENDERER0+100, &CGraphView::OnDummyEvent)
+	ON_COMMAND_RANGE(ID_VIDEO_RENDERER0, ID_VIDEO_RENDERER0+100, &CGraphView::OnDummyEvent)
+	ON_COMMAND_RANGE(ID_FAVORITE_FILTER, ID_FAVORITE_FILTER+500, &CGraphView::OnDummyEvent)
 
 	ON_WM_KEYDOWN()
 	ON_WM_DESTROY()
@@ -207,6 +207,10 @@ void CGraphView::OnInit()
 {
 	DragAcceptFiles(TRUE);
 
+	// set the parent view
+	CMainFrame	*frm = (CMainFrame*)GetParent();
+	frm->view = this;
+
 	LoadWindowPosition();
 
 
@@ -264,6 +268,31 @@ void CGraphView::OnInit()
 
 void CGraphView::OnFileRenderdvd()
 {
+}
+
+LRESULT CGraphView::OnWmCommand(WPARAM wParam, LPARAM lParam)
+{
+	/*
+		For some strange reason MFC kept blocking several IDs
+		from the command range so I had to do a little bypass.
+	*/
+
+	int		id = LOWORD(wParam);
+
+	if (id >= ID_AUDIO_RENDERER0 && id < ID_AUDIO_RENDERER0 + 100) {
+		OnAudioRendererClick(id);
+	} else
+	if (id >= ID_VIDEO_RENDERER0 && id < ID_VIDEO_RENDERER0 + 100) {
+		OnVideoRendererClick(id);
+	} else
+	if (id >= ID_FAVORITE_FILTER && id < ID_FAVORITE_FILTER + 500) {
+		OnFavoriteFilterClick(id);
+	} else
+	if (id >= ID_LIST_MRU_FILE0 && id < ID_LIST_MRU_FILE0 + 10) {
+		OnMRUClick(id);
+	}	
+
+	return 0;
 }
 
 BOOL CGraphView::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT *pResult)
