@@ -68,6 +68,8 @@ namespace GraphStudio
 		void OnLButtonDblClk(UINT nFlags, CPoint point);
 
 		void OnRenderPin();
+		void OnRenderNullStream();
+		void OnDumpStream();
 		void OnPropertyPage();
 
 		void MakeScreenshot();

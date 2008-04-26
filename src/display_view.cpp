@@ -29,6 +29,8 @@ namespace GraphStudio
 		ON_WM_LBUTTONUP()
 
 		ON_COMMAND(ID_PIN_RENDER, &DisplayView::OnRenderPin)
+		ON_COMMAND(ID_PIN_NULL_STREAM, &DisplayView::OnRenderNullStream)
+		ON_COMMAND(ID_PIN_DUMP_STREAM, &DisplayView::OnDumpStream)
 		ON_COMMAND(ID_PROPERTYPAGE, &DisplayView::OnPropertyPage)
 	END_MESSAGE_MAP()
 
@@ -96,8 +98,12 @@ namespace GraphStudio
 			if (current_pin->dir != PINDIR_OUTPUT) flags |= MF_GRAYED;
 			if (state != State_Stopped) flags |= MF_GRAYED;
 			
-			menu.InsertMenu(0, MF_STRING | flags, ID_PIN_RENDER, _T("Render pin"));
-			menu.InsertMenu(0, MF_STRING, ID_PROPERTYPAGE, _T("Properties"));
+			menu.InsertMenu(0, MF_BYPOSITION | MF_STRING | flags, ID_PIN_RENDER, _T("Render Pin"));
+			menu.InsertMenu(1, MF_BYPOSITION | MF_SEPARATOR);
+			menu.InsertMenu(2, MF_BYPOSITION | MF_STRING | flags, ID_PIN_NULL_STREAM, _T("Insert Null Renderer"));
+			menu.InsertMenu(3, MF_BYPOSITION | MF_STRING | flags, ID_PIN_DUMP_STREAM, _T("Insert Dump Filter"));
+			menu.InsertMenu(4, MF_BYPOSITION | MF_SEPARATOR);
+			menu.InsertMenu(5, MF_BYPOSITION | MF_STRING, ID_PROPERTYPAGE, _T("Properties"));
 
 		} else {
 			menu.InsertMenu(0, MF_STRING, ID_PROPERTYPAGE, _T("Properties"));
@@ -488,6 +494,100 @@ namespace GraphStudio
 		}
 	}
 
+	void DisplayView::OnDumpStream()
+	{
+		if (!current_pin) return ;
+
+		// now create an instance of this filter
+		CComPtr<IBaseFilter>	instance;
+		HRESULT					hr;
+
+		hr = CoCreateInstance(DSUtil::CLSID_Dump, NULL, CLSCTX_INPROC_SERVER, IID_IBaseFilter, (void**)&instance);
+		if (FAILED(hr)) {
+			// try our internal Dump Filter as an alternative
+			CMonoDump	*dump = new CMonoDump(NULL, &hr);
+			hr = dump->NonDelegatingQueryInterface(IID_IBaseFilter, (void**)&instance);
+		} 
+		
+		if (SUCCEEDED(hr)){
+			
+			// now check for a few interfaces
+			int ret = ConfigureInsertedFilter(instance);
+			if (ret < 0) {
+				instance = NULL;
+			}
+
+			if (instance) {
+
+				IPin		*outpin = current_pin->pin;
+				outpin->AddRef();
+
+				// add the filter to graph
+				hr = graph.AddFilter(instance, _T("Dump"));
+				if (FAILED(hr)) {
+					// display error message
+				} else {
+					// connect the pin to the renderer
+					hr = DSUtil::ConnectPin(graph.gb, outpin, instance);
+
+					graph.RefreshFilters();
+					graph.SmartPlacement();
+					graph.Dirty();
+					Invalidate();
+				}
+
+				outpin->Release();
+			}
+		}
+		instance = NULL;
+		current_pin = NULL;
+	}
+
+	void DisplayView::OnRenderNullStream()
+	{
+		if (!current_pin) return ;
+
+		// now create an instance of this filter
+		CComPtr<IBaseFilter>	instance;
+		HRESULT					hr;
+
+		hr = CoCreateInstance(DSUtil::CLSID_NullRenderer, NULL, CLSCTX_INPROC_SERVER, IID_IBaseFilter, (void**)&instance);
+		if (FAILED(hr)) {
+			// display error message
+		} else {
+			
+			// now check for a few interfaces
+			int ret = ConfigureInsertedFilter(instance);
+			if (ret < 0) {
+				instance = NULL;
+			}
+
+			if (instance) {
+
+				IPin		*outpin = current_pin->pin;
+				outpin->AddRef();
+
+				// add the filter to graph
+				hr = graph.AddFilter(instance, _T("Null Renderer"));
+				if (FAILED(hr)) {
+					// display error message
+				} else {
+					// connect the pin to the renderer
+					hr = DSUtil::ConnectPin(graph.gb, outpin, instance);
+
+					graph.RefreshFilters();
+					graph.SmartPlacement();
+					graph.Dirty();
+					Invalidate();
+				}
+
+				outpin->Release();
+			}
+		}
+		instance = NULL;
+		current_pin = NULL;
+	}
+
 	void DisplayView::OnRenderPin()
 	{
 		if (!current_pin) return ;
@@ -499,7 +599,7 @@ namespace GraphStudio
 			graph.Dirty();
 			Invalidate();
 		}
-
+		current_pin = NULL;
 	}
 
 	void DisplayView::OnPropertyPage()

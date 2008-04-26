@@ -140,13 +140,15 @@
 #define ID_BUTTON_REFRESH               32843
 #define ID_GRAPH_REFRESHGRAPH           32844
 #define ID_VIEW_PROGRESSVIEW            32845
+#define ID_PIN_NULL_STREAM				32847
+#define ID_PIN_DUMP_STREAM				32848
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        151
-#define _APS_NEXT_COMMAND_VALUE         32846
+#define _APS_NEXT_COMMAND_VALUE         32847
 #define _APS_NEXT_CONTROL_VALUE         1040
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

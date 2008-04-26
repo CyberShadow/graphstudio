@@ -932,10 +932,12 @@ namespace DSUtil
 
 			// naplnime info
 			npin.name = CString(info.achName);
-			npin.filter = info.pFilter;				// nereleasujeme, lebo npin drzi referenciu
+			npin.filter = info.pFilter; info.pFilter->AddRef();
 			npin.pin = pin;	pin->AddRef();
 			npin.dir = dir;
 			pins.Add(npin);
+
+			info.pFilter->Release();
 
 		label_next:
 			pin->Release();
@@ -963,6 +965,8 @@ namespace DSUtil
 					hr = gb->Connect(opins[i].pin, ipins[j].pin);
 				}
 				if (SUCCEEDED(hr)) {
+					opins.RemoveAll();
+					ipins.RemoveAll();
 					return NOERROR;
 				}
 
@@ -971,6 +975,8 @@ namespace DSUtil
 			}
 		}
 
+		opins.RemoveAll();
+		ipins.RemoveAll();
 		return E_FAIL;
 	}
 
@@ -988,12 +994,14 @@ namespace DSUtil
 				hr = gb->Connect(output, ipins[j].pin);
 			}
 			if (SUCCEEDED(hr)) {
+				ipins.RemoveAll();
 				return NOERROR;
 			}
 
 			gb->Disconnect(output);
 			gb->Disconnect(ipins[j].pin);
 		}
+		ipins.RemoveAll();
 		return E_FAIL;
 	}
 

@@ -518,6 +518,18 @@
 				>
 			</File>
 		</Filter>
+		<Filter
+			Name="filter_dump"
+			>
+			<File
+				RelativePath=".\src\filters\dump\filter_dump.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\filters\dump\filter_dump.h"
+				>
+			</File>
+		</Filter>
 	</Files>
 	<Globals>
 		<Global

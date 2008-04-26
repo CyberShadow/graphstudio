@@ -702,6 +702,9 @@ void CGraphView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 					return ;
 				}
 
+				// avoid some unnecessary crashes
+				overlay_filter = NULL;
+
 				// delete selected objects
 				graph.DeleteSelected();
 				Invalidate();

@@ -106,7 +106,7 @@ using namespace std;
 #include "graphView.h"
 
 #include "..\interfaces\monofilters.h"
-
+#include "filters\dump\filter_dump.h"
 
 
 #ifdef _UNICODE
