@@ -507,10 +507,21 @@ namespace GraphStudio
 		mviinfo->AddItem(new PropItem(_T("dwStartTimeCode"), (int)mvi->dwStartTimeCode));
 		mviinfo->AddItem(new PropItem(_T("cbSequenceHeader"), (int)mvi->cbSequenceHeader));
 
+		// todo: sequence header
+		int				i;
+		CString			extrabuf = _T("");
+		uint8			*extra = (uint8*)&mvi->bSequenceHeader[0];
+		int				extralen = mvi->cbSequenceHeader;
+		for (i=0; i<extralen; i++) {
+			CString	t;
+			t.Format(_T("%02x "), extra[i]);
+			extrabuf += t;
+		}
+		extrabuf = extrabuf.MakeUpper();
+		mviinfo->AddItem(new PropItem(_T("Sequence Header"), extrabuf));
+
 		PropItem	*vihinfo = mviinfo->AddItem(new PropItem(_T("VIDEOINFOHEADER")));
 		GetVideoInfoDetails(&mvi->hdr, vihinfo);
-
-		// todo: sequence header
 
 		return 0;
 	}
@@ -523,10 +534,23 @@ namespace GraphStudio
 		mviinfo->AddItem(new PropItem(_T("dwLevel"), (int)mvi->dwLevel));
 		mviinfo->AddItem(new PropItem(_T("dwFlags"), (int)mvi->dwFlags));
 
+		// todo: sequence header
+		int				i;
+		CString			extrabuf = _T("");
+		uint8			*extra = (uint8*)&mvi->dwSequenceHeader[0];
+		int				extralen = mvi->cbSequenceHeader;
+		for (i=0; i<extralen; i++) {
+			CString	t;
+			t.Format(_T("%02x "), extra[i]);
+			extrabuf += t;
+		}
+		extrabuf = extrabuf.MakeUpper();
+		mviinfo->AddItem(new PropItem(_T("Sequence Header"), extrabuf));
+
+
 		PropItem	*vihinfo = mviinfo->AddItem(new PropItem(_T("VIDEOINFOHEADER2")));
 		GetVideoInfo2Details(&mvi->hdr, vihinfo);
 
-		// todo: sequence header
 		return 0;
 	}
 
