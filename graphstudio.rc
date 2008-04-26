@@ -76,6 +76,8 @@ IDR_graphstudioTYPE     ICON                    "res\\graphstudioDoc.ico"
 IDR_MAINFRAME           BITMAP                  "res\\Toolbar.bmp"
 IDB_BITMAP_LOGO         BITMAP                  "res\\bitmap_logo.bmp"
 IDB_BITMAP_TREE         BITMAP                  "res\\bitmap_tree.bmp"
+IDB_BITMAP_VOLUME_HI    BITMAP                  "res\\bitmap_volume.bmp"
+IDB_BITMAP_VOLUME_LO    BITMAP                  "res\\bitmap_volume2.bmp"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -402,6 +404,20 @@ BEGIN
     RTEXT           "00:00:00 / 00:00:00",IDC_STATIC_TIME,168,30,84,8
 END
 
+IDD_DIALOG_VOLUMEBAR DIALOGEX 0, 0, 150, 35
+STYLE DS_SETFONT | DS_SETFOREGROUND | DS_FIXEDSYS | WS_POPUP | WS_SYSMENU
+EXSTYLE WS_EX_TOPMOST | WS_EX_TOOLWINDOW
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    CONTROL         "",IDC_SLIDER_VOLUME,"msctls_trackbar32",TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,38,5,78,12
+    CONTROL         "",IDC_STATIC,"Static",SS_BLACKFRAME,0,0,150,35
+    LTEXT           "Volume:",IDC_STATIC,5,5,26,8
+    LTEXT           "Balance:",IDC_STATIC,5,20,28,8
+    CONTROL         "",IDC_SLIDER_BALANCE,"msctls_trackbar32",TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,38,20,78,12
+    RTEXT           "100%",IDC_STATIC_VOLUME,120,5,24,8
+    RTEXT           "100%",IDC_STATIC_BALANCE,120,20,24,8
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -543,6 +559,14 @@ BEGIN
         RIGHTMARGIN, 251
         TOPMARGIN, 7
         BOTTOMMARGIN, 75
+    END
+
+    IDD_DIALOG_VOLUMEBAR, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 143
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 28
     END
 END
 #endif    // APSTUDIO_INVOKED

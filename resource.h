@@ -25,6 +25,9 @@
 #define IDD_DIALOG_NEWGROUP             146
 #define IDD_DIALOG_RENDERURL            147
 #define IDD_DIALOG_PROGRESS             148
+#define IDB_BITMAP_VOLUME_HI            149
+#define IDB_BITMAP_VOLUME_LO            150
+#define IDD_DIALOG_VOLUMEBAR            150
 #define IDC_COMBO_CATEGORIES            1001
 #define IDC_LIST_FILTERS                1002
 #define IDC_COMBO_MERIT                 1003
@@ -46,7 +49,9 @@
 #define IDC_BUTTON_REFRESH              1015
 #define IDC_SLIDER1                     1016
 #define IDC_SLIDER_SEEK                 1016
+#define IDC_SLIDER_VOLUME               1016
 #define IDC_STATIC_TIME                 1017
+#define IDC_SLIDER_BALANCE              1017
 #define IDC_BUTTON1                     1018
 #define IDC_BUTTON_BROWSE               1018
 #define IDC_BUTTON_APPLY                1018
@@ -71,6 +76,8 @@
 #define IDC_PROGRESS_POSITION           1034
 #define IDC_CHECK_AUTOSWITCH            1035
 #define IDC_STATIC_CAPTION              1037
+#define IDC_STATIC_VOLUME               1038
+#define IDC_STATIC_BALANCE              1039
 #define ID_LIST_MRU_CLEAR               4999
 #define ID_LIST_MRU_FILE0               5000
 #define ID_AUDIO_RENDERER0              6000
@@ -138,9 +145,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        149
+#define _APS_NEXT_RESOURCE_VALUE        151
 #define _APS_NEXT_COMMAND_VALUE         32846
-#define _APS_NEXT_CONTROL_VALUE         1038
+#define _APS_NEXT_CONTROL_VALUE         1040
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

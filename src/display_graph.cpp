@@ -1098,6 +1098,9 @@ namespace GraphStudio
 		posx = 0;
 		posy = 0;
 		selected = false;
+		basic_audio = NULL;
+		overlay_icon_active = -1;
+		overlay_icons.RemoveAll();
 	}
 
 	Filter::~Filter()
@@ -1108,10 +1111,15 @@ namespace GraphStudio
 	void Filter::Release()
 	{
 		RemovePins();
+		ReleaseIcons();
 		name = _T("");
+
+		basic_audio = NULL;
 		if (filter != NULL) {
 			filter = NULL;
 		}
+
+		overlay_icon_active = -1;
 	}
 
 	void Filter::RemovePins()
@@ -1196,7 +1204,7 @@ namespace GraphStudio
 			}
 		}
 		if (!filter || !f) return ;
-		
+
 		// get the filter CLSID
 		f->GetClassID(&clsid);
 		NameGuid(clsid, clsid_str);
@@ -1271,7 +1279,18 @@ namespace GraphStudio
 			vw->put_Caption(vw_name.GetBuffer());
 			vw = NULL;
 		}
+		
+		// check for basic audio interface
+		basic_audio = NULL;
+		hr = f->QueryInterface(IID_IBasicAudio, (void**)&basic_audio);
+		if (FAILED(hr)) {
+			basic_audio = NULL;
+		}
 
+		// overlay icons
+		ReleaseIcons();
+		CreateIcons();
+		overlay_icon_active = -1;
 
 		// now scan for pins
 		IEnumPins	*epins;
@@ -1374,7 +1393,6 @@ namespace GraphStudio
 			pin->LoadPeer();
 		}
 	}
-
 
 	// Helpers
 	bool Filter::IsSource()
@@ -1525,7 +1543,35 @@ namespace GraphStudio
 			y += params->pin_spacing;
 		}
 
+		//---------------------------------------------------------------------
+		// draw overlay icons
+		//---------------------------------------------------------------------
+		int	ocx		 = 16;
+		int ocy		 = 16;
+		int	offset	 = 6;
 
+		int	ov_count = overlay_icons.GetCount();
+
+		if (ov_count > 0) {
+			CDC		tmp_dc;
+			tmp_dc.CreateCompatibleDC(NULL);
+			for (i=0; i<ov_count; i++) {
+				OverlayIcon	*icon = overlay_icons[i];
+
+				int		ox = posx + width - (ov_count - i)*ocx - offset;
+				int		oy = posy + offset;
+
+				if (overlay_icon_active == i) {
+					tmp_dc.SelectObject(icon->icon_hover);
+				} else {
+					tmp_dc.SelectObject(icon->icon_normal);
+				}
+	
+				DWORD	transpColor = tmp_dc.GetPixel(0, 0);		
+				dc->TransparentBlt(ox, oy, ocx, ocy, &tmp_dc, 0, 0, ocx, ocy, transpColor);
+			}
+			tmp_dc.DeleteDC();
+		}
 	}
 
 	void Filter::CalculatePlacementChain(int new_depth, int x)
@@ -1689,6 +1735,69 @@ namespace GraphStudio
 		}
 		return NULL;
 	}
+
+	// overlay icons
+	void Filter::ReleaseIcons()
+	{
+		for (int i=0; i<overlay_icons.GetCount(); i++) {
+			OverlayIcon *icon = overlay_icons[i];
+			if (icon) delete icon;
+		}
+		overlay_icons.RemoveAll();
+		overlay_icon_active = -1;
+	}
+
+	void Filter::CreateIcons()
+	{
+		ReleaseIcons();
+		if (!params) return ;
+
+		// filter supports basic audio 
+		if (basic_audio) {
+
+			OverlayIcon	*icon = new OverlayIcon(this, OverlayIcon::ICON_VOLUME);
+			icon->icon_normal = &params->bmp_volume_lo;
+			icon->icon_hover  = &params->bmp_volume_hi;
+
+			overlay_icons.Add(icon);
+		}
+	}
+
+	int Filter::CheckIcons(CPoint pt)
+	{
+		// check icon regions
+		int i;
+		int	offset	= 6;
+		int	ocx		= 16;
+		int ocy		= 16;
+		int	oy		= posy + offset;
+
+		int	ov_count = overlay_icons.GetCount();
+		if (ov_count <= 0) {
+			return -1;
+		}
+
+		// not in vertical range
+		if (pt.y < oy || pt.y >= (oy+ocy)) {
+			overlay_icon_active = -1;
+			return -1;
+		}
+
+		for (i=0; i<ov_count; i++) {
+			OverlayIcon	*icon = overlay_icons[i];
+
+			int		ox = posx + width - (ov_count - i)*ocx - offset;
+
+			if (pt.x >= ox && pt.x < ox+ocx) {
+				overlay_icon_active = i;
+				return i;
+			}
+		}
+
+		overlay_icon_active = -1;
+		return overlay_icon_active;
+	}
+
 
 	//-------------------------------------------------------------------------
 	//
@@ -1890,6 +1999,28 @@ namespace GraphStudio
 
 	}
 
+
+	//-------------------------------------------------------------------------
+	//
+	//	OverlayIcon class
+	//
+	//-------------------------------------------------------------------------
+	OverlayIcon::OverlayIcon(Filter *parent, int icon_id) :
+		icon_normal(NULL),
+		icon_hover(NULL),
+		filter(parent),
+		id(icon_id)
+	{
+
+	}
+
+	OverlayIcon::~OverlayIcon()
+	{
+		// TODO:
+	}
+
+
+
 	typedef struct {
 		float x;
 		float y;
@@ -1969,6 +2100,13 @@ namespace GraphStudio
 		direct_connect = false;
 
 		Zoom(1.0);
+
+		// load bitmaps
+		BOOL ok;
+		ok = bmp_volume_hi.LoadBitmap(IDB_BITMAP_VOLUME_HI);
+		if (!ok) return ;
+		ok = bmp_volume_lo.LoadBitmap(IDB_BITMAP_VOLUME_LO);
+		if (!ok) return ;
 	}
 
 	RenderParameters::~RenderParameters()
@@ -1990,7 +2128,6 @@ namespace GraphStudio
 		MakeFont(font_filter, _T("Arial"), size, false, false); 
 		size = 5 + (2.0*z / 100.0);
 		MakeFont(font_pin, _T("Arial"), size, false, false);
-
 	}
 
 

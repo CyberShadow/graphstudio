@@ -43,11 +43,13 @@ namespace GraphStudio
 		enum {
 			DRAG_GROUP = 0,
 			DRAG_CONNECTION = 1,
-			DRAG_SELECTION = 2
+			DRAG_SELECTION = 2,
+			DRAG_OVERLAY_ICON = 3
 		};
 		int					drag_mode;
 
 		// helpers for rightclick menu
+		Filter				*overlay_filter;
 		Filter				*current_filter;
 		Pin					*current_pin;
 
@@ -77,6 +79,7 @@ namespace GraphStudio
 		// to be overriden
 		virtual void OnDisplayPropertyPage(IUnknown *object, IUnknown *filter, CString title);
 		virtual void OnFilterRemoved(DisplayGraph *sender, Filter *filter);
+		virtual void OnOverlayIconClick(OverlayIcon *icon, CPoint point);
 	};
 
 

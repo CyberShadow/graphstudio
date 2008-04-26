@@ -32,6 +32,7 @@ public:
 	CTextInfoForm				*form_textinfo;
 	CFavoritesForm				*form_favorites;
 	CProgressForm				*form_progress;
+	CVolumeBarForm				*form_volume;
 
 	// active property pages
 	CArray<CPropertyForm*>		property_pages;
@@ -133,6 +134,7 @@ public:
 	virtual void OnPropertyPageClosed(CPropertyForm *page);
 	void ClosePropertyPages();
 	void ClosePropertyPage(IUnknown *filter);
+	virtual void OnOverlayIconClick(GraphStudio::OverlayIcon *icon, CPoint point);
 
 	// save/load window position
 	void LoadWindowPosition();

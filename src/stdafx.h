@@ -88,6 +88,7 @@ using namespace std;
 #include "graphDoc.h"
 #include "auto_restart.h"
 #include "FiltersForm.h"
+#include "volumebarform.h"
 
 #include "CustomPage.h"
 #include "FilterDetailsPage.h"

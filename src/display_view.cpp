@@ -36,6 +36,7 @@ namespace GraphStudio
 	{
 		back_width = 0;
 		back_height = 0;
+		overlay_filter = NULL;
 
 		// nastavime DC
 		graph.params = &render_params;
@@ -153,6 +154,13 @@ namespace GraphStudio
 			drag_mode = DisplayView::DRAG_CONNECTION;
 
 		} else {
+
+			int icon = current->CheckIcons(point);
+			if (icon >= 0) {
+				drag_mode = DisplayView::DRAG_OVERLAY_ICON;
+				return ;
+			}
+
 			if (current->selected) {
 				if (nFlags & MK_SHIFT) {
 					current->Select(false);
@@ -191,6 +199,17 @@ namespace GraphStudio
 	{
 		point += GetScrollPosition();
 
+		// check for an overlay icon
+		if (drag_mode == DisplayView::DRAG_OVERLAY_ICON) {
+			Filter	*current = graph.FindFilterByPos(point);
+			if (current && current == overlay_filter) {
+				int icon = current->CheckIcons(point);
+				if (icon >= 0) {
+					OnOverlayIconClick(current->overlay_icons[icon], point); 
+				}
+			}
+		}
+
 		if (drag_mode == DisplayView::DRAG_CONNECTION) {
 			Pin *p1 = graph.FindPinByPos(new_connection_start);
 			Pin *p2 = graph.FindPinByPos(new_connection_end);
@@ -211,11 +230,11 @@ namespace GraphStudio
 	void DisplayView::OnMouseMove(UINT nFlags, CPoint point)
 	{
 		point += GetScrollPosition();
+		bool need_invalidate = false;
 
 		// loop through the filters...
 		if (nFlags & MK_LBUTTON) {
 
-			bool need_invalidate = false;
 
 			switch (drag_mode) {
 			case DisplayView::DRAG_GROUP:
@@ -314,6 +333,39 @@ namespace GraphStudio
 					}
 				}
 				break;
+			}
+
+			if (need_invalidate) {
+				graph.Dirty();
+				Invalidate();
+			}
+		} else {
+
+			/*
+				No buttons are pressed. We only check for overlay icons
+			*/
+
+			Filter	*current = graph.FindFilterByPos(point);
+
+			// if there was a filter active before
+			if (overlay_filter) {
+				// which was not ours
+				if (overlay_filter != current) {
+					// make it's overlay icon disappear
+					overlay_filter->overlay_icon_active = -1;
+					need_invalidate = true;
+				}
+			}
+
+			overlay_filter = current;
+
+			if (current) {		
+				int	cur_icon = current->overlay_icon_active;
+
+				int ret = current->CheckIcons(point);
+				if (ret != cur_icon) {
+					need_invalidate = true;
+				}
 			}
 
 			if (need_invalidate) {
@@ -471,6 +523,10 @@ namespace GraphStudio
 	}
 
 	void DisplayView::OnDisplayPropertyPage(IUnknown *object, IUnknown *filter, CString title)
+	{
+	}
+
+	void DisplayView::OnOverlayIconClick(OverlayIcon *icon, CPoint point)
 	{
 	}
 

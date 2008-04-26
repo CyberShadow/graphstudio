@@ -314,6 +314,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\VolumeBarForm.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\xml_parser.cpp"
 				>
 			</File>
@@ -448,6 +452,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\VolumeBarForm.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\xml_parser.h"
 				>
 			</File>
@@ -467,6 +475,14 @@
 			</File>
 			<File
 				RelativePath=".\res\bitmap_tree.bmp"
+				>
+			</File>
+			<File
+				RelativePath=".\res\bitmap_volume.bmp"
+				>
+			</File>
+			<File
+				RelativePath=".\res\bitmap_volume2.bmp"
 				>
 			</File>
 			<File

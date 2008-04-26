@@ -110,12 +110,14 @@ CGraphView::CGraphView()
 	form_textinfo = NULL;
 	form_favorites = NULL;
 	form_progress = NULL;
+	form_volume = NULL;
 	filename = _T("");
 	can_save = false;
 }
 
 CGraphView::~CGraphView()
 {
+	if (form_volume) { form_volume->DestroyWindow(); delete form_volume; }
 	if (form_progress) { form_progress->DestroyWindow(); delete form_progress; }
 	if (form_filters) { form_filters->DestroyWindow(); delete form_filters; }
 	if (form_events) { form_events->DestroyWindow(); delete form_events; }
@@ -1358,4 +1360,24 @@ void CGraphView::OnViewProgressview()
 	form_progress->UpdateCaption(graph.graph_name);
 	form_progress->ShowWindow(SW_SHOW);
 	AfxGetMainWnd()->ShowWindow(SW_HIDE);
+}
+
+void CGraphView::OnOverlayIconClick(GraphStudio::OverlayIcon *icon, CPoint point)
+{
+	if (!icon) return ;
+
+	switch (icon->id) {
+	case GraphStudio::OverlayIcon::ICON_VOLUME:
+		{
+			// let's bring up some slider bar for the volume
+			if (!form_volume) {
+				form_volume = new CVolumeBarForm();
+				form_volume->DoCreateDialog();
+			}
+			
+			form_volume->DoHide();
+			form_volume->DisplayVolume(icon->filter->filter);
+		}
+		break;
+	}
 }

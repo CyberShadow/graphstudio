@@ -3,6 +3,7 @@
 + added ALLOCATOR_PROPERTIES information for pin connection
 + added "Progress View" form
 + fixed a strange menu event problem
++ added volume & balance controls for filters exposing the IBasicAudio interface
 
 [0.2.2.0 - Beta    24/Mar/2008]
 + added frame-step button

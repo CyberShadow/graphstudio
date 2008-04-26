@@ -54,6 +54,10 @@ namespace GraphStudio
 		bool			display_file_name;
 		bool			direct_connect;
 
+		// Overlay Icons
+		CBitmap			bmp_volume_hi;
+		CBitmap			bmp_volume_lo;
+
 	public:
 		RenderParameters();
 		virtual ~RenderParameters();
@@ -99,6 +103,28 @@ namespace GraphStudio
 
 	//-------------------------------------------------------------------------
 	//
+	//	OverlayIcon class
+	//
+	//-------------------------------------------------------------------------
+	class OverlayIcon
+	{
+	public:
+		CBitmap			*icon_normal;
+		CBitmap			*icon_hover;
+		Filter			*filter;
+		int				id;
+
+		enum {
+			ICON_VOLUME = 0
+		};
+
+	public:
+		OverlayIcon(Filter *parent, int icon_id);
+		virtual ~OverlayIcon();
+	};
+
+	//-------------------------------------------------------------------------
+	//
 	//	Filter class
 	//
 	//-------------------------------------------------------------------------
@@ -127,6 +153,13 @@ namespace GraphStudio
 		bool					selected;
 		bool					connected;
 
+		// special
+		CComPtr<IBasicAudio>	basic_audio;
+
+		// overlay icons
+		CArray<OverlayIcon*>	overlay_icons;
+		int						overlay_icon_active;	// index of icon
+
 		enum {
 			FILTER_UNKNOWN = 0,
 			FILTER_STANDARD = 1,
@@ -142,6 +175,10 @@ namespace GraphStudio
 		// kreslenie filtra
 		void Draw(CDC *dc);
 		void DrawConnections(CDC *dc);
+
+		// overlay icons
+		void ReleaseIcons();
+		void CreateIcons();
 
 		// I/O
 		void Release();
@@ -171,6 +208,9 @@ namespace GraphStudio
 		void VerifyDrag(int *deltax, int *deltay);
 		void Select(bool select);
 		void SelectConnection(UINT flags, CPoint pt);
+
+		// overlay icons
+		int CheckIcons(CPoint pt);
 	};
 
 
