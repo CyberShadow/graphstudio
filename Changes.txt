@@ -1,4 +1,4 @@
-[0.2.3.0 - Beta    xx/Apr/2008]
+[0.2.3.0 - Beta    27/Apr/2008]
 + added some more XML filter interfaces (mainly monogram filters)
 + added ALLOCATOR_PROPERTIES information for pin connection
 + added "Progress View" form
