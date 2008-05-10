@@ -57,6 +57,10 @@ namespace GraphStudio
 		// Overlay Icons
 		CBitmap			bmp_volume_hi;
 		CBitmap			bmp_volume_lo;
+		CBitmap			bmp_clock_active_hi;
+		CBitmap			bmp_clock_active_lo;
+		CBitmap			bmp_clock_inactive_hi;
+		CBitmap			bmp_clock_inactive_lo;
 
 	public:
 		RenderParameters();
@@ -109,13 +113,15 @@ namespace GraphStudio
 	class OverlayIcon
 	{
 	public:
-		CBitmap			*icon_normal;
-		CBitmap			*icon_hover;
+		CBitmap			*icon_normal[2];
+		CBitmap			*icon_hover[2];
 		Filter			*filter;
 		int				id;
+		int				state;
 
 		enum {
-			ICON_VOLUME = 0
+			ICON_VOLUME = 0,
+			ICON_CLOCK = 1
 		};
 
 	public:
@@ -154,7 +160,8 @@ namespace GraphStudio
 		bool					connected;
 
 		// special
-		CComPtr<IBasicAudio>	basic_audio;
+		CComPtr<IBasicAudio>		basic_audio;
+		CComPtr<IReferenceClock>	clock;
 
 		// overlay icons
 		CArray<OverlayIcon*>	overlay_icons;
@@ -193,6 +200,7 @@ namespace GraphStudio
 		void LoadPeers();
 		void DeleteSelectedConnections();
 		void DeleteFilter();
+		void UpdateClock();
 
 		// Helpers
 		bool IsSource();
@@ -258,6 +266,7 @@ namespace GraphStudio
 
 		// helpers
 		CString							graph_name;
+		bool							uses_clock;
 
 	public:
 		DisplayGraph();
@@ -302,6 +311,10 @@ namespace GraphStudio
 		void DeleteSelected();
 		void DoubleSelected();
 		int ConnectPins(Pin *p1, Pin *p2);
+
+		// Clock manipulation
+		void SetClock(bool default_clock, IReferenceClock *new_clock);
+		void RefreshClock();
 
 		// rendering the graph
 		void Draw(CDC *dc);

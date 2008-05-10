@@ -49,6 +49,7 @@ namespace GraphStudio
 		fs = NULL;
 		is_remote = false;
 		is_frame_stepping = false;
+		uses_clock = true;
 
 		MakeNew();
 
@@ -86,6 +87,7 @@ namespace GraphStudio
 		cgb = NULL;
 		is_remote = false;
 		is_frame_stepping = false;
+		uses_clock = true;
 
 		// attach remote graph
 		HRESULT hr;
@@ -151,6 +153,7 @@ namespace GraphStudio
 
 		is_remote = false;
 		is_frame_stepping = false;
+		uses_clock = true;
 
 		graph_name = _T("Graph");
 
@@ -159,6 +162,8 @@ namespace GraphStudio
 		do {
 			hr = CoCreateInstance(CLSID_FilterGraph, NULL, CLSCTX_INPROC_SERVER, IID_IGraphBuilder, (void**)&gb);
 			if (FAILED(hr)) break;
+
+			gb->SetDefaultSyncSource();
 
 			gb->QueryInterface(IID_IMediaControl, (void**)&mc);
 
@@ -289,6 +294,54 @@ namespace GraphStudio
 		REFERENCE_TIME	rtpos = time_ms * 10000;
 		ms->SetPositions(&rtpos, AM_SEEKING_AbsolutePositioning, NULL, AM_SEEKING_NoPositioning);
 		return 0;
+	}
+
+	void DisplayGraph::RefreshClock()
+	{
+		// set the new clock for all filters
+		for (int i=0; i<filters.GetCount(); i++) {
+			Filter	*filter = filters[i];
+			filter->UpdateClock();
+		}
+	}
+
+	void DisplayGraph::SetClock(bool default_clock, IReferenceClock *new_clock)
+	{
+		FILTER_STATE	state;
+		int ret = GetState(state, 50);
+		if (ret < 0) {
+			MessageBeep(MB_ICONASTERISK);
+			return ;
+		}
+
+		if (state != State_Stopped) {
+			MessageBeep(MB_ICONASTERISK);
+			return ;
+		}
+
+		if (default_clock) {
+
+			if (gb) {
+				gb->SetDefaultSyncSource();
+			}
+
+			uses_clock = true;
+
+			RefreshClock();
+
+		} else {
+
+			uses_clock = (new_clock == NULL ? false : true);
+
+			// set the new clock for all filters
+			for (int i=0; i<filters.GetCount(); i++) {
+				Filter	*filter = filters[i];
+				if (filter->filter) {
+					filter->filter->SetSyncSource(new_clock);
+				}
+				filter->UpdateClock();
+			}
+		}
 	}
 
 	// seeking helpers
@@ -940,6 +993,7 @@ namespace GraphStudio
 		// kill those inactive
 		RemoveUnusedFilters();
 		LoadPeers();
+		RefreshClock();
 		Dirty();
 
 	}
@@ -1099,6 +1153,7 @@ namespace GraphStudio
 		posy = 0;
 		selected = false;
 		basic_audio = NULL;
+		clock = NULL;
 		overlay_icon_active = -1;
 		overlay_icons.RemoveAll();
 	}
@@ -1115,6 +1170,7 @@ namespace GraphStudio
 		name = _T("");
 
 		basic_audio = NULL;
+		clock = NULL;
 		if (filter != NULL) {
 			filter = NULL;
 		}
@@ -1189,6 +1245,30 @@ namespace GraphStudio
 		selected = false;
 	}
 
+	void Filter::UpdateClock()
+	{
+		bool	we_are_sync_source = false;
+
+		if (filter && clock) {
+			CComPtr<IReferenceClock>	syncclock;
+			syncclock = NULL;
+
+			HRESULT hr = filter->GetSyncSource(&syncclock);
+			if (SUCCEEDED(hr)) {
+				if (syncclock == clock) {
+					we_are_sync_source = true;
+				}
+			}
+		}
+
+		// update icon
+		for (int i=0; i<overlay_icons.GetCount(); i++) {
+			OverlayIcon	*icon = overlay_icons[i];
+			if (icon->id == OverlayIcon::ICON_CLOCK) {
+				icon->state = (we_are_sync_source ? 1 : 0);
+			}
+		}
+	}
 
 	void Filter::LoadFromFilter(IBaseFilter *f)
 	{
@@ -1287,10 +1367,17 @@ namespace GraphStudio
 			basic_audio = NULL;
 		}
 
+		clock = NULL;
+		hr = f->QueryInterface(IID_IReferenceClock, (void**)&clock);
+		if (FAILED(hr)) {
+			clock = NULL;
+		}
+
 		// overlay icons
 		ReleaseIcons();
 		CreateIcons();
 		overlay_icon_active = -1;
+		UpdateClock();
 
 		// now scan for pins
 		IEnumPins	*epins;
@@ -1562,9 +1649,9 @@ namespace GraphStudio
 				int		oy = posy + offset;
 
 				if (overlay_icon_active == i) {
-					tmp_dc.SelectObject(icon->icon_hover);
+					tmp_dc.SelectObject(icon->icon_hover[icon->state]);
 				} else {
-					tmp_dc.SelectObject(icon->icon_normal);
+					tmp_dc.SelectObject(icon->icon_normal[icon->state]);
 				}
 	
 				DWORD	transpColor = tmp_dc.GetPixel(0, 0);		
@@ -1751,13 +1838,26 @@ namespace GraphStudio
 	{
 		ReleaseIcons();
 		if (!params) return ;
+		
+		// reference clock ?
+		if (clock) {
+			OverlayIcon *icon = new OverlayIcon(this, OverlayIcon::ICON_CLOCK);
+			icon->icon_normal[0] = &params->bmp_clock_inactive_lo;
+			icon->icon_hover[0]  = &params->bmp_clock_inactive_hi;
+			icon->icon_normal[1] = &params->bmp_clock_active_lo;
+			icon->icon_hover[1]  = &params->bmp_clock_active_hi;
+
+			overlay_icons.Add(icon);
+		}
 
 		// filter supports basic audio 
 		if (basic_audio) {
 
 			OverlayIcon	*icon = new OverlayIcon(this, OverlayIcon::ICON_VOLUME);
-			icon->icon_normal = &params->bmp_volume_lo;
-			icon->icon_hover  = &params->bmp_volume_hi;
+			icon->icon_normal[0] = &params->bmp_volume_lo;
+			icon->icon_hover[0]  = &params->bmp_volume_hi;
+			icon->icon_normal[1] = &params->bmp_volume_lo;
+			icon->icon_hover[1]  = &params->bmp_volume_hi;
 
 			overlay_icons.Add(icon);
 		}
@@ -2006,12 +2106,14 @@ namespace GraphStudio
 	//
 	//-------------------------------------------------------------------------
 	OverlayIcon::OverlayIcon(Filter *parent, int icon_id) :
-		icon_normal(NULL),
-		icon_hover(NULL),
 		filter(parent),
-		id(icon_id)
+		id(icon_id),
+		state(0)
 	{
-
+		icon_normal[0] = NULL;
+		icon_normal[1] = NULL;
+		icon_hover[0] = NULL;
+		icon_hover[1] = NULL;
 	}
 
 	OverlayIcon::~OverlayIcon()
@@ -2102,11 +2204,13 @@ namespace GraphStudio
 		Zoom(1.0);
 
 		// load bitmaps
-		BOOL ok;
-		ok = bmp_volume_hi.LoadBitmap(IDB_BITMAP_VOLUME_HI);
-		if (!ok) return ;
-		ok = bmp_volume_lo.LoadBitmap(IDB_BITMAP_VOLUME_LO);
-		if (!ok) return ;
+		BOOL ok;	
+		ok = bmp_volume_hi.LoadBitmap(IDB_BITMAP_VOLUME_HI);					if (!ok) return ;
+		ok = bmp_volume_lo.LoadBitmap(IDB_BITMAP_VOLUME_LO);					if (!ok) return ;
+		ok = bmp_clock_inactive_hi.LoadBitmap(IDB_BITMAP_CLOCK_INACTIVE_HI);	if (!ok) return ;
+		ok = bmp_clock_inactive_lo.LoadBitmap(IDB_BITMAP_CLOCK_INACTIVE_LO);	if (!ok) return ;
+		ok = bmp_clock_active_hi.LoadBitmap(IDB_BITMAP_CLOCK_ACTIVE_HI);		if (!ok) return ;
+		ok = bmp_clock_active_lo.LoadBitmap(IDB_BITMAP_CLOCK_ACTIVE_LO);		if (!ok) return ;
 	}
 
 	RenderParameters::~RenderParameters()

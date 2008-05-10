@@ -78,6 +78,10 @@ IDB_BITMAP_LOGO         BITMAP                  "res\\bitmap_logo.bmp"
 IDB_BITMAP_TREE         BITMAP                  "res\\bitmap_tree.bmp"
 IDB_BITMAP_VOLUME_HI    BITMAP                  "res\\bitmap_volume.bmp"
 IDB_BITMAP_VOLUME_LO    BITMAP                  "res\\bitmap_volume2.bmp"
+IDB_BITMAP_CLOCK_ACTIVE_HI BITMAP                  "res\\bitmap_clock_active_hi.bmp"
+IDB_BITMAP_CLOCK_ACTIVE_LO BITMAP                  "res\\bitmap_clock_active_lo.bmp"
+IDB_BITMAP_CLOCK_INACTIVE_HI BITMAP                  "res\\bitmap_clock_inactive_hi.bmp"
+IDB_BITMAP_CLOCK_INACTIVE_LO BITMAP                  "res\\bitmap_clock_inactive_lo.bmp"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -162,6 +166,8 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "Refresh Graph\tCtrl+F5",      ID_BUTTON_REFRESH
         MENUITEM "Make Graph Screenshot\tCtrl+F12", ID_GRAPH_MAKEGRAPHSCREENSHOT
+        MENUITEM SEPARATOR
+        MENUITEM "Use Clock",                   ID_GRAPH_USECLOCK
     END
     POPUP "Filters"
     BEGIN
@@ -254,7 +260,7 @@ STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSM
 CAPTION "About MONOGRAM GraphStudio"
 FONT 8, "MS Shell Dlg", 0, 0, 0x1
 BEGIN
-    LTEXT           "MONOGRAM GraphStudio v0.2.3.0 Beta",IDC_STATIC,6,30,156,8,SS_NOPREFIX
+    LTEXT           "MONOGRAM GraphStudio v0.2.4.0 Beta",IDC_STATIC,6,30,156,8,SS_NOPREFIX
     DEFPUSHBUTTON   "OK",IDOK,198,78,50,16,WS_GROUP
     LTEXT           "This software is free under the GNU GPL license",IDC_STATIC,6,72,153,8
     LTEXT           "http://www.monogrammultimedia.com",IDC_STATIC,6,84,123,8
@@ -425,8 +431,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 0,2,3,0
- PRODUCTVERSION 0,2,3,0
+ FILEVERSION 0,2,4,0
+ PRODUCTVERSION 0,2,4,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -443,11 +449,11 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "MONOGRAM Mutimedia s.r.o."
             VALUE "FileDescription", "GraphStudio"
-            VALUE "FileVersion", "0.2.3.0"
+            VALUE "FileVersion", "0.2.4.0"
             VALUE "InternalName", "graphstudio.exe"
             VALUE "OriginalFilename", "graphstudio.exe"
             VALUE "ProductName", "MONOGRAM GraphStudio"
-            VALUE "ProductVersion", "0.2.3.0"
+            VALUE "ProductVersion", "0.2.4.0"
         END
     END
     BLOCK "VarFileInfo"

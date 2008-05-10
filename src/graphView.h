@@ -114,6 +114,7 @@ public:
 	void OnGraphPaused();
 	void OnUpdateTimeLabel(CString text);
 	void OnUpdateSeekbar(double pos);
+	void OnUseClock();
 
 	void OnUpdateConnectRemote(CCmdUI *ui);
 	void OnUpdateDisconnectRemote(CCmdUI *ui);
@@ -121,6 +122,7 @@ public:
 	void OnUpdatePauseButton(CCmdUI *ui);
 	void OnUpdateStopButton(CCmdUI *ui);
 	void OnUpdateRenderMediaFile(CCmdUI *ui);
+	void OnUpdateUseClock(CCmdUI *ui);
 	void OnDropFiles(HDROP hDropInfo);
 	int TryOpenFile(CString fn);
 	int TryOpenXML(CString fn);

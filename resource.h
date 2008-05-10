@@ -28,6 +28,10 @@
 #define IDB_BITMAP_VOLUME_HI            149
 #define IDB_BITMAP_VOLUME_LO            150
 #define IDD_DIALOG_VOLUMEBAR            150
+#define IDB_BITMAP_CLOCK_ACTIVE_HI      151
+#define IDB_BITMAP_CLOCK_ACTIVE_LO      152
+#define IDB_BITMAP_CLOCK_INACTIVE_HI    153
+#define IDB_BITMAP_CLOCK_INACTIVE_LO    154
 #define IDC_COMBO_CATEGORIES            1001
 #define IDC_LIST_FILTERS                1002
 #define IDC_COMBO_MERIT                 1003
@@ -140,15 +144,16 @@
 #define ID_BUTTON_REFRESH               32843
 #define ID_GRAPH_REFRESHGRAPH           32844
 #define ID_VIEW_PROGRESSVIEW            32845
-#define ID_PIN_NULL_STREAM				32847
-#define ID_PIN_DUMP_STREAM				32848
+#define ID_PIN_NULL_STREAM              32847
+#define ID_PIN_DUMP_STREAM              32848
+#define ID_GRAPH_USECLOCK               32849
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        151
-#define _APS_NEXT_COMMAND_VALUE         32847
+#define _APS_NEXT_RESOURCE_VALUE        155
+#define _APS_NEXT_COMMAND_VALUE         32850
 #define _APS_NEXT_CONTROL_VALUE         1040
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

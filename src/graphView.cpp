@@ -49,6 +49,7 @@ BEGIN_MESSAGE_MAP(CGraphView, GraphStudio::DisplayView)
 	ON_COMMAND(ID_VIEW_GRAPHEVENTS, &CGraphView::OnViewGraphEvents)
 	ON_COMMAND(ID_LIST_MRU_CLEAR, &CGraphView::OnClearMRUClick)
 	ON_COMMAND(ID_GRAPH_MAKEGRAPHSCREENSHOT, &CGraphView::OnGraphScreenshot)
+	ON_COMMAND(ID_GRAPH_USECLOCK, &CGraphView::OnUseClock)
 	ON_COMMAND_RANGE(ID_LIST_MRU_FILE0, ID_LIST_MRU_FILE0+10, &CGraphView::OnDummyEvent)
 	ON_COMMAND_RANGE(ID_AUDIO_RENDERER0, ID_AUDIO_RENDERER0+100, &CGraphView::OnDummyEvent)
 	ON_COMMAND_RANGE(ID_VIDEO_RENDERER0, ID_VIDEO_RENDERER0+100, &CGraphView::OnDummyEvent)
@@ -59,6 +60,7 @@ BEGIN_MESSAGE_MAP(CGraphView, GraphStudio::DisplayView)
 	ON_WM_TIMER()
 	ON_WM_DROPFILES()
 
+	ON_UPDATE_COMMAND_UI(ID_GRAPH_USECLOCK, &CGraphView::OnUpdateUseClock)
 	ON_UPDATE_COMMAND_UI(ID_BUTTON_DIRECT, &CGraphView::OnUpdateDirectConnect)
 	ON_UPDATE_COMMAND_UI(ID_OPTIONS_DIRECT, &CGraphView::OnUpdateOptionsDirectConnect)
 	ON_UPDATE_COMMAND_UI(ID_BUTTON_PLAY, &CGraphView::OnUpdatePlayButton)
@@ -534,6 +536,7 @@ int CGraphView::TryOpenFile(CString fn)
 	doc->SetTitle(short_fn);
 
 	UpdateGraphState();
+	graph.SetClock(true, NULL);
 	graph.RefreshFilters();
 	graph.SmartPlacement();
 	Invalidate();
@@ -614,6 +617,7 @@ void CGraphView::OnFileAddmediafile()
 		mru.NotifyEntry(filename);
 		UpdateMRUMenu();
 
+		graph.SetClock(true, NULL);
 		graph.RefreshFilters();
 		graph.SmartPlacement();
 		graph.Dirty();
@@ -633,6 +637,7 @@ void CGraphView::OnRenderUrlClick()
 			MessageBox(_T("Cannot render URL"));
 		}
 
+		graph.SetClock(true, NULL);
 		graph.RefreshFilters();
 		graph.SmartPlacement();
 		graph.Dirty();
@@ -666,6 +671,7 @@ void CGraphView::OnRenderFileClick()
 		mru.NotifyEntry(filename);
 		UpdateMRUMenu();
 
+		graph.SetClock(true, NULL);
 		graph.RefreshFilters();
 		graph.SmartPlacement();
 		graph.Dirty();
@@ -784,6 +790,23 @@ void CGraphView::OnTimer(UINT_PTR nIDEvent)
 		}
 		break;
 	}
+}
+
+void CGraphView::OnUseClock()
+{
+	if (graph.uses_clock) {
+		graph.SetClock(false, NULL);
+	} else {
+		graph.SetClock(true, NULL);
+	}
+
+	graph.Dirty();
+	Invalidate();
+}
+
+void CGraphView::OnUpdateUseClock(CCmdUI *ui)
+{
+	ui->SetCheck(graph.uses_clock);
 }
 
 void CGraphView::OnUpdateTimeLabel(CString text)
@@ -1380,6 +1403,16 @@ void CGraphView::OnOverlayIconClick(GraphStudio::OverlayIcon *icon, CPoint point
 			
 			form_volume->DoHide();
 			form_volume->DisplayVolume(icon->filter->filter);
+		}
+		break;
+	case GraphStudio::OverlayIcon::ICON_CLOCK:
+		{
+			// set this new clock
+			if (icon->filter && icon->filter->clock) {
+				graph.SetClock(false, icon->filter->clock);
+				graph.Dirty();
+				Invalidate();
+			}
 		}
 		break;
 	}

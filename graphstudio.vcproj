@@ -466,7 +466,19 @@
 			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
 			>
 			<File
-				RelativePath=".\res\bitmap1.bmp"
+				RelativePath=".\res\bitmap_clock_active_hi.bmp"
+				>
+			</File>
+			<File
+				RelativePath=".\res\bitmap_clock_active_lo.bmp"
+				>
+			</File>
+			<File
+				RelativePath=".\res\bitmap_clock_inactive_hi.bmp"
+				>
+			</File>
+			<File
+				RelativePath=".\res\bitmap_clock_inactive_lo.bmp"
 				>
 			</File>
 			<File
