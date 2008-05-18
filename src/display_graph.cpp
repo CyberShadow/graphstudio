@@ -1391,6 +1391,31 @@ namespace GraphStudio
 			pin->QueryDirection(&dir);
 			LoadPin(pin, dir);
 			pin->Release();
+
+#if 0
+			CComPtr<IAMStreamConfig>	cfg;
+			HRESULT						hhr;
+			hhr = pin->QueryInterface(IID_IAMStreamConfig, (void**)&cfg);
+			if (SUCCEEDED(hhr)) {
+
+				int	count, size;
+				cfg->GetNumberOfCapabilities(&count, &size);
+				if (size == sizeof(VIDEO_STREAM_CONFIG_CAPS)) {
+					VIDEO_STREAM_CONFIG_CAPS	caps;
+					AM_MEDIA_TYPE				*pmt = NULL;
+
+					cfg->GetStreamCaps(0, &pmt, (BYTE*)&caps);
+					if (pmt) {
+						DeleteMediaType(pmt);
+					}
+
+				}
+
+			}
+
+#endif
+
+
 		}
 		epins->Release();
 

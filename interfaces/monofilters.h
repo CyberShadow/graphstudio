@@ -127,18 +127,6 @@ namespace Monogram
 	static const GUID CLSID_MonogramQueue = 
 	{ 0x67efd5b, 0xefe2, 0x42b3, { 0xb4, 0x66, 0x86, 0x4f, 0x50, 0x27, 0xdb, 0xda } };
 
-	// {87493084-DC79-4978-8B0B-C37714FFA909}
-	static const GUID CLSID_MonogramVideoProc = 
-	{ 0x87493084, 0xdc79, 0x4978, { 0x8b, 0xb, 0xc3, 0x77, 0x14, 0xff, 0xa9, 0x9 } };
-
-	// {C8A8A229-63AB-4665-B237-2A421DE56F76}
-	static const GUID CLSID_MonogramVideoPropertyPage = 
-	{ 0xc8a8a229, 0x63ab, 0x4665, { 0xb2, 0x37, 0x2a, 0x42, 0x1d, 0xe5, 0x6f, 0x76 } };
-
-	// {13DAE007-20DC-496e-9091-F922216B4D43}
-	static const GUID CLSID_IMonogramVideoProc = 
-	{ 0x13dae007, 0x20dc, 0x496e, { 0x90, 0x91, 0xf9, 0x22, 0x21, 0x6b, 0x4d, 0x43 } };
-
 	// {E739CB5C-3F3E-486b-9A9B-0C833C85AA86}
 	static const GUID CLSID_MonogramHttpSource = 
 	{ 0xe739cb5c, 0x3f3e, 0x486b, { 0x9a, 0x9b, 0xc, 0x83, 0x3c, 0x85, 0xaa, 0x86 } };
@@ -207,6 +195,17 @@ namespace Monogram
 	static const GUID IID_IMonogramMetaSource = 
 	{ 0x6c6a69a3, 0xfcac, 0x40b8, { 0xb6, 0xf4, 0x1e, 0xd7, 0x46, 0x19, 0xb5, 0x87 } };
 
+	// {87493084-DC79-4978-8B0B-C37714FFA909}
+	static const GUID CLSID_MonogramVideoProc = 
+	{ 0x87493084, 0xdc79, 0x4978, { 0x8b, 0xb, 0xc3, 0x77, 0x14, 0xff, 0xa9, 0x9 } };
+
+	// {C8A8A229-63AB-4665-B237-2A421DE56F76}
+	static const GUID CLSID_MonogramVideoPropertyPage = 
+	{ 0xc8a8a229, 0x63ab, 0x4665, { 0xb2, 0x37, 0x2a, 0x42, 0x1d, 0xe5, 0x6f, 0x76 } };
+
+	// {13DAE007-20DC-496e-9091-F922216B4D43}
+	static const GUID IID_IMonogramVideoProc = 
+	{ 0x13dae007, 0x20dc, 0x496e, { 0x90, 0x91, 0xf9, 0x22, 0x21, 0x6b, 0x4d, 0x43 } };
 
 	//-------------------------------------------------------------------------
 	//
@@ -516,6 +515,20 @@ namespace Monogram
 		int			port;
 	};
 
+	struct VideoProcConfig
+	{
+		int		deinterlace_method;
+		int		zoom;					// 0 - 100
+		int		crop_vertical;			// * 8
+		int		crop_horizontal;		// * 8
+		int		aspect_ratio_mode;		// rezim aspect ratia
+		int		out_w, out_h;			// output width & height
+		int		in_w, in_h;				// input width & height
+		int64	frames_done;			// pocitadlo framov
+
+		GUID	subtype_in;				// typy spojeni
+		GUID	subtype_out;
+	};
 
 	//-------------------------------------------------------------------------
 	//
@@ -643,5 +656,14 @@ namespace Monogram
 		STDMETHOD(GetXML)(void **xml_root, int *version);			// XMLNode z MonoBase
 	};
 
+	DECLARE_INTERFACE_(IMonogramVideoProc, IUnknown)
+	{
+		STDMETHOD(GetConfig)(VideoProcConfig *conf);
+		STDMETHOD(SetDeinterlace)(int mode);
+		STDMETHOD(SetOutputSize)(int width, int height);
+		STDMETHOD(SetCrop)(int crop_v, int crop_h);
+		STDMETHOD(SetAspectRatioMode)(int mode);
+		STDMETHOD(SetZoom)(int percent);
+	};
 
 };

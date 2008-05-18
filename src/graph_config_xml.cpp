@@ -136,6 +136,44 @@ namespace GraphStudio
 				ret = 0;
 			}
 
+		PRESET("imonogramvideoproc")
+			// <imonogramvideoproc deinterlace="vfilter" vcrop="1" hcrop="1"
+			//                     aspect="free" width="640" height="480"/>
+			CComPtr<Monogram::IMonogramVideoProc>	proc;
+			hr = filter->QueryInterface(Monogram::IID_IMonogramVideoProc, (void**)&proc);
+			if (SUCCEEDED(hr)) {
+				CString		method = conf->GetValue(_T("deinterlace"));
+				int			deint_method = 0;
+				if (method == _T("vfilter"))	deint_method = 9; else
+				if (method == _T("linear"))		deint_method = 5; else
+				if (method == _T("weave"))		deint_method = 1; else
+				if (method == _T("none"))		deint_method = 0; else
+				if (method == _T("bob"))		deint_method = 3;
+
+				proc->SetDeinterlace(deint_method);
+
+				int		crop_v	= conf->GetValue(_T("vcrop"), 0);
+				int		crop_h	= conf->GetValue(_T("hcrop"), 0);
+				proc->SetCrop(crop_v, crop_h);
+
+				CString		aspect = conf->GetValue(_T("aspect"));
+				int			aspect_method = 0;
+				if (aspect == _T("free"))	aspect_method = 0; else
+				if (aspect == _T("4:3"))	aspect_method = 1; else
+				if (aspect == _T("16:9"))	aspect_method = 2; else
+				if (aspect == _T("16:10"))	aspect_method = 3;
+				proc->SetAspectRatioMode(aspect_method);
+
+				int		outw	= conf->GetValue(_T("width"), -1);
+				int		outh	= conf->GetValue(_T("height"), -1);
+				proc->SetOutputSize(outw, outh);
+
+				int		zoom	= conf->GetValue(_T("zoom"), 0);
+				proc->SetZoom(zoom);
+
+				ret = 0;
+			}
+
 		PRESET("imonogramaacencoder")
 			// <imonogramaacencoder version="mpeg4" object_type="lc" 
 			//                      output_type="raw" bitrate="128000"/>
