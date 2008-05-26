@@ -287,12 +287,18 @@ namespace GraphStudio
 		return NOERROR;
 	}
 
-	int DisplayGraph::Seek(double time_ms)
+	int DisplayGraph::Seek(double time_ms, BOOL keyframe)
 	{
 		if (!ms) return -1;
 
 		REFERENCE_TIME	rtpos = time_ms * 10000;
-		ms->SetPositions(&rtpos, AM_SEEKING_AbsolutePositioning, NULL, AM_SEEKING_NoPositioning);
+		DWORD			flags = AM_SEEKING_AbsolutePositioning;
+
+		if (keyframe) {
+			flags |= AM_SEEKING_SeekToKeyFrame;
+		}
+
+		ms->SetPositions(&rtpos, flags, NULL, AM_SEEKING_NoPositioning);
 		return 0;
 	}
 
@@ -345,6 +351,60 @@ namespace GraphStudio
 	}
 
 	// seeking helpers
+	int DisplayGraph::GetFPS(double &fps)	
+	{
+		fps = this->fps;
+		return 0;
+	}
+
+	int DisplayGraph::RefreshFPS()
+	{
+		if (!ms) {
+			fps = 0;
+			return 0;
+		}
+
+		HRESULT	hr = NOERROR;
+		do {
+			REFERENCE_TIME		rtDur, rtFrames;
+			GUID				time_format;
+
+			rtDur = 0;
+			rtFrames = 0;
+
+			if (ms->IsFormatSupported(&TIME_FORMAT_FRAME) != NOERROR) {
+				hr = E_FAIL;
+				break;
+			}
+			hr = ms->SetTimeFormat(&TIME_FORMAT_FRAME);
+			if (FAILED(hr)) break;
+			hr = ms->GetDuration(&rtFrames);
+			if (FAILED(hr)) break;
+			hr = ms->SetTimeFormat(&TIME_FORMAT_MEDIA_TIME);
+			if (FAILED(hr)) break;
+			hr = ms->GetDuration(&rtDur);
+			if (FAILED(hr)) break;
+
+			// special case
+			if (rtFrames == 0 || rtDur == 0) {
+				fps = 0.0;
+				return 0;
+			}
+
+			// calculate the FPS
+			fps = (double)rtFrames * 10000000.0 / (double)rtDur;
+			hr = NOERROR;
+
+		} while (0);
+
+		if (FAILED(hr)) {
+			fps = -1.0;
+			return -1;
+		}
+
+		return 0;
+	}
+
 	int DisplayGraph::GetPositions(double &current_ms, double &duration_ms)
 	{
 		if (!ms) {
@@ -381,8 +441,21 @@ namespace GraphStudio
 				duration_ms = (double)rtDur / 10000.0;
 			}
 
+			/*
+				I had to enable exceptions for C++ because Gabest's Avi Splitter
+				kept crashing after this call when not connected. Not sure why.
+				But the splitter wasn't able to play any files.. so I guess
+				it might be wrong.
+			*/
+
 			// get position
-			hr = ms->GetCurrentPosition(&rtCur);
+			try {
+				hr = ms->GetCurrentPosition(&rtCur);
+			}
+			catch (...) {
+				hr = E_FAIL;
+			}
+
 			if (FAILED(hr)) {
 				current_ms = 0;
 			} else {
@@ -427,6 +500,7 @@ namespace GraphStudio
 			}
 		}
 		RefreshFilters();
+		RefreshFPS();
 	}
 
 	HRESULT DisplayGraph::AddFilter(IBaseFilter *filter, CString proposed_name)
@@ -458,6 +532,7 @@ namespace GraphStudio
 
 		// refresh our filters
 		RefreshFilters();
+		RefreshFPS();
 		return NOERROR;
 	}
 
@@ -798,6 +873,7 @@ namespace GraphStudio
 			pPersistStream->Release();
 		}
 		pStorage->Release();
+		RefreshFPS();
 		return hr;
 	}
 
@@ -850,6 +926,7 @@ namespace GraphStudio
 			return -1;
 		}
 
+		RefreshFPS();
 		return 0;
 	}
 

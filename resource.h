@@ -32,6 +32,7 @@
 #define IDB_BITMAP_CLOCK_ACTIVE_LO      152
 #define IDB_BITMAP_CLOCK_INACTIVE_HI    153
 #define IDB_BITMAP_CLOCK_INACTIVE_LO    154
+#define IDD_DIALOG_SEEK                 155
 #define IDC_COMBO_CATEGORIES            1001
 #define IDC_LIST_FILTERS                1002
 #define IDC_COMBO_MERIT                 1003
@@ -75,6 +76,7 @@
 #define IDC_TREE_FAVORITES              1030
 #define IDC_EDIT1                       1031
 #define IDC_EDIT_NAME                   1031
+#define IDC_EDIT_TIME                   1031
 #define IDC_TREE1                       1033
 #define IDC_TREE                        1033
 #define IDC_PROGRESS_POSITION           1034
@@ -82,6 +84,13 @@
 #define IDC_STATIC_CAPTION              1037
 #define IDC_STATIC_VOLUME               1038
 #define IDC_STATIC_BALANCE              1039
+#define IDC_RADIO_TIME                  1040
+#define IDC_RADIO_FRAME                 1041
+#define IDC_CHECK_KEYFRAME              1042
+#define IDC_EDIT_FRAME                  1043
+#define IDC_STATIC_DURATION             1044
+#define IDC_STATIC_POSITION             1045
+#define IDC_STATIC_FPS                  1046
 #define ID_LIST_MRU_CLEAR               4999
 #define ID_LIST_MRU_FILE0               5000
 #define ID_AUDIO_RENDERER0              6000
@@ -147,14 +156,16 @@
 #define ID_PIN_NULL_STREAM              32847
 #define ID_PIN_DUMP_STREAM              32848
 #define ID_GRAPH_USECLOCK               32849
+#define ID_BUTTON32850                  32850
+#define ID_BUTTON_SEEK                  32851
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        155
-#define _APS_NEXT_COMMAND_VALUE         32850
-#define _APS_NEXT_CONTROL_VALUE         1040
+#define _APS_NEXT_RESOURCE_VALUE        156
+#define _APS_NEXT_COMMAND_VALUE         32852
+#define _APS_NEXT_CONTROL_VALUE         1047
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

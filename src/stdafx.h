@@ -95,6 +95,7 @@ using namespace std;
 
 #include "FavoritesForm.h"
 #include "EventsForm.h"
+#include "SeekForm.h"
 #include "RemoteGraphForm.h"
 #include "TextInfoForm.h"
 #include "FileSrcForm.h"

@@ -36,6 +36,7 @@ BEGIN_MESSAGE_MAP(CGraphView, GraphStudio::DisplayView)
 	ON_COMMAND(ID_BUTTON_PLAYPAUSE, &CGraphView::OnPlayPauseToggleClick)
 	ON_COMMAND(ID_BUTTON_DIRECT, &CGraphView::OnDirectConnectClick)
 	ON_COMMAND(ID_BUTTON_REFRESH, &CGraphView::OnRefreshFilters)
+	ON_COMMAND(ID_BUTTON_SEEK, &CGraphView::OnSeekClick)
 	ON_COMMAND(ID_OPTIONS_DIRECT, &CGraphView::OnOptionsDirectConnectClick)
 	ON_COMMAND(ID_FILE_NEW, &CGraphView::OnNewClick)
 	ON_COMMAND(ID_FILE_OPEN, &CGraphView::OnFileOpenClick)
@@ -113,6 +114,7 @@ CGraphView::CGraphView()
 	form_favorites = NULL;
 	form_progress = NULL;
 	form_volume = NULL;
+	form_seek = NULL;
 	filename = _T("");
 	can_save = false;
 }
@@ -123,6 +125,7 @@ CGraphView::~CGraphView()
 	if (form_progress) { form_progress->DestroyWindow(); delete form_progress; }
 	if (form_filters) { form_filters->DestroyWindow(); delete form_filters; }
 	if (form_events) { form_events->DestroyWindow(); delete form_events; }
+	if (form_seek) { form_seek->DestroyWindow(); delete form_seek; }
 	if (form_textinfo) { form_textinfo->DestroyWindow(); delete form_textinfo; }
 	if (form_favorites) { form_favorites->DestroyWindow(); delete form_favorites; }
 }
@@ -412,6 +415,18 @@ void CGraphView::OnPlayPauseToggleClick()
 	} else {
 		OnPauseClick();
 	}
+}
+
+void CGraphView::OnSeekClick()
+{
+	if (!form_seek) {
+		form_seek = new CSeekForm();
+		form_seek->view = this;
+		form_seek->DoCreateDialog();
+	}
+
+	form_seek->UpdateGraphPosition();
+	form_seek->ShowWindow(SW_SHOW);
 }
 
 void CGraphView::OnNewClick()

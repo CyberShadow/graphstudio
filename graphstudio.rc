@@ -101,6 +101,7 @@ BEGIN
     SEPARATOR
     BUTTON      ID_BUTTON_DIRECT
     BUTTON      ID_BUTTON_REFRESH
+    BUTTON      ID_BUTTON_SEEK
 END
 
 
@@ -424,6 +425,26 @@ BEGIN
     RTEXT           "100%",IDC_STATIC_BALANCE,120,20,24,8
 END
 
+IDD_DIALOG_SEEK DIALOGEX 0, 0, 180, 148
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Seek"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,120,124,50,14
+    CONTROL         "",IDC_TITLEBAR,"Static",SS_OWNERDRAW,0,0,180,20
+    CONTROL         "Time",IDC_RADIO_TIME,"Button",BS_AUTORADIOBUTTON,6,79,31,10
+    CONTROL         "Frame",IDC_RADIO_FRAME,"Button",BS_AUTORADIOBUTTON,6,97,36,10
+    LTEXT           "Total duration: ",IDC_STATIC,6,30,50,8
+    LTEXT           "00:00:00,520 (1152 frames)",IDC_STATIC_DURATION,60,30,108,8
+    LTEXT           "Position:",IDC_STATIC,6,42,28,8
+    LTEXT           "00:00:00,000 (0 frames)",IDC_STATIC_POSITION,60,42,108,8
+    LTEXT           "Indicated FPS:",IDC_STATIC,6,54,48,8
+    LTEXT           "25.000",IDC_STATIC_FPS,60,54,108,8
+    EDITTEXT        IDC_EDIT_TIME,60,78,108,14,ES_AUTOHSCROLL
+    CONTROL         "Seek to keyframe",IDC_CHECK_KEYFRAME,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,6,126,72,10
+    EDITTEXT        IDC_EDIT_FRAME,60,97,108,14,ES_AUTOHSCROLL | ES_NUMBER
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -574,6 +595,14 @@ BEGIN
         TOPMARGIN, 7
         BOTTOMMARGIN, 28
     END
+
+    IDD_DIALOG_SEEK, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 173
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 141
+    END
 END
 #endif    // APSTUDIO_INVOKED
 
@@ -721,6 +750,12 @@ BEGIN
     ID_BUTTON_DIRECT        "DirectConnect mode toggle"
     ID_BUTTON_STEP          "Frame Step"
     ID_BUTTON_REFRESH       "Refresh the graph display"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_BUTTON32850          "Seek to specified position"
+    ID_BUTTON_SEEK          "Seek to specified position"
 END
 
 #endif    // Slovak resources

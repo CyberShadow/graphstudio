@@ -1,4 +1,7 @@
-[0.2.4.0 - Beta    xx/May/2008]
+[0.2.5.0 - Beta	   xx/May/2008]
++ added seeking dialog
+
+[0.2.4.0 - Beta    11/May/2008]
 + added graph clock control and filter icons
 
 [0.2.3.0 - Beta    27/Apr/2008]

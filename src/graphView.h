@@ -33,6 +33,7 @@ public:
 	CFavoritesForm				*form_favorites;
 	CProgressForm				*form_progress;
 	CVolumeBarForm				*form_volume;
+	CSeekForm					*form_seek;
 
 	// active property pages
 	CArray<CPropertyForm*>		property_pages;
@@ -84,6 +85,7 @@ public:
 	void OnFrameStepClick();
 	void OnRefreshFilters();
 	void OnNewClick();
+	void OnSeekClick();
 	void OnRenderFileClick();
 	void OnGraphInsertfilter();
 	void OnClearMRUClick();

@@ -267,6 +267,7 @@ namespace GraphStudio
 		// helpers
 		CString							graph_name;
 		bool							uses_clock;
+		double							fps;
 
 	public:
 		DisplayGraph();
@@ -329,7 +330,9 @@ namespace GraphStudio
 
 		// seeking helpers
 		int GetPositions(double &current_ms, double &duration_ms);
-		int Seek(double time_ms);
+		int GetFPS(double &fps);
+		int RefreshFPS();
+		int Seek(double time_ms, BOOL keyframe = FALSE);
 
 		// control
 		void DoFrameStep();
