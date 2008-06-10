@@ -418,18 +418,103 @@ namespace GraphStudio
 
 		if (pmt->formattype == FORMAT_WaveFormatEx) {
 			WAVEFORMATEX	*wfx = (WAVEFORMATEX*)pmt->pbFormat;
-			PropItem	*wfxinfo = mtinfo->AddItem(new PropItem(_T("WAVEFORMATEX")));
-			GetWaveFormatExDetails(wfx, wfxinfo);
+			uint8			*extra = NULL;
+			int				len = 0;
+
+			if (wfx->wFormatTag == WAVE_FORMAT_EXTENSIBLE) {
+				PropItem	*wfxinfo = mtinfo->AddItem(new PropItem(_T("WAVEFORMATEXTENSIBLE")));
+				GetWaveFormatExtensibleDetails((WAVEFORMATEXTENSIBLE*)wfx, wfxinfo);
+
+				if (pmt->cbFormat > sizeof(WAVEFORMATEXTENSIBLE)) {
+					extra = (uint8*)wfx + sizeof(WAVEFORMATEXTENSIBLE);
+					len = pmt->cbFormat - sizeof(WAVEFORMATEXTENSIBLE);
+				}
+
+			} else {
+				PropItem	*wfxinfo = mtinfo->AddItem(new PropItem(_T("WAVEFORMATEX")));
+				GetWaveFormatExDetails(wfx, wfxinfo);
+
+				if (pmt->cbFormat > sizeof(WAVEFORMATEX)) {
+					extra = (uint8*)wfx + sizeof(WAVEFORMATEX);
+					len = pmt->cbFormat - sizeof(WAVEFORMATEX);
+				}
+			}
+
+			// are there any extradata left ?
+			if (len > 0) {
+				PropItem	*info = mtinfo->AddItem(new PropItem(_T("Decoder Specific")));
+
+				int				i;
+				CString			extrabuf = _T("");
+				for (i=0; i<len; i++) {
+					CString	t;
+					t.Format(_T("%02x "), extra[i]);
+					extrabuf += t;
+				}
+				extrabuf = extrabuf.MakeUpper();
+				info->AddItem(new PropItem(_T("Length"), len));
+				info->AddItem(new PropItem(_T("Extradata"), extrabuf));
+			}
+
 		} else
 		if (pmt->formattype == FORMAT_VideoInfo) {
 			VIDEOINFOHEADER	*vih = (VIDEOINFOHEADER*)pmt->pbFormat;
 			PropItem	*vihinfo = mtinfo->AddItem(new PropItem(_T("VIDEOINFOHEADER")));
 			GetVideoInfoDetails(vih, vihinfo);
+
+			uint8			*extra = NULL;
+			int				len = 0;
+
+			if (pmt->cbFormat > sizeof(VIDEOINFOHEADER)) {
+				len = pmt->cbFormat - sizeof(VIDEOINFOHEADER);
+				extra = (uint8*)vih + sizeof(VIDEOINFOHEADER);
+			}
+
+			// are there any extradata left ?
+			if (len > 0) {
+				PropItem	*info = mtinfo->AddItem(new PropItem(_T("Decoder Specific")));
+
+				int				i;
+				CString			extrabuf = _T("");
+				for (i=0; i<len; i++) {
+					CString	t;
+					t.Format(_T("%02x "), extra[i]);
+					extrabuf += t;
+				}
+				extrabuf = extrabuf.MakeUpper();
+				info->AddItem(new PropItem(_T("Length"), len));
+				info->AddItem(new PropItem(_T("Extradata"), extrabuf));
+			}
+
 		} else
 		if (pmt->formattype == FORMAT_VideoInfo2) {
 			VIDEOINFOHEADER2	*vih = (VIDEOINFOHEADER2*)pmt->pbFormat;
 			PropItem	*vihinfo = mtinfo->AddItem(new PropItem(_T("VIDEOINFOHEADER2")));
 			GetVideoInfo2Details(vih, vihinfo);
+
+			uint8			*extra = NULL;
+			int				len = 0;
+
+			if (pmt->cbFormat > sizeof(VIDEOINFOHEADER)) {
+				len = pmt->cbFormat - sizeof(VIDEOINFOHEADER);
+				extra = (uint8*)vih + sizeof(VIDEOINFOHEADER);
+			}
+
+			// are there any extradata left ?
+			if (len > 0) {
+				PropItem	*info = mtinfo->AddItem(new PropItem(_T("Decoder Specific")));
+
+				int				i;
+				CString			extrabuf = _T("");
+				for (i=0; i<len; i++) {
+					CString	t;
+					t.Format(_T("%02x "), extra[i]);
+					extrabuf += t;
+				}
+				extrabuf = extrabuf.MakeUpper();
+				info->AddItem(new PropItem(_T("Length"), len));
+				info->AddItem(new PropItem(_T("Extradata"), extrabuf));
+			}
 		} else
 		if (pmt->formattype == FORMAT_MPEGVideo) {
 			MPEG1VIDEOINFO		*mvi = (MPEG1VIDEOINFO*)pmt->pbFormat;
@@ -457,9 +542,70 @@ namespace GraphStudio
 		return 0;
 	}
 
+	const TCHAR	*WfExNames[] = {
+		_T("Front Left"),
+		_T("Front Right"),
+		_T("Front Center"),
+		_T("Low Frequency"),
+		_T("Back Left"),
+		_T("Back Right"),
+		_T("Front Left Of Center"),
+		_T("Front Right Of Center"),
+		_T("Back Center"),
+		_T("Side Left"),
+		_T("Side Right"),
+		_T("Top Center"),
+		_T("Top Front Left"),
+		_T("Top Front Right"),
+		_T("Top Back Left"),
+		_T("Top Back Center"),
+		_T("Top Back Right"),
+	};
+	const int WfxCount = sizeof(WfExNames)/sizeof(WfExNames[0]);
+
+	int GetWaveFormatExtensibleDetails(WAVEFORMATEXTENSIBLE *wfx, PropItem *wfxinfo)
+	{
+		// read waveformatex info
+		PropItem	*wfxi = wfxinfo->AddItem(new PropItem(_T("WAVEFORMATEX")));
+		GetWaveFormatExDetails(&wfx->Format, wfxi);
+
+		// and add WFExtensible
+		wfxinfo->AddItem(new PropItem(_T("wSamplesPerBlock"), (int)wfx->Samples.wSamplesPerBlock));
+		wfxinfo->AddItem(new PropItem(_T("dwChannelMask"), (int)wfx->dwChannelMask));
+
+		CString		id_name;
+		GraphStudio::NameGuid(wfx->SubFormat,	id_name);		
+		wfxinfo->AddItem(new PropItem(_T("SubFormat"), id_name));
+
+		if (wfx->dwChannelMask != 0) {
+
+			PropItem	*chans = wfxinfo->AddItem(new PropItem(_T("Channels")));
+			uint32		mask = 1;
+
+			for (int i=0; i<WfxCount; i++) {
+				CString	ok = (wfx->dwChannelMask & mask ? _T("TRUE") : _T("FALSE"));
+				chans->AddItem(new PropItem(CString(WfExNames[i]), ok));
+				mask <<= 1;
+			}
+		}
+		return 0;
+	}
+
 	int GetWaveFormatExDetails(WAVEFORMATEX *wfx, PropItem *wfxinfo)
 	{
-		wfxinfo->AddItem(new PropItem(_T("wFormatTag"), (int)wfx->wFormatTag));
+		CString		fmttag;
+		fmttag.Format(_T("%d"), wfx->wFormatTag);
+
+		switch (wfx->wFormatTag) {
+		case WAVE_FORMAT_PCM:			fmttag += _T(" (WAVE_FORMAT_PCM)"); break;		
+		case WAVE_FORMAT_IEEE_FLOAT:	fmttag += _T(" (WAVE_FORMAT_IEEE_FLOAT)"); break;		
+		case WAVE_FORMAT_DRM:			fmttag += _T(" (WAVE_FORMAT_DRM)"); break;		
+		case WAVE_FORMAT_ALAW:			fmttag += _T(" (WAVE_FORMAT_ALAW)"); break;		
+		case WAVE_FORMAT_MULAW:			fmttag += _T(" (WAVE_FORMAT_MULAW)"); break;		
+		case WAVE_FORMAT_ADPCM:			fmttag += _T(" (WAVE_FORMAT_ADPCM)"); break;		
+		case WAVE_FORMAT_EXTENSIBLE:	fmttag += _T(" (WAVE_FORMAT_EXTENSIBLE)"); break;
+		}
+		wfxinfo->AddItem(new PropItem(_T("wFormatTag"), fmttag));
 		wfxinfo->AddItem(new PropItem(_T("nChannels"), (int)wfx->nChannels));
 		wfxinfo->AddItem(new PropItem(_T("nSamplesPerSec"), (int)wfx->nSamplesPerSec));
 		wfxinfo->AddItem(new PropItem(_T("nAvgBytesPerSec"), (int)wfx->nAvgBytesPerSec));

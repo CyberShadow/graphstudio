@@ -31,6 +31,7 @@ namespace GraphStudio
 
 	int GetAllocatorDetails(ALLOCATOR_PROPERTIES *prop, PropItem *apinfo);
 	int GetWaveFormatExDetails(WAVEFORMATEX *wfx, PropItem *wfxinfo);
+	int GetWaveFormatExtensibleDetails(WAVEFORMATEXTENSIBLE *wfx, PropItem *wfxinfo);
 	int GetVideoInfoDetails(VIDEOINFOHEADER *vih, PropItem *vihinfo);
 	int GetVideoInfo2Details(VIDEOINFOHEADER2 *vih, PropItem *vihinfo);
 	int GetBitmapInfoDetails(BITMAPINFOHEADER *bih, PropItem *bihinfo);

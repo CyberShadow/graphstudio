@@ -282,6 +282,8 @@ namespace GraphStudio
 		int AttachCaptureGraphBuilder();
 
 		// XML-based graph construction
+		int SaveXML(CString fn);
+		int SaveXML_Filter(Filter *filter, XML::XMLWriter *writer);
 		int LoadXML(CString fn);
 		int LoadXML_Filter(XML::XMLNode *node);
 		int LoadXML_Render(XML::XMLNode *node);

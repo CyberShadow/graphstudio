@@ -56,6 +56,9 @@
 #include <initguid.h>
 #include <dvdmedia.h>
 #include <dmodshow.h>
+#include <mmreg.h>
+#include <ks.h>
+#include <ksmedia.h>
 
 #include "..\resource.h"
 

@@ -322,7 +322,7 @@ namespace XML
 	
 	void XMLWriter::Clear()
 	{
-		ret = _T("<?xml version=\"1.0\"?>\n");
+		ret = _T("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n");
 		stack.clear();
 		has_children.clear();
 		has_params.clear();

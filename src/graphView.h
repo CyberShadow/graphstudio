@@ -180,6 +180,7 @@ public:
 	void OnUpdateOptionsDirectConnect(CCmdUI *pCmdUI);
 
 	afx_msg void OnViewProgressview();
+	afx_msg void OnFileSaveasxml();
 };
 
 #ifndef _DEBUG  // debug version in graphView.cpp

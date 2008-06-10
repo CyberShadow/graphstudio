@@ -67,6 +67,19 @@ namespace GraphStudio
 				ret = 0;
 			}
 
+		PRESET("ifilesinkfilter")
+			//	<ifilesinkfilter dest="d:\sga.avi"/>
+
+			CComPtr<IFileSinkFilter>		fsink;
+			hr = filter->QueryInterface(IID_IFileSinkFilter, (void**)&fsink);
+			if (SUCCEEDED(hr)) {
+				// save the file
+				CString	dest = conf->GetValue(_T("dest"));
+				hr = fsink->SetFileName((LPCOLESTR)dest.GetBuffer(), NULL);
+				if (FAILED(hr)) return -1;			// cannot open file
+				ret = 0;
+			}
+
 		PRESET("imonogramgraphsink")
 			// <imonogramgraphsink name="video" blocking="1"/>
 

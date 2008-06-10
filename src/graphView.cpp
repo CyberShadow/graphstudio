@@ -97,6 +97,7 @@ BEGIN_MESSAGE_MAP(CGraphView, GraphStudio::DisplayView)
 	ON_COMMAND(ID_OPTIONS_DISPLAYASFILENAME, &CGraphView::OnOptionsDisplayFileName)
 	ON_UPDATE_COMMAND_UI(ID_OPTIONS_DISPLAYASFILENAME, &CGraphView::OnUpdateOptionsDisplayFileName)
 	ON_COMMAND(ID_VIEW_PROGRESSVIEW, &CGraphView::OnViewProgressview)
+	ON_COMMAND(ID_FILE_SAVEASXML, &CGraphView::OnFileSaveasxml)
 END_MESSAGE_MAP()
 
 //-----------------------------------------------------------------------------
@@ -505,6 +506,28 @@ void CGraphView::OnFileSaveAsClick()
 		CString	short_fn = filename;
 		short_fn.Delete(0, pos);
 		doc->SetTitle(short_fn);
+	}
+}
+
+void CGraphView::OnFileSaveasxml()
+{
+	// nabrowsujeme subor
+	CString		filter;
+	CString		filename;
+
+	filter =  _T("");
+	filter += _T("GraphStudio XML Files (xml)|*.xml|");
+	filter += _T("All Files|*.*|");
+
+	CFileDialog dlg(FALSE,NULL,NULL,OFN_OVERWRITEPROMPT|OFN_ENABLESIZING,filter);
+    int ret = dlg.DoModal();
+
+	filename = dlg.GetPathName();
+	if (ret == IDOK) {	
+		ret = graph.SaveXML(filename);
+		if (ret < 0) {
+			MessageBox(_T("Cannot save file"));
+		}
 	}
 }
 
@@ -1432,3 +1455,4 @@ void CGraphView::OnOverlayIconClick(GraphStudio::OverlayIcon *icon, CPoint point
 		break;
 	}
 }
+

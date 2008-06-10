@@ -536,6 +536,104 @@ namespace GraphStudio
 		return NOERROR;
 	}
 
+	CStringA UTF16toUTF8(const CStringW &utf16)
+	{
+	   CStringA utf8;
+	   int len = WideCharToMultiByte(CP_UTF8, 0, utf16, -1, NULL, 0, 0, 0);
+	   if (len>1) { 
+		  char *ptr = utf8.GetBuffer(len-1);
+		  if (ptr) WideCharToMultiByte(CP_UTF8, 0, utf16, -1, ptr, len, 0, 0);
+		  utf8.ReleaseBuffer();
+	   }
+	   return utf8;
+	} 
+
+	int DisplayGraph::SaveXML_Filter(Filter *filter, XML::XMLWriter *writer)
+	{
+		CComPtr<IFileSourceFilter>		src;
+		CComPtr<IFileSinkFilter>		sink;
+		CComPtr<IPersistStream>			persist;
+		HRESULT							hr;
+		
+		hr = filter->filter->QueryInterface(IID_IFileSourceFilter, (void**)&src);
+		if (SUCCEEDED(hr)) {
+			LPOLESTR		fn = NULL;
+			if (SUCCEEDED(src->GetCurFile(&fn, NULL))) {
+				//	<ifilesourcefilter source="d:\sga.avi"/>
+				writer->BeginNode(_T("ifilesourcefilter"));
+					writer->WriteValue(_T("source"), CString(fn));
+				writer->EndNode();
+				if (fn) CoTaskMemFree(fn);
+			}
+			src = NULL;
+		}
+
+		hr = filter->filter->QueryInterface(IID_IFileSinkFilter, (void**)&sink);
+		if (SUCCEEDED(hr)) {
+			LPOLESTR		fn = NULL;
+			if (SUCCEEDED(sink->GetCurFile(&fn, NULL))) {
+				//	<ifilesinkfilter dest="d:\sga.avi"/>
+				writer->BeginNode(_T("ifilesinkfilter"));
+					writer->WriteValue(_T("dest"), CString(fn));
+				writer->EndNode();
+				if (fn) CoTaskMemFree(fn);
+			}
+			sink = NULL;
+		}
+
+
+
+		return 0;
+	}
+
+	int DisplayGraph::SaveXML(CString fn)
+	{
+		XML::XMLWriter			xml;
+		int						ret;
+
+		xml.BeginNode(_T("graph"));
+			xml.WriteValue(_T("name"), _T("Unnamed Graph"));
+
+			/*
+				First we add all filters into the graph
+			*/
+			for (int i=0; i<filters.GetCount(); i++) {
+				Filter	*filter = filters[i];
+
+				xml.BeginNode(_T("filter"));
+					// save the filter CLSID. If the filter is a wrapper it will initialize properly
+					// after loading IPersistStream 
+					xml.WriteValue(_T("name"), filter->name);
+
+					LPOLESTR	strclsid = NULL;
+					StringFromCLSID(filter->clsid, &strclsid);
+					xml.WriteValue(_T("clsid"), strclsid);
+					CoTaskMemFree(strclsid);
+
+					// now check for interfaces
+					SaveXML_Filter(filter, &xml);
+
+				xml.EndNode();
+			}
+
+			/*
+				Now let's add all the connections
+			*/
+
+		xml.EndNode();
+
+		FILE		*f;
+		f = _tfopen(fn, _T("wb"));
+		if (!f) return -1;
+
+		CString		x = xml.XML();
+		CStringA	xa = UTF16toUTF8(x);
+		fwrite(xa.GetBuffer(), 1, xa.GetLength(), f);
+		fclose(f);
+
+		return 0;
+	}
+
 	int DisplayGraph::LoadXML(CString fn)
 	{
 		XML::XMLFile			xml;
