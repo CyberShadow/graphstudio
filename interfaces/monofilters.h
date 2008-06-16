@@ -91,6 +91,14 @@ namespace Monogram
 	static const GUID CLSID_MonogramAudioPropertyPage = 
 	{ 0x45815c33, 0x859a, 0x4549, { 0x93, 0xa7, 0x70, 0x72, 0x4c, 0x51, 0x4, 0x8d } };
 
+	// {1FB0F046-623C-40a7-B439-41E4BFCB8BAB}
+	static const GUID CLSID_MonogramX264 = 
+	{ 0x1fb0f046, 0x623c, 0x40a7, { 0xb4, 0x39, 0x41, 0xe4, 0xbf, 0xcb, 0x8b, 0xab } };
+
+	// {A519B1EF-EB84-4a49-AE39-38DC4533EBC1}
+	static const GUID IID_IMonogramX264 = 
+	{ 0xa519b1ef, 0xeb84, 0x4a49, { 0xae, 0x39, 0x38, 0xdc, 0x45, 0x33, 0xeb, 0xc1 } };
+
 	// {65DD8A3A-CDA8-4fdc-BAAB-E8748C285926}
 	static const GUID IID_IMonogramAudioProc = 
 	{ 0x65dd8a3a, 0xcda8, 0x4fdc, { 0xba, 0xab, 0xe8, 0x74, 0x8c, 0x28, 0x59, 0x26 } };
@@ -535,6 +543,11 @@ namespace Monogram
 	//	Interfaces
 	//
 	//-------------------------------------------------------------------------
+
+	DECLARE_INTERFACE_(IMonogramX264, IUnknown)
+	{
+		STDMETHOD(SetBitrate)(int bitrate_kbps) PURE;
+	};
 
 	DECLARE_INTERFACE_(IMonogramQueue, IUnknown)
 	{

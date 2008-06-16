@@ -220,6 +220,18 @@ namespace GraphStudio
 				ret = 0;
 			}
 
+		PRESET("imonogramx264")
+			// <imonogramx264
+			//	  bitrate="250000"
+			// />
+
+			int	br = conf->GetValue(_T("bitrate"), 800000);
+			CComPtr<Monogram::IMonogramX264>	enc;
+			hr = filter->QueryInterface(Monogram::IID_IMonogramX264, (void**)&enc);
+			if (SUCCEEDED(hr)) {
+				enc->SetBitrate(br / 1000);
+			}
+
 		PRESET("imonogramavcencoder")
 			// <imonogramavcencoder
 			// 	  profile="baseline" level="51"
