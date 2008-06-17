@@ -178,12 +178,7 @@ BEGIN
     END
     POPUP "Options"
     BEGIN
-        POPUP "Automatic Restart"
-        BEGIN
-            MENUITEM "Disabled",                    ID_AUTORESTART_DISABLED
-            MENUITEM SEPARATOR
-            MENUITEM "04:00 AM",                    ID_AUTORESTART
-        END
+        MENUITEM "Schedule ...",                ID_AUTOMATICRESTART_SCHEDULE
         MENUITEM SEPARATOR
         MENUITEM "Display As File Name",        ID_OPTIONS_DISPLAYASFILENAME
         MENUITEM "DirectConnect Mode",          ID_OPTIONS_DIRECT
@@ -445,6 +440,15 @@ BEGIN
     EDITTEXT        IDC_EDIT_FRAME,60,97,108,14,ES_AUTOHSCROLL | ES_NUMBER
 END
 
+IDD_DIALOG_SCHEDULE DIALOGEX 0, 0, 246, 137
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_POPUP | WS_CLIPCHILDREN | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
+CAPTION "Schedule"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    CONTROL         "",IDC_TITLEBAR,"Static",SS_OWNERDRAW,0,0,246,20
+    CONTROL         "",IDC_LIST_SCHEDULE,"SysListView32",LVS_REPORT | LVS_SHOWSELALWAYS | LVS_OWNERDRAWFIXED | LVS_ALIGNLEFT | WS_TABSTOP,0,24,240,102
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -602,6 +606,14 @@ BEGIN
         RIGHTMARGIN, 173
         TOPMARGIN, 7
         BOTTOMMARGIN, 141
+    END
+
+    IDD_DIALOG_SCHEDULE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 239
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 130
     END
 END
 #endif    // APSTUDIO_INVOKED

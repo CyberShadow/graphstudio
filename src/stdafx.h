@@ -82,6 +82,7 @@ using namespace std;
 #include "dsutil.h"
 #include "filter_list.h"
 #include "prop_tree.h"
+#include "schedule_list.h"
 
 #include "object_details.h"
 
@@ -89,7 +90,6 @@ using namespace std;
 #include "mru_list.h"
 #include "MainFrm.h"
 #include "graphDoc.h"
-#include "auto_restart.h"
 #include "FiltersForm.h"
 #include "volumebarform.h"
 
@@ -98,6 +98,7 @@ using namespace std;
 
 #include "FavoritesForm.h"
 #include "EventsForm.h"
+#include "ScheduleForm.h"
 #include "SeekForm.h"
 #include "RemoteGraphForm.h"
 #include "TextInfoForm.h"

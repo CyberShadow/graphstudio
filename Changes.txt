@@ -1,8 +1,10 @@
-[0.2.5.0 - Beta	   xx/June/2008]
+[0.2.5.0 - Beta	   17/June/2008]
 + added seeking dialog
 + added WAVEFORMATEXTENSIBLE parsing
 + added additional extradata parsing after VIDEOINFOHEADER & VIDEOINFOHEADER2
 + added some new GUIDs
++ added new event scheduling dialog
++ added support for schedule events via XML
 
 [0.2.4.0 - Beta    11/May/2008]
 + added graph clock control and filter icons

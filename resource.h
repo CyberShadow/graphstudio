@@ -33,6 +33,7 @@
 #define IDB_BITMAP_CLOCK_INACTIVE_HI    153
 #define IDB_BITMAP_CLOCK_INACTIVE_LO    154
 #define IDD_DIALOG_SEEK                 155
+#define IDD_DIALOG_SCHEDULE             156
 #define IDC_COMBO_CATEGORIES            1001
 #define IDC_LIST_FILTERS                1002
 #define IDC_COMBO_MERIT                 1003
@@ -91,6 +92,9 @@
 #define IDC_STATIC_DURATION             1044
 #define IDC_STATIC_POSITION             1045
 #define IDC_STATIC_FPS                  1046
+#define IDC_LIST_SCHEDULE               1048
+#define IDC_BUTTON_ADD					1049
+#define IDC_BUTTON_REMOVE				1050
 #define ID_LIST_MRU_CLEAR               4999
 #define ID_LIST_MRU_FILE0               5000
 #define ID_AUDIO_RENDERER0              6000
@@ -158,14 +162,15 @@
 #define ID_GRAPH_USECLOCK               32849
 #define ID_BUTTON32850                  32850
 #define ID_BUTTON_SEEK                  32851
+#define ID_AUTOMATICRESTART_SCHEDULE    32852
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        156
-#define _APS_NEXT_COMMAND_VALUE         32852
-#define _APS_NEXT_CONTROL_VALUE         1047
+#define _APS_NEXT_RESOURCE_VALUE        157
+#define _APS_NEXT_COMMAND_VALUE         32853
+#define _APS_NEXT_CONTROL_VALUE         1051
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

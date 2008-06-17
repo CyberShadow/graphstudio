@@ -196,10 +196,6 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\src\auto_restart.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\src\bits.cpp"
 				>
 			</File>
@@ -304,6 +300,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\schedule_list.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\ScheduleForm.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\SeekForm.cpp"
 				>
 			</File>
@@ -333,10 +337,6 @@
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
-			<File
-				RelativePath=".\src\auto_restart.h"
-				>
-			</File>
 			<File
 				RelativePath=".\src\bits.h"
 				>
@@ -439,6 +439,14 @@
 			</File>
 			<File
 				RelativePath=".\Resource.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\schedule_list.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\ScheduleForm.h"
 				>
 			</File>
 			<File

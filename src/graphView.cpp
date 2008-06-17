@@ -89,15 +89,12 @@ BEGIN_MESSAGE_MAP(CGraphView, GraphStudio::DisplayView)
 	ON_COMMAND(ID_VIEW_DECREASEZOOMLEVEL, &CGraphView::OnViewDecreasezoomlevel)
 	ON_COMMAND(ID_VIEW_INCREASEZOOMLEVEL, &CGraphView::OnViewIncreasezoomlevel)
 	ON_COMMAND(ID_FILTERS_MANAGEFAVORITES, &CGraphView::OnFiltersManageFavorites)
-	ON_COMMAND(ID_AUTORESTART, &CGraphView::OnAutorestart)
-	ON_COMMAND(ID_AUTORESTART_DISABLED, &CGraphView::OnAutorestartDisabled)
-	ON_UPDATE_COMMAND_UI(ID_AUTORESTART, &CGraphView::OnUpdateAutorestart)
-	ON_UPDATE_COMMAND_UI(ID_AUTORESTART_DISABLED, &CGraphView::OnUpdateAutorestartDisabled)
 	ON_COMMAND(ID_FILE_OPENFROMXML, &CGraphView::OnFileOpenfromxml)
 	ON_COMMAND(ID_OPTIONS_DISPLAYASFILENAME, &CGraphView::OnOptionsDisplayFileName)
 	ON_UPDATE_COMMAND_UI(ID_OPTIONS_DISPLAYASFILENAME, &CGraphView::OnUpdateOptionsDisplayFileName)
 	ON_COMMAND(ID_VIEW_PROGRESSVIEW, &CGraphView::OnViewProgressview)
 	ON_COMMAND(ID_FILE_SAVEASXML, &CGraphView::OnFileSaveasxml)
+	ON_COMMAND(ID_AUTOMATICRESTART_SCHEDULE, &CGraphView::OnAutomaticrestartSchedule)
 END_MESSAGE_MAP()
 
 //-----------------------------------------------------------------------------
@@ -112,6 +109,7 @@ CGraphView::CGraphView()
 	form_filters = NULL;
 	form_events = NULL;
 	form_textinfo = NULL;
+	form_schedule = NULL;
 	form_favorites = NULL;
 	form_progress = NULL;
 	form_volume = NULL;
@@ -126,6 +124,7 @@ CGraphView::~CGraphView()
 	if (form_progress) { form_progress->DestroyWindow(); delete form_progress; }
 	if (form_filters) { form_filters->DestroyWindow(); delete form_filters; }
 	if (form_events) { form_events->DestroyWindow(); delete form_events; }
+	if (form_schedule) { form_schedule->DestroyWindow(); delete form_schedule; }
 	if (form_seek) { form_seek->DestroyWindow(); delete form_seek; }
 	if (form_textinfo) { form_textinfo->DestroyWindow(); delete form_textinfo; }
 	if (form_favorites) { form_favorites->DestroyWindow(); delete form_favorites; }
@@ -227,6 +226,11 @@ void CGraphView::OnInit()
 	form_events->view = this;
 	form_events->DoCreateDialog();
 
+	// initialize schedule
+	form_schedule = new CScheduleForm(NULL);
+	form_schedule->view = this;
+	form_schedule->DoCreateDialog();
+
 	form_textinfo = new CTextInfoForm(NULL);
 	form_textinfo->Create(IDD_DIALOG_TEXTVIEW);
 	form_textinfo->view = this;
@@ -256,10 +260,6 @@ void CGraphView::OnInit()
 
 	UpdateGraphState();
 	UpdateMRUMenu();
-
-	// auto restart
-	auto_restart.hwndTarget = *this;
-	auto_restart.Enable(false);
 
 	// load favorites
 	GraphStudio::Favorites	*favorites = GraphStudio::Favorites::GetInstance();
@@ -301,21 +301,6 @@ LRESULT CGraphView::OnWmCommand(WPARAM wParam, LPARAM lParam)
 	}	
 
 	return 0;
-}
-
-BOOL CGraphView::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT *pResult)
-{
-	if (message == WM_AUTORESTART) {
-
-		// restart the graph
-		OnStopClick();
-		OnPlayClick();
-
-		// schedule next restart
-		auto_restart.Schedule();
-
-	}
-	return __super::OnWndMsg(message, wParam, lParam, pResult);
 }
 
 void CGraphView::UpdateRenderersMenu()
@@ -381,9 +366,6 @@ void CGraphView::OnFrameStepClick()
 void CGraphView::OnPlayClick()
 {
 	if (SUCCEEDED(graph.DoPlay())) {
-		if (!graph.is_remote) {
-			SetTimer(CGraphView::TIMER_AUTO_RESTART, 1000, NULL);
-		}
 	}
 	UpdateGraphState();
 }
@@ -391,7 +373,6 @@ void CGraphView::OnPlayClick()
 void CGraphView::OnStopClick()
 {
 	if (SUCCEEDED(graph.DoStop())) {
-		KillTimer(CGraphView::TIMER_AUTO_RESTART);
 	}
 	UpdateGraphState();
 }
@@ -432,8 +413,12 @@ void CGraphView::OnSeekClick()
 
 void CGraphView::OnNewClick()
 {
+	if (form_schedule) {
+		// reset schedule events for new graphs
+		form_schedule->ClearEvents();
+	}
+
 	KillTimer(CGraphView::TIMER_REMOTE_GRAPH_STATE);
-	KillTimer(CGraphView::TIMER_AUTO_RESTART);
 
 	if (!graph.is_remote) {
 		OnStopClick();
@@ -765,6 +750,12 @@ void CGraphView::OnRefreshFilters()
 	Invalidate();
 }
 
+
+void CGraphView::OnAutomaticrestartSchedule()
+{
+	if (form_schedule) form_schedule->ShowWindow(SW_SHOW);
+}
+
 void CGraphView::OnViewGraphEvents()
 {
 	if (form_events) form_events->ShowWindow(SW_SHOW);
@@ -814,11 +805,6 @@ void CGraphView::OnTimer(UINT_PTR nIDEvent)
 	case CGraphView::TIMER_REMOTE_GRAPH_STATE:
 		{
 			UpdateGraphState();
-		}
-		break;
-	case CGraphView::TIMER_AUTO_RESTART:
-		{
-			auto_restart.OnTimer();
 		}
 		break;
 	case 1001:
@@ -1363,26 +1349,6 @@ void CGraphView::OnFiltersManageFavorites()
 	form_favorites->ShowWindow(SW_SHOW);
 }
 
-void CGraphView::OnAutorestart()
-{
-	auto_restart.Enable(true);
-}
-
-void CGraphView::OnAutorestartDisabled()
-{
-	auto_restart.Enable(false);
-}
-
-void CGraphView::OnUpdateAutorestart(CCmdUI *pCmdUI)
-{
-	pCmdUI->SetCheck(auto_restart.enabled);
-}
-
-void CGraphView::OnUpdateAutorestartDisabled(CCmdUI *pCmdUI)
-{
-	pCmdUI->SetCheck(!auto_restart.enabled);
-}
-
 void CGraphView::OnOptionsDisplayFileName()
 {
 	render_params.display_file_name = !render_params.display_file_name;
@@ -1455,4 +1421,3 @@ void CGraphView::OnOverlayIconClick(GraphStudio::OverlayIcon *icon, CPoint point
 		break;
 	}
 }
-

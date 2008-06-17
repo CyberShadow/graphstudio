@@ -663,6 +663,7 @@ namespace GraphStudio
 			if (node->name == _T("connect")) ret = LoadXML_Connect(node); else
 			if (node->name == _T("config")) ret = LoadXML_Config(node); else
 			if (node->name == _T("iamgraphstreams")) ret = LoadXML_IAMGraphStreams(node); else
+			if (node->name == _T("schedule")) ret = LoadXML_Schedule(node); else
 			if (node->name == _T("command")) ret = LoadXML_Command(node); else
 			{
 				//ret = -1;
@@ -671,6 +672,30 @@ namespace GraphStudio
 			// is everything okay ?
 			if (ret < 0) {
 				return -1;
+			}
+		}
+
+		return 0;
+	}
+
+	int DisplayGraph::LoadXML_Schedule(XML::XMLNode *node)
+	{
+		// <schedule pattern="*:*:*" action="restart"/>
+		CMainFrame	*frame = (CMainFrame*)AfxGetMainWnd();
+		if (frame) {
+			CGraphView	*view = frame->view;
+
+			CString	pattern = node->GetValue(_T("pattern"));
+			CString	action  = node->GetValue(_T("action"));
+
+			int act = 0;
+			if (action == _T("start")) act = ScheduleEvent::ACTION_START; else
+			if (action == _T("stop")) act = ScheduleEvent::ACTION_STOP; else
+			if (action == _T("restart")) act = ScheduleEvent::ACTION_RESTART;
+
+			if (view->form_schedule) {
+				// add a new schedule event
+				view->form_schedule->AddEvent(pattern, act);
 			}
 		}
 
@@ -780,7 +805,16 @@ namespace GraphStudio
 		} else
 		if (msg == _T("stop")) {
 			DoStop();
+		} else
+		if (msg == _T("progress")) {
+			
+			CMainFrame	*frame = (CMainFrame*)AfxGetMainWnd();
+			if (frame) {
+				// run in the progress mode
+				frame->view->OnViewProgressview();
+			}
 		}
+
 		return 0;
 	}
 

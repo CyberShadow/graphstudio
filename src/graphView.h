@@ -29,6 +29,7 @@ public:
 
 	CFiltersForm				*form_filters;
 	CEventsForm					*form_events;
+	CScheduleForm				*form_schedule;
 	CTextInfoForm				*form_textinfo;
 	CFavoritesForm				*form_favorites;
 	CProgressForm				*form_progress;
@@ -40,7 +41,6 @@ public:
 
 	// most recently used list
 	GraphStudio::MRUList		mru;
-	GraphStudio::AutoRestart	auto_restart;
 
 	// enumerated audio & video renderers
 	DSUtil::FilterTemplates		audio_renderers;
@@ -129,7 +129,6 @@ public:
 	int TryOpenFile(CString fn);
 	int TryOpenXML(CString fn);
 
-	virtual BOOL OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT *pResult);
 	virtual LRESULT OnWmCommand(WPARAM wParam, LPARAM lParam);
 
 	// property pages
@@ -167,10 +166,6 @@ public:
 	void OnViewDecreasezoomlevel();
 	void OnViewIncreasezoomlevel();
 	void OnFiltersManageFavorites();
-	void OnAutorestart();
-	void OnAutorestartDisabled();
-	void OnUpdateAutorestart(CCmdUI *pCmdUI);
-	void OnUpdateAutorestartDisabled(CCmdUI *pCmdUI);
 	void OnFileOpenfromxml();
 	void OnOptionsDisplayFileName();
 	void OnUpdateOptionsDisplayFileName(CCmdUI *pCmdUI);
@@ -181,6 +176,7 @@ public:
 
 	afx_msg void OnViewProgressview();
 	afx_msg void OnFileSaveasxml();
+	afx_msg void OnAutomaticrestartSchedule();
 };
 
 #ifndef _DEBUG  // debug version in graphView.cpp
