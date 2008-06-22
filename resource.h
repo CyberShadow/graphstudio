@@ -34,6 +34,9 @@
 #define IDB_BITMAP_CLOCK_INACTIVE_LO    154
 #define IDD_DIALOG_SEEK                 155
 #define IDD_DIALOG_SCHEDULE             156
+#define IDD_DIALOG_VCM_DIALOGS          157
+#define IDD_OLE_PROPPAGE_LARGE          158
+#define IDD_DIALOG_VCM                  158
 #define IDC_COMBO_CATEGORIES            1001
 #define IDC_LIST_FILTERS                1002
 #define IDC_COMBO_MERIT                 1003
@@ -53,23 +56,33 @@
 #define IDC_BUTTON2                     1015
 #define IDC_BUTTON_COPY                 1015
 #define IDC_BUTTON_REFRESH              1015
+#define IDC_BUTTON_ABOUT                1015
 #define IDC_SLIDER1                     1016
 #define IDC_SLIDER_SEEK                 1016
 #define IDC_SLIDER_VOLUME               1016
+#define IDC_SLIDER_IRATE                1016
 #define IDC_STATIC_TIME                 1017
 #define IDC_SLIDER_BALANCE              1017
+#define IDC_SLIDER_PRATE                1017
 #define IDC_BUTTON1                     1018
 #define IDC_BUTTON_BROWSE               1018
 #define IDC_BUTTON_APPLY                1018
 #define IDC_BUTTON_CLOSE                1018
+#define IDC_BUTTON_CONFIG               1018
+#define IDC_BUTTON_DEF_IRATE            1018
 #define IDC_EDIT_DETAILS                1019
+#define IDC_BUTTON_DEF_PRATE            1019
 #define IDC_COMBO_REPORTTYPE            1020
 #define IDC_RADIO_FILE                  1021
 #define IDC_RADIO_URL                   1022
+#define IDC_SLIDER_QUALITY              1022
 #define IDC_COMBO_FILE                  1023
+#define IDC_BUTTON_DEF_QUALITY          1023
 #define IDC_COMBO_URL                   1024
+#define IDC_SLIDER_WINDOW               1024
 #define IDC_TAB1                        1025
 #define IDC_TAB_PAGES                   1025
+#define IDC_BUTTON_DEF_WINDOW           1025
 #define IDC_TITLEBAR                    1027
 #define IDC_TITLE                       1028
 #define IDC_LIST_GRAPHS                 1029
@@ -93,8 +106,18 @@
 #define IDC_STATIC_POSITION             1045
 #define IDC_STATIC_FPS                  1046
 #define IDC_LIST_SCHEDULE               1048
-#define IDC_BUTTON_ADD					1049
-#define IDC_BUTTON_REMOVE				1050
+#define IDC_BUTTON_ADD                  1049
+#define IDC_BUTTON_REMOVE               1050
+#define IDC_STATIC_DESC                 1051
+#define IDC_STATIC_VERSION              1052
+#define IDC_STATIC_IRATE                1053
+#define IDC_STATIC_PRATE                1054
+#define IDC_STATIC_QUALITY              1055
+#define IDC_STATIC_WINDOW               1056
+#define IDC_STATIC_VAL_IRATE            1057
+#define IDC_STATIC_VAL_PRATE            1058
+#define IDC_STATIC_VAL_QUALITY          1059
+#define IDC_STATIC_VAL_WINDOW           1060
 #define ID_LIST_MRU_CLEAR               4999
 #define ID_LIST_MRU_FILE0               5000
 #define ID_AUDIO_RENDERER0              6000
@@ -170,7 +193,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        157
 #define _APS_NEXT_COMMAND_VALUE         32853
-#define _APS_NEXT_CONTROL_VALUE         1051
+#define _APS_NEXT_CONTROL_VALUE         1061
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

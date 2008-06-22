@@ -261,6 +261,34 @@ int CPropertyForm::AnalyzeObject(IUnknown *obj)
 			details_page->Release();
 		}
 
+		//---------------------------------------------------------------------
+		//
+		//	Support for Video For Windows & ACM objects
+		//
+		//---------------------------------------------------------------------
+		CComPtr<IAMVfwCompressDialogs>		vfw_dialogs;
+		if (SUCCEEDED(obj->QueryInterface(IID_IAMVfwCompressDialogs, (void**)&vfw_dialogs))) {
+			CFilterVCMPage	*vcm_page;
+			vcm_page = new CFilterVCMPage(NULL, &hr, _T("VFW Dialogs"));
+			if (vcm_page) {
+				vcm_page->AddRef();
+
+				hr = vcm_page->QueryInterface(IID_IPropertyPage, (void**)&page);
+				if (SUCCEEDED(hr)) {
+					hr = page->SetObjects(1, &obj);
+					if (SUCCEEDED(hr)) {
+						container->AddPage(page);
+					}
+				}
+				page = NULL;
+
+				vcm_page->Release();
+			}
+		}
+		vfw_dialogs = NULL;
+
+
+
 		// let's enumerate all pins
 		CComPtr<IEnumPins>		epins;
 		hr = filter->EnumPins(&epins);
@@ -338,6 +366,32 @@ int CPropertyForm::LoadPinPage(IPin *pin)
 		// don't care anymore
 		details_page->Release();
 	}
+
+	//---------------------------------------------------------------------
+	//
+	//	Support for Video For Windows
+	//
+	//---------------------------------------------------------------------
+	CComPtr<IAMVideoCompression>		vfw_comp;
+	if (SUCCEEDED(pin->QueryInterface(IID_IAMVideoCompression, (void**)&vfw_comp))) {
+		CVideoCompressionPage	*cm_page;
+		cm_page = new CVideoCompressionPage(NULL, &hr, _T("Video Compression"));
+		if (cm_page) {
+			cm_page->AddRef();
+
+			hr = cm_page->QueryInterface(IID_IPropertyPage, (void**)&page);
+			if (SUCCEEDED(hr)) {
+				hr = page->SetObjects(1, (IUnknown**)&pin);
+				if (SUCCEEDED(hr)) {
+					container->AddPage(page);
+				}
+			}
+			page = NULL;
+
+			cm_page->Release();
+		}
+	}
+	vfw_comp = NULL;	
 
 	return 0;
 }

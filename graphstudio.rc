@@ -256,7 +256,7 @@ STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSM
 CAPTION "About MONOGRAM GraphStudio"
 FONT 8, "MS Shell Dlg", 0, 0, 0x1
 BEGIN
-    LTEXT           "MONOGRAM GraphStudio v0.2.5.0 Beta",IDC_STATIC,6,30,156,8,SS_NOPREFIX
+    LTEXT           "MONOGRAM GraphStudio v0.2.6.0 Beta",IDC_STATIC,6,30,156,8,SS_NOPREFIX
     DEFPUSHBUTTON   "OK",IDOK,198,78,50,16,WS_GROUP
     LTEXT           "This software is free under the GNU GPL license",IDC_STATIC,6,72,153,8
     LTEXT           "http://www.monogrammultimedia.com",IDC_STATIC,6,84,123,8
@@ -456,8 +456,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 0,2,5,0
- PRODUCTVERSION 0,2,5,0
+ FILEVERSION 0,2,6,0
+ PRODUCTVERSION 0,2,6,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -474,11 +474,11 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "MONOGRAM Mutimedia s.r.o."
             VALUE "FileDescription", "GraphStudio"
-            VALUE "FileVersion", "0.2.5.0"
+            VALUE "FileVersion", "0.2.6.0"
             VALUE "InternalName", "graphstudio.exe"
             VALUE "OriginalFilename", "graphstudio.exe"
             VALUE "ProductName", "MONOGRAM GraphStudio"
-            VALUE "ProductVersion", "0.2.5.0"
+            VALUE "ProductVersion", "0.2.6.0"
         END
     END
     BLOCK "VarFileInfo"
@@ -802,6 +802,42 @@ FONT 8, "MS Shell Dlg", 0, 0, 0x0
 BEGIN
 END
 
+IDD_DIALOG_VCM_DIALOGS DIALOGEX 0, 0, 272, 248
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD
+FONT 8, "MS Shell Dlg", 0, 0, 0x0
+BEGIN
+    PUSHBUTTON      "Display VFW Configuration Dialog",IDC_BUTTON_CONFIG,6,48,132,14
+    PUSHBUTTON      "Display About Box",IDC_BUTTON_ABOUT,6,66,132,14
+    CONTROL         "",IDC_TITLEBAR,"Static",SS_OWNERDRAW,0,0,272,20
+    LTEXT           "IAMVfwCompressDialogs Interface",IDC_STATIC,6,30,112,8
+END
+
+IDD_DIALOG_VCM DIALOGEX 0, 0, 272, 248
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD
+FONT 8, "MS Shell Dlg", 0, 0, 0x0
+BEGIN
+    CONTROL         "",IDC_TITLEBAR,"Static",SS_OWNERDRAW,0,0,272,20
+    LTEXT           "IAMVideoCompression Interface",IDC_STATIC,6,30,104,8
+    LTEXT           "Key-frame Rate",IDC_STATIC_IRATE,6,78,52,8
+    CTEXT           "My Codec",IDC_STATIC_DESC,138,30,126,8
+    CTEXT           "1.2.2.0",IDC_STATIC_VERSION,138,42,126,8
+    CONTROL         "",IDC_SLIDER_IRATE,"msctls_trackbar32",TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,72,78,102,12
+    LTEXT           "-1",IDC_STATIC_VAL_IRATE,180,78,30,8
+    PUSHBUTTON      "Default",IDC_BUTTON_DEF_IRATE,216,75,43,13
+    LTEXT           "P-frame Rate",IDC_STATIC_PRATE,6,93,44,8
+    CONTROL         "",IDC_SLIDER_PRATE,"msctls_trackbar32",TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,72,93,102,12
+    LTEXT           "-1",IDC_STATIC_VAL_PRATE,180,93,30,8
+    PUSHBUTTON      "Default",IDC_BUTTON_DEF_PRATE,216,90,43,13
+    LTEXT           "Quality",IDC_STATIC_QUALITY,6,108,24,8
+    CONTROL         "",IDC_SLIDER_QUALITY,"msctls_trackbar32",TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,72,108,102,12
+    LTEXT           "-1",IDC_STATIC_VAL_QUALITY,180,108,30,8
+    PUSHBUTTON      "Default",IDC_BUTTON_DEF_QUALITY,216,105,43,13
+    LTEXT           "Window Size",IDC_STATIC_WINDOW,6,124,41,8
+    CONTROL         "",IDC_SLIDER_WINDOW,"msctls_trackbar32",TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,72,124,102,12
+    LTEXT           "-1",IDC_STATIC_VAL_WINDOW,180,124,30,8
+    PUSHBUTTON      "Default",IDC_BUTTON_DEF_WINDOW,216,121,43,13
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -820,6 +856,22 @@ BEGIN
     END
 
     IDD_DIALOG_FILTERDETAILS, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 265
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 241
+    END
+
+    IDD_DIALOG_VCM_DIALOGS, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 265
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 241
+    END
+
+    IDD_DIALOG_VCM, DIALOG
     BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 265

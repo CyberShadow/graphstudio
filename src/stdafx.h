@@ -95,6 +95,7 @@ using namespace std;
 
 #include "CustomPage.h"
 #include "FilterDetailsPage.h"
+#include "FilterVCMPage.h"
 
 #include "FavoritesForm.h"
 #include "EventsForm.h"

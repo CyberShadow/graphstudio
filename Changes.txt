@@ -1,3 +1,7 @@
+[0.2.6.0 - Beta    xx/June/2008]
++ added support for VFW property pages
++ added support for IAMVideoCompression interface
+
 [0.2.5.0 - Beta	   17/June/2008]
 + added seeking dialog
 + added WAVEFORMATEXTENSIBLE parsing

@@ -13,8 +13,8 @@
 //
 //-----------------------------------------------------------------------------
 class CMFCPropertyPage : 
-	public CUnknown,
 	public CDialog,
+	public CUnknown,
 	public IPropertyPage
 {
 protected:
