@@ -1,4 +1,4 @@
-[0.2.6.0 - Beta    xx/June/2008]
+[0.2.6.0 - Beta    22/June/2008]
 + fixed bug with bad offset of VIDEOINFOHEADER2 extradata
 + added support for VFW property pages
 + added support for IAMVideoCompression interface
