@@ -495,9 +495,9 @@ namespace GraphStudio
 			uint8			*extra = NULL;
 			int				len = 0;
 
-			if (pmt->cbFormat > sizeof(VIDEOINFOHEADER)) {
-				len = pmt->cbFormat - sizeof(VIDEOINFOHEADER);
-				extra = (uint8*)vih + sizeof(VIDEOINFOHEADER);
+			if (pmt->cbFormat > sizeof(VIDEOINFOHEADER2)) {
+				len = pmt->cbFormat - sizeof(VIDEOINFOHEADER2);
+				extra = (uint8*)vih + sizeof(VIDEOINFOHEADER2);
 			}
 
 			// are there any extradata left ?
