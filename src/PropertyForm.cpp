@@ -214,7 +214,7 @@ int CPropertyForm::AnalyzeObject(IUnknown *obj)
 			if (SUCCEEDED(hr)) {
 
 				// now create all pages
-				for (int i=0; i<pagelist.cElems; i++) {
+				for (int i=0; i<(int)pagelist.cElems; i++) {
 					CComPtr<IPropertyPage>	page;
 					hr = CoCreateInstance(pagelist.pElems[i], NULL, CLSCTX_INPROC_SERVER, IID_IPropertyPage, (void**)&page);
 					if (SUCCEEDED(hr)) {

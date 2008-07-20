@@ -192,7 +192,7 @@ void CSeekForm::UpdateGraphPosition()
 	fps    = -1;
 
 	if (view) {
-		int ret = view->graph.GetPositions(pos_ms, dur_ms);
+		ret = view->graph.GetPositions(pos_ms, dur_ms);
 		if (ret < 0) {
 			pos_ms = 0;
 			dur_ms = 0;

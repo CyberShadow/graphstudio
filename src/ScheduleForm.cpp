@@ -330,7 +330,6 @@ bool ScheduleEvent::Check(int h, int m, int s)
 
 	CString	p = time_pattern;
 	CString	hp, mp, sp;
-	int		i;
 
 	// check hour
 	hp = GetPatternToken(p);

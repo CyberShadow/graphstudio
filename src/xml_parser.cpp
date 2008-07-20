@@ -248,7 +248,7 @@ namespace XML
 	int XMLFile::LoadFromXmlReader(IXmlReader *reader)
 	{
 		XmlNodeType		type;
-		int				depth = 0, ret;
+		int				depth = 0;
 		LPCWSTR			text, value;
 		HRESULT			hr;
 

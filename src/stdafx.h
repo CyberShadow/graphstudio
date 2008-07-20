@@ -59,6 +59,8 @@
 #include <mmreg.h>
 #include <ks.h>
 #include <ksmedia.h>
+#include <mfidl.h>
+#include <evr.h>
 
 #include "..\resource.h"
 
@@ -77,6 +79,7 @@ using namespace std;
 
 #include "title_bar.h"
 #include "seeking_bar.h"
+#include "EVR_VideoWindow.h"
 #include "display_graph.h"
 #include "display_view.h"
 #include "dsutil.h"

@@ -159,6 +159,9 @@ namespace GraphStudio
 		bool					selected;
 		bool					connected;
 
+		// Enhanced Video Renderer support
+		EVR_VideoWindow			*videowindow;
+
 		// special
 		CComPtr<IBasicAudio>		basic_audio;
 		CComPtr<IReferenceClock>	clock;

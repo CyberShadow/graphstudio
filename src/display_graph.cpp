@@ -248,6 +248,16 @@ namespace GraphStudio
 
 	HRESULT DisplayGraph::DoPlay()
 	{
+		// notify all EVR windows
+		if (!is_remote) {
+			for (int i=0; i<filters.GetCount(); i++) {
+				Filter	*filter = filters[i];
+				if (filter->videowindow) {
+					filter->videowindow->Start();
+				}
+			}
+		}
+
 		if (is_frame_stepping) {
 			if (fs) fs->CancelStep();
 			if (mc) mc->Run();
@@ -283,6 +293,17 @@ namespace GraphStudio
 
 	HRESULT DisplayGraph::DoPause()
 	{
+		// send start notification to all EVR filters
+		// set the new clock for all filters
+		if (!is_remote) {
+			for (int i=0; i<filters.GetCount(); i++) {
+				Filter	*filter = filters[i];
+				if (filter->videowindow) {
+					filter->videowindow->Start();
+				}
+			}
+		}
+
 		if (mc) mc->Pause();
 		return NOERROR;
 	}
@@ -1363,6 +1384,7 @@ namespace GraphStudio
 		selected = false;
 		basic_audio = NULL;
 		clock = NULL;
+		videowindow = NULL;
 		overlay_icon_active = -1;
 		overlay_icons.RemoveAll();
 	}
@@ -1374,6 +1396,11 @@ namespace GraphStudio
 
 	void Filter::Release()
 	{
+		if (videowindow) {
+			delete videowindow;
+			videowindow = NULL;
+		}
+
 		RemovePins();
 		ReleaseIcons();
 		name = _T("");
@@ -1568,7 +1595,7 @@ namespace GraphStudio
 			vw->put_Caption(vw_name.GetBuffer());
 			vw = NULL;
 		}
-		
+
 		// check for basic audio interface
 		basic_audio = NULL;
 		hr = f->QueryInterface(IID_IBasicAudio, (void**)&basic_audio);
@@ -1654,6 +1681,22 @@ namespace GraphStudio
 		} else
 		if (clsid == DSUtil::CLSID_KSProxy) {
 			filter_type = Filter::FILTER_WDM;
+		}
+
+		// check for Enhanced Video Renderer
+		if (graph && (graph->is_remote == false)) {
+			if (clsid == CLSID_EnhancedVideoRenderer) {
+				int ret;
+				if (videowindow) { delete videowindow; videowindow = NULL; }
+
+				// try to initialize the video window object
+				videowindow = new EVR_VideoWindow();
+				ret = videowindow->Open(this);
+				if (ret < 0) {
+					delete videowindow;
+					videowindow = NULL;
+				}
+			}		
 		}
 
 		//---------------------------------------------------------------------

@@ -103,7 +103,7 @@ bool CSeekSlider::Create(CWnd *parent, CRect rc, UINT id)
 	UINT	style = WS_CHILD | WS_VISIBLE | TBS_BOTH | TBS_ENABLESELRANGE |
 					TBS_HORZ | TBS_NOTICKS | TBS_FIXEDLENGTH;
 
-	bool ret = __super::Create(style, rc, parent, id);
+	bool ret = (bool)__super::Create(style, rc, parent, id);
 	if (!ret) return false;
 
 	// setup properties
