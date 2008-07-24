@@ -121,8 +121,10 @@ namespace DSUtil
 	public:
 		CString		name;
 		GUID		clsid;
+		bool		is_dmo;				// is this category DMO ?
 	public:
 		FilterCategory();
+		FilterCategory(CString nm, GUID cat_clsid, bool dmo=false);
 		FilterCategory(const FilterCategory &fc);
 		virtual ~FilterCategory();
 		FilterCategory &operator =(const FilterCategory &fc);
@@ -152,6 +154,7 @@ namespace DSUtil
 		// enumeracia kategorii
 		int Enumerate(FilterCategory &cat);
 		int Enumerate(GUID clsid);
+		int EnumerateDMO(GUID clsid);
 
 		// enumerating filters
 		int EnumerateAudioRenderers();

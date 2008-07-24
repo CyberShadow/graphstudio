@@ -35,8 +35,8 @@
 #define IDD_DIALOG_SEEK                 155
 #define IDD_DIALOG_SCHEDULE             156
 #define IDD_DIALOG_VCM_DIALOGS          157
-#define IDD_OLE_PROPPAGE_LARGE          158
 #define IDD_DIALOG_VCM                  158
+#define IDD_DIALOG_AUDIO_COMPRESS       159
 #define IDC_COMBO_CATEGORIES            1001
 #define IDC_LIST_FILTERS                1002
 #define IDC_COMBO_MERIT                 1003

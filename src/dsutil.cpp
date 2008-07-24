@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-//	Transkoder/Broadcaster
+//	MONOGRAM GraphStudio
 //
 //	Author : Igor Janos
 //
@@ -401,12 +401,29 @@ namespace DSUtil
 		HRESULT hr;
 		if (!filter) return E_POINTER;
 
-		// ak mame moniker, ideme cez neho
+		// do we have a moniker ?
 		if (moniker) {
 			return moniker->BindToObject(NULL, NULL, IID_IBaseFilter, (void**)filter);
 		}
+	
+		// let's try it with a moniker display name
+		do {
+			CComPtr<IMoniker>		loc_moniker;
+			CComPtr<IBindCtx>		bind;
+			ULONG					eaten = 0;
 
-		// inak skusime klasicky
+			if (FAILED(CreateBindCtx(0, &bind))) break;
+			hr = MkParseDisplayName(bind, moniker_name, &eaten, &loc_moniker);
+			if (hr != NOERROR) { bind = NULL; break; }
+
+			hr = loc_moniker->BindToObject(NULL, NULL, IID_IBaseFilter, (void**)filter);
+			if (SUCCEEDED(hr)) return NOERROR;
+
+			loc_moniker = NULL;
+			bind = NULL;
+		} while (0);
+
+		// last resort
 		return CoCreateInstance(clsid, NULL, CLSCTX_INPROC_SERVER, IID_IBaseFilter, (void**)filter);
 	}
 
@@ -429,13 +446,22 @@ namespace DSUtil
 
 	FilterCategory::FilterCategory() :
 		name(_T("")),
-		clsid(GUID_NULL)
+		clsid(GUID_NULL),
+		is_dmo(false)
+	{
+	}
+
+	FilterCategory::FilterCategory(CString nm, GUID cat_clsid, bool dmo) :
+		name(nm),
+		clsid(cat_clsid),
+		is_dmo(dmo)
 	{
 	}
 
 	FilterCategory::FilterCategory(const FilterCategory &fc) :
 		name(fc.name),
-		clsid(fc.clsid)
+		clsid(fc.clsid),
+		is_dmo(fc.is_dmo)
 	{
 	}
 
@@ -447,6 +473,7 @@ namespace DSUtil
 	{
 		name = fc.name;
 		clsid = fc.clsid;
+		is_dmo = fc.is_dmo;
 		return *this;
 	}
 
@@ -517,6 +544,13 @@ namespace DSUtil
 			ret = 0;
 		} while (0);
 
+		// now add the DMO categories
+		categories.Add(FilterCategory(_T("DMO Audio Decoder"), DMOCATEGORY_AUDIO_DECODER, true));
+		categories.Add(FilterCategory(_T("DMO Audio Effect"), DMOCATEGORY_AUDIO_EFFECT, true));
+		categories.Add(FilterCategory(_T("DMO Video Decoder"), DMOCATEGORY_VIDEO_DECODER, true));
+		categories.Add(FilterCategory(_T("DMO Video Effect"), DMOCATEGORY_VIDEO_EFFECT, true));
+		categories.Add(FilterCategory(_T("DMO Audio Capture Effect"), DMOCATEGORY_AUDIO_CAPTURE_EFFECT, true));
+		
 	label_done:
 		if (propbag) propbag->Release();
 		if (moniker) moniker->Release();
@@ -585,7 +619,13 @@ namespace DSUtil
 
 	int FilterTemplates::Enumerate(FilterCategory &cat)
 	{
-		return Enumerate(cat.clsid);
+		filters.RemoveAll();
+
+		if (cat.is_dmo) {
+			return EnumerateDMO(cat.clsid);
+		} else {
+			return Enumerate(cat.clsid);
+		}
 	}
 
 	int FilterTemplates::Find(CString name, FilterTemplate *filter)
@@ -637,6 +677,7 @@ namespace DSUtil
 
 	int FilterTemplates::EnumerateAudioRenderers()
 	{
+		filters.RemoveAll();
 		int ret = Enumerate(CLSID_AudioRendererCategory);
 		if (ret < 0) return ret;
 		SortByName();
@@ -656,6 +697,8 @@ namespace DSUtil
 			MEDIATYPE_Video, MEDIASUBTYPE_RGB32,
 			MEDIATYPE_Video, MEDIASUBTYPE_YUY2
 		};
+
+		filters.RemoveAll();
 
 		hr = mapper.CoCreateInstance(CLSID_FilterMapper2);
 		if (FAILED(hr)) return -1;
@@ -678,9 +721,84 @@ namespace DSUtil
 		return ret;
 	}
 
+	int FilterTemplates::EnumerateDMO(GUID clsid)
+	{
+
+		IEnumDMO		*enum_dmo = NULL;
+		ULONG			f;
+		HRESULT			hr;
+
+		// create the enum object
+		hr = DMOEnum(clsid, 0, 0, NULL, 0, NULL, &enum_dmo);
+		if (FAILED(hr) || !enum_dmo) return -1;
+
+		CLSID			dmo_clsid;
+		WCHAR			*name = NULL;
+
+		enum_dmo->Reset();
+		while (enum_dmo->Next(1, &dmo_clsid, &name, &f) == NOERROR) {
+
+			if (dmo_clsid != GUID_NULL) {
+				FilterTemplate		filter;
+
+				// let's fill any information
+				filter.name = CString(name);
+				filter.clsid = dmo_clsid;
+				filter.category = clsid;
+				filter.type = FilterTemplate::FT_DMO;
+				filter.moniker = NULL;
+
+				LPOLESTR		str;
+				CString			display_name;
+
+				display_name = _T("@device:dmo:");
+				StringFromCLSID(dmo_clsid, &str);	
+				if (str) {	display_name += CString(str);	CoTaskMemFree(str);	str = NULL;	}
+				StringFromCLSID(clsid, &str);	
+				if (str) {	display_name += CString(str);	CoTaskMemFree(str);	str = NULL;	}
+				filter.moniker_name = display_name;
+				filter.version = 2;
+				filter.FindFilename();
+
+				// find out merit
+
+				// HKEY_CLASSES_ROOT\CLSID\{07C9CB2C-F51C-47EA-B551-7DA02541D586}
+				StringFromCLSID(dmo_clsid, &str);
+				CString		str_clsid(str);
+				CString		key_name;
+				if (str) CoTaskMemFree(str);
+
+				key_name.Format(_T("CLSID\\%s"), str_clsid);
+				CRegKey		key;
+				if (key.Open(HKEY_CLASSES_ROOT, key_name, KEY_READ) != ERROR_SUCCESS) { 
+					filter.merit = 0x00600000 + 0x800;
+				} else {
+
+					DWORD	dwVal;
+					if (key.QueryDWORDValue(_T("Merit"), dwVal) != ERROR_SUCCESS) {
+						filter.merit = 0x00600000 + 0x800;
+					} else {
+						filter.merit = dwVal;
+					}
+					key.Close();
+				}
+
+				filters.Add(filter);
+			}
+
+			// release any memory held for the name
+			if (name) {
+				CoTaskMemFree(name);
+				name = NULL;
+			}
+		}
+
+		enum_dmo->Release();
+		return 0;
+	}
+
 	int FilterTemplates::Enumerate(GUID clsid)
 	{
-		filters.RemoveAll();
 
 		// ideme nato
 		ICreateDevEnum		*sys_dev_enum = NULL;
@@ -702,6 +820,9 @@ namespace DSUtil
 	label_done:
 		if (enum_moniker) enum_moniker->Release();
 		if (sys_dev_enum) sys_dev_enum->Release();
+
+		// let's append DMO filters for this category
+		EnumerateDMO(clsid);
 
 		return ret;
 	}

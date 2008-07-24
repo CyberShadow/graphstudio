@@ -838,6 +838,14 @@ BEGIN
     PUSHBUTTON      "Default",IDC_BUTTON_DEF_WINDOW,216,121,43,13
 END
 
+IDD_DIALOG_AUDIO_COMPRESS DIALOGEX 0, 0, 272, 248
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD
+FONT 8, "MS Shell Dlg", 0, 0, 0x0
+BEGIN
+    CONTROL         "",IDC_TITLEBAR,"Static",SS_OWNERDRAW,0,0,272,20
+    LTEXT           "IAMStreamConfig",IDC_STATIC,6,30,57,8
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -872,6 +880,14 @@ BEGIN
     END
 
     IDD_DIALOG_VCM, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 265
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 241
+    END
+
+    IDD_DIALOG_AUDIO_COMPRESS, DIALOG
     BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 265

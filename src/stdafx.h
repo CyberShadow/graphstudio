@@ -61,6 +61,7 @@
 #include <ksmedia.h>
 #include <mfidl.h>
 #include <evr.h>
+#include <dmo.h>
 
 #include "..\resource.h"
 

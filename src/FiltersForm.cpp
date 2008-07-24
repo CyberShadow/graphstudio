@@ -343,6 +343,12 @@ void CFiltersForm::OnFilterItemClick(NMHDR *pNMHDR, LRESULT *pResult)
 				}	
 				group->AddItem(new GraphStudio::PropItem(_T("DisplayName"), filter->moniker_name));
 				group->AddItem(new GraphStudio::PropItem(_T("Type"), type));
+
+				if (filter->type == DSUtil::FilterTemplate::FT_DMO) {
+					CString		val;
+					val.Format(_T("0x%08x"), filter->merit);
+					group->AddItem(new GraphStudio::PropItem(_T("Merit"), val));
+				}
 				GraphStudio::GetFilterDetails(filter->clsid, group);
 
 			tree_details.BuildPropertyTree(&info);
