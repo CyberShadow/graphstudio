@@ -256,7 +256,7 @@ STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSM
 CAPTION "About MONOGRAM GraphStudio"
 FONT 8, "MS Shell Dlg", 0, 0, 0x1
 BEGIN
-    LTEXT           "MONOGRAM GraphStudio v0.2.7.0 Beta",IDC_STATIC,6,30,156,8,SS_NOPREFIX
+    LTEXT           "MONOGRAM GraphStudio v0.2.8.0 Beta",IDC_STATIC,6,30,156,8,SS_NOPREFIX
     DEFPUSHBUTTON   "OK",IDOK,198,78,50,16,WS_GROUP
     LTEXT           "This software is free under the GNU GPL license",IDC_STATIC,6,72,153,8
     LTEXT           "http://www.monogrammultimedia.com",IDC_STATIC,6,84,123,8
@@ -456,8 +456,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 0,2,7,0
- PRODUCTVERSION 0,2,7,0
+ FILEVERSION 0,2,8,0
+ PRODUCTVERSION 0,2,8,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -474,11 +474,11 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "MONOGRAM Mutimedia s.r.o."
             VALUE "FileDescription", "GraphStudio"
-            VALUE "FileVersion", "0.2.7.0"
+            VALUE "FileVersion", "0.2.8.0"
             VALUE "InternalName", "graphstudio.exe"
             VALUE "OriginalFilename", "graphstudio.exe"
             VALUE "ProductName", "MONOGRAM GraphStudio"
-            VALUE "ProductVersion", "0.2.7.0"
+            VALUE "ProductVersion", "0.2.8.0"
         END
     END
     BLOCK "VarFileInfo"
@@ -844,6 +844,25 @@ FONT 8, "MS Shell Dlg", 0, 0, 0x0
 BEGIN
     CONTROL         "",IDC_TITLEBAR,"Static",SS_OWNERDRAW,0,0,272,20
     LTEXT           "IAMStreamConfig",IDC_STATIC,6,30,57,8
+    GROUPBOX        "Active configuration",IDC_STATIC,6,48,258,72
+    LTEXT           "Format:",IDC_STATIC,18,66,26,8
+    LTEXT           "Dolby AC-3",IDC_STATIC_FORMAT,66,66,96,8
+    LTEXT           "Channels:",IDC_STATIC,18,78,33,8
+    LTEXT           "6",IDC_STATIC_CHANNELS,66,78,96,8
+    LTEXT           "Samplerate:",IDC_STATIC,18,90,40,8
+    LTEXT           "48000 Hz",IDC_STATIC_SAMPLERATE,66,90,96,8
+    LTEXT           "Bitrate:",IDC_STATIC,18,102,25,8
+    LTEXT           "384 kbps",IDC_STATIC_BITRATE,66,102,96,8
+    GROUPBOX        "Possible configurations",IDC_STATIC,6,126,258,90
+    LTEXT           "Samplerate",IDC_STATIC,18,144,37,8
+    COMBOBOX        IDC_COMBO_SAMPLERATE,18,156,84,84,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Channels",IDC_STATIC,114,144,30,8
+    COMBOBOX        IDC_COMBO_CHANNELS,114,156,48,72,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Bitrate",IDC_STATIC,174,144,22,8
+    COMBOBOX        IDC_COMBO_BITRATE,174,156,78,84,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "Apply",IDC_BUTTON_APPLY,204,192,50,14
+    LTEXT           "Format",IDC_STATIC,18,180,24,8
+    COMBOBOX        IDC_COMBO_FORMAT,18,192,144,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
 END
 
 

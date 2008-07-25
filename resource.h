@@ -118,6 +118,15 @@
 #define IDC_STATIC_VAL_PRATE            1058
 #define IDC_STATIC_VAL_QUALITY          1059
 #define IDC_STATIC_VAL_WINDOW           1060
+#define IDC_COMBO_SAMPLERATE            1061
+#define IDC_COMBO_CHANNELS              1062
+#define IDC_COMBO_BITRATE               1063
+#define IDC_STATIC_FORMAT               1064
+#define IDC_STATIC_CHANNELS             1065
+#define IDC_STATIC_SAMPLERATE           1066
+#define IDC_STATIC_BITRATE              1067
+#define IDC_COMBO4                      1068
+#define IDC_COMBO_FORMAT                1068
 #define ID_LIST_MRU_CLEAR               4999
 #define ID_LIST_MRU_FILE0               5000
 #define ID_AUDIO_RENDERER0              6000
@@ -193,7 +202,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        157
 #define _APS_NEXT_COMMAND_VALUE         32853
-#define _APS_NEXT_CONTROL_VALUE         1061
+#define _APS_NEXT_CONTROL_VALUE         1069
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

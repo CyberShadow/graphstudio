@@ -1,3 +1,6 @@
+[0.2.8.0 - Beta    xx/July/2008]
++ added support for ACM codec configuration (via IAMStreamConfig interface)
+
 [0.2.7.0 - Beta	   24/July/2008]
 + added support for Enhanced Video Renderer
 + added support for DMO objects (but it's not possible to duplicate "CTRL-D" a DMO filter once created)

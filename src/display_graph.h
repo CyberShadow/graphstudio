@@ -358,6 +358,7 @@ namespace GraphStudio
 
 	// GUID helpers
 	bool NameGuid(GUID guid, CString &str);
+	int GetFormatName(int wFormatTag, CString &str);
 
 	void MakeFont(CFont &f, CString name, int size, bool bold, bool italic);
 

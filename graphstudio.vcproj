@@ -240,6 +240,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\FilterACMPage.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\FilterDetailsPage.cpp"
 				>
 			</File>
@@ -387,6 +391,10 @@
 			</File>
 			<File
 				RelativePath=".\src\filter_list.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\FilterACMPage.h"
 				>
 			</File>
 			<File

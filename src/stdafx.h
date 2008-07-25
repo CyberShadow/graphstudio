@@ -100,6 +100,7 @@ using namespace std;
 #include "CustomPage.h"
 #include "FilterDetailsPage.h"
 #include "FilterVCMPage.h"
+#include "FilterACMPage.h"
 
 #include "FavoritesForm.h"
 #include "EventsForm.h"

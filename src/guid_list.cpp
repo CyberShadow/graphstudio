@@ -220,6 +220,96 @@ namespace GraphStudio
 		return false;
 	}
 
+
+	struct FormatTagPair {
+		int		tag;
+		LPCTSTR	name;
+	};
+
+	const FormatTagPair	KnownFormatsList[] = 
+	{
+		{ 0,		_T("Invalid Format") },
+		{ 1,		_T("Raw PCM") },
+		{ 2,		_T("ADPCM") },
+		{ 3,		_T("IEEE Float") },
+		{ 5,		_T("IBM CVSD") },
+		{ 6,		_T("A-Law PCM") },
+		{ 7,		_T("Mu-Law PCM") },
+		{ 0x10,		_T("OKI ADPCM") },
+		{ 0x11,		_T("DVI/IMA ADPCM") },
+		{ 0x12,		_T("Mediaspace ADPCM") },
+		{ 0x13,		_T("Sierra ADPCM") },
+		{ 0x14,		_T("G.723 ADPCM") },
+		{ 0x15,		_T("DigiSTD") },
+		{ 0x16,		_T("DigiFIX") },
+		{ 0x17,		_T("Dialogic OKI ADPCM") },
+		{ 0x18,		_T("Media Vision ADPCM") },
+		{ 0x20,		_T("YAMAHA ADPCM") },
+		{ 0x21,		_T("Sonarc Speech") },
+		{ 0x22,		_T("DSP Group TrueSpeech") },
+		{ 0x23,		_T("Echo Speech") },
+		{ 0x24,		_T("AudioFile AF36") },
+		{ 0x25,		_T("APTX") },
+		{ 0x26,		_T("AudioFile AF10") },
+		{ 0x30,		_T("Dolby AC-2") },
+		{ 0x31,		_T("GSM 6.10") },
+		{ 0x32,		_T("MSN Audio") },
+		{ 0x33,		_T("Antex ADPCME") },
+		{ 0x34,		_T("Control Resources VQLPC") },
+		{ 0x35,		_T("DigiReal") },
+		{ 0x36,		_T("DigiADPCM") },
+		{ 0x37,		_T("Control Resources CR10") },
+		{ 0x38,		_T("NMS VBXADPCM") },
+		{ 0x39,		_T("CS IMA ADPCM") },
+		{ 0x3A,		_T("Echo Speech 3") },
+		{ 0x3B,		_T("Rockwell ADPCM") },
+		{ 0x3C,		_T("Rockwell Digitalk") },
+		{ 0x3D,		_T("Xebec") },
+		{ 0x40,		_T("G.721 ADPCM") },
+		{ 0x41,		_T("G.728 CELP") },
+		{ 0x50,		_T("MPEG Audio") },
+		{ 0x55,		_T("MPEG Layer 3") },
+		{ 0x60,		_T("Cirrus Logic") },
+		{ 0x61,		_T("ESS PCM") },
+		{ 0x62,		_T("Voxware") },
+		{ 0x63,		_T("Canopus ATRAC") },
+		{ 0x64,		_T("G.726 ADPCM") },
+		{ 0x65,		_T("G.722 ADPCM") },
+		{ 0x66,		_T("DSAT") },
+		{ 0x67,		_T("DSAT Display") },
+		{ 0x80,		_T("Softsound") },
+		{ 0xFF,		_T("MPEG-2/4 AAC") },
+		{ 0x100,	_T("Rhetorex ADPCM") },
+		{ 0x200,	_T("Creative ADPCM") },
+		{ 0x202,	_T("Creative Fastspeech 8") },
+		{ 0x203,	_T("Creative Fastspeech 10") },
+		{ 0x300,	_T("Quarterdeck") },
+		{ 0x400,	_T("Brooktree Digital") },
+		{ 0x1000,	_T("Olivetti GSM") },
+		{ 0x1001,	_T("Olivetti ADPCM") },
+		{ 0x1002,	_T("Olivetti CELP") },
+		{ 0x1003,	_T("Olivetti SBC") },
+		{ 0x1004,	_T("Olivetti OPR") },
+		{ 0x1100,	_T("LH Codec") },
+		{ 0x1400,	_T("Norris") },
+		{ 0x2000,	_T("Dolby AC-3") }
+	};
+	const int KnownFormatsCount = sizeof(KnownFormatsList) / sizeof(KnownFormatsList[0]);
+
+	int GetFormatName(int wFormatTag, CString &str)
+	{
+		for (int i=0; i<KnownFormatsCount; i++) {
+			if (wFormatTag == KnownFormatsList[i].tag) {
+				str = CString(KnownFormatsList[i].name);
+				return 0;
+			}
+		}
+
+		str.Format(_T("Unknown (%d)"), wFormatTag);
+		return 1;
+	}
+
+
 };
 
 

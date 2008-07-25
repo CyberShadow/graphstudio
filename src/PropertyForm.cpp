@@ -393,6 +393,59 @@ int CPropertyForm::LoadPinPage(IPin *pin)
 	}
 	vfw_comp = NULL;	
 
+	//-------------------------------------------------------------------------
+	//
+	//	Support for ACM audio codecs
+	//
+	//-------------------------------------------------------------------------
+	CComPtr<IAMStreamConfig>	stream_config;
+	if (SUCCEEDED(pin->QueryInterface(IID_IAMStreamConfig, (void**)&stream_config))) {
+		
+		// if the parent filter is the ACM Wrapper Filter then we will show
+		// the ACM Compression page
+		PIN_INFO	info;
+		bool		is_acm_wrapper = false;
+
+		memset(&info, 0, sizeof(info));
+
+		pin->QueryPinInfo(&info);
+		if (info.pFilter) {
+			CLSID	clsid;
+			info.pFilter->GetClassID(&clsid);
+
+			if (clsid == CLSID_ACMWrapper) {
+				is_acm_wrapper = true;
+			}
+
+			info.pFilter->Release();
+		}
+
+		if (is_acm_wrapper) {
+
+			// now add the ACM Compression page
+			CAudioCompressionPage	*cm_page;
+			cm_page = new CAudioCompressionPage(NULL, &hr, _T("Audio Compression"));
+			if (cm_page) {
+				cm_page->AddRef();
+
+				hr = cm_page->QueryInterface(IID_IPropertyPage, (void**)&page);
+				if (SUCCEEDED(hr)) {
+					hr = page->SetObjects(1, (IUnknown**)&pin);
+					if (SUCCEEDED(hr)) {
+						container->AddPage(page);
+					}
+				}
+				page = NULL;
+
+				cm_page->Release();
+			}		
+
+		} else {
+			// I'll think of some nice page later ...
+		}
+	}
+	stream_config = NULL;
+
 	return 0;
 }
 
