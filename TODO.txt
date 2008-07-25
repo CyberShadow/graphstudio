@@ -1,2 +1,6 @@
 - some sort of encoding wizards
 - better filter placement algorithm
+- stream selection via IAMStreamSelect interface
+- video window control via filter overlay icon (just like audio volume/balance)
+- performance measurement feature
+- AVI Mux property page (IConfigAviMux, IConfigInterleaving)
