@@ -132,6 +132,7 @@
 #define ID_AUDIO_RENDERER0              6000
 #define ID_VIDEO_RENDERER0              6100
 #define ID_FAVORITE_FILTER              6200
+#define ID_STREAM_SELECT				6800
 #define ID_Menu                         32771
 #define ID_FILE_RENDERURL               32772
 #define ID_FILE_RENDERDVD               32773

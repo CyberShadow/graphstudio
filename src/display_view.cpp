@@ -32,6 +32,8 @@ namespace GraphStudio
 		ON_COMMAND(ID_PIN_NULL_STREAM, &DisplayView::OnRenderNullStream)
 		ON_COMMAND(ID_PIN_DUMP_STREAM, &DisplayView::OnDumpStream)
 		ON_COMMAND(ID_PROPERTYPAGE, &DisplayView::OnPropertyPage)
+
+		ON_COMMAND_RANGE(ID_STREAM_SELECT, ID_STREAM_SELECT+100, &DisplayView::OnSelectStream)
 	END_MESSAGE_MAP()
 
 	DisplayView::DisplayView()
@@ -105,8 +107,14 @@ namespace GraphStudio
 			menu.InsertMenu(4, MF_BYPOSITION | MF_SEPARATOR);
 			menu.InsertMenu(5, MF_BYPOSITION | MF_STRING, ID_PROPERTYPAGE, _T("Properties"));
 
+			// check for IAMStreamSelect interface
+			PrepareStreamSelectMenu(menu, current_pin->pin);
+
 		} else {
 			menu.InsertMenu(0, MF_STRING, ID_PROPERTYPAGE, _T("Properties"));
+
+			// check for IAMStreamSelect interface
+			PrepareStreamSelectMenu(menu, current_filter->filter);
 		}
 
 		CPoint	pt;
@@ -694,6 +702,97 @@ namespace GraphStudio
 		tempdc.DeleteDC();
 
 	}
+
+	void DisplayView::OnSelectStream(UINT id)
+	{
+		CComPtr<IAMStreamSelect>	select;
+		select = NULL;
+
+		if (!current_filter) return ;
+		if (current_pin && current_pin->pin) current_pin->pin->QueryInterface(IID_IAMStreamSelect, (void**)&select);
+		if (!select) current_filter->filter->QueryInterface(IID_IAMStreamSelect, (void**)&select);
+		if (!select) return ;
+
+		id -= ID_STREAM_SELECT;
+
+		// enable the stream
+		select->Enable(id, AMSTREAMSELECTENABLE_ENABLE);
+
+		select = NULL;
+	}
+
+	void DisplayView::PrepareStreamSelectMenu(CMenu &menu, IUnknown *obj)
+	{
+		// support for IAMStreamSelect
+		CComPtr<IAMStreamSelect>	stream_select;
+
+		HRESULT		hr = obj->QueryInterface(IID_IAMStreamSelect, (void**)&stream_select);
+		if (FAILED(hr) || !stream_select) return ;
+			
+		// now scan through the streams
+		DWORD		last_group = (DWORD)-1;
+		DWORD		stream_count = 0;
+		hr = stream_select->Count(&stream_count);
+		if (FAILED(hr)) {
+			stream_select = NULL;
+			return ;
+		}
+
+		// nothing to add - we're done here
+		if (stream_count <= 0) {
+			stream_select = NULL;
+			return ;
+		}
+
+		CMenu	submenu;
+		submenu.CreatePopupMenu();
+		CMenu	&active_menu = submenu;
+
+
+			menu.InsertMenu(menu.GetMenuItemCount(), MF_BYPOSITION | MF_SEPARATOR);
+			for (int i=0; i<stream_count; i++) {
+
+				AM_MEDIA_TYPE		*mt = NULL;
+				DWORD				flags;
+				LCID				language;
+				DWORD				group;
+				LPWSTR				name;
+
+				hr = stream_select->Info(i, &mt, &flags, &language, &group, &name, NULL, NULL);
+				if (SUCCEEDED(hr)) {
+				
+					// add separators between stream groups
+					if (i == 0) {
+						last_group = group;
+					} else {
+						if (group != last_group) {
+							active_menu.InsertMenu(active_menu.GetMenuItemCount(), MF_BYPOSITION | MF_SEPARATOR);
+							last_group = group;
+						}
+					}
+
+					int idx = active_menu.GetMenuItemCount();
+					UINT	mflags = MF_BYPOSITION | MF_STRING;
+					if (flags > 0) mflags |= MF_CHECKED;
+					active_menu.InsertMenu(idx, mflags | MF_STRING, ID_STREAM_SELECT+i, name);
+				}
+
+				// get rid of the buffers
+				if (mt) {
+					DeleteMediaType(mt);
+				}
+			}
+
+		// do insert the menu
+		int		count = menu.GetMenuItemCount();
+		menu.InsertMenu(count, MF_BYPOSITION | MF_STRING, 0, _T("Stream selection"));
+		menu.ModifyMenu(count, MF_BYPOSITION | MF_POPUP | MF_STRING, (UINT_PTR)submenu.m_hMenu, _T("Stream selection"));
+		submenu.Detach();
+
+		stream_select = NULL;
+	}
+
+
 
 };
 

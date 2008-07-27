@@ -74,6 +74,10 @@ namespace GraphStudio
 
 		void MakeScreenshot();
 
+		// stream selection
+		void PrepareStreamSelectMenu(CMenu &menu, IUnknown *obj);
+		void OnSelectStream(UINT id);
+
 		// scrolling aid
 		void UpdateScrolling();
 		void RepaintBackbuffer();
