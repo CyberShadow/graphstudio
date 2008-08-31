@@ -5,6 +5,7 @@
 + pressing "Enter" in the filters form will create a new instance of a filter
 + added "Locate" button to find filter DLL files quickly
 + added "Unregister" feature to remove filters. (works also for missing DLLs)
++ added merit changing functionality
 
 [0.2.7.0 - Beta	   24/July/2008]
 + added support for Enhanced Video Renderer

@@ -663,10 +663,41 @@ void CFiltersForm::OnMeritClick()
 
 			if (ChangeMeritDialog(filter->name, oldmerit, newmerit)) {
 
-				// reload the filters
-				OnComboCategoriesChange();
+				// try to change the merit
+				filter->merit = newmerit;
+				int ret = filter->WriteMerit();
+				if (ret < 0) {
+					MessageBox(_T("Failed to update merit value"), _T("Error"), MB_ICONERROR);
+					filter->merit = oldmerit;
+				} else {
+					MessageBox(_T("Merit change succeeded."), _T("Information"));
+
+					// remember the display name so we can select the same filter again
+					CString		displayname = filter->moniker_name;
+					int			bottom = list_filters.GetBottomIndex();
+
+					// reload the filters
+					OnComboCategoriesChange();
+
+					int			idx = -1;
+					for (int i=0; i<list_filters.GetItemCount(); i++) {
+						DSUtil::FilterTemplate	*filt = (DSUtil::FilterTemplate*)list_filters.GetItemData(i);
+						if (filt->moniker_name == displayname) {
+							idx = i;
+							break;
+						}
+					}
+
+					if (idx >= 0) {
+						list_filters.SetItemState(idx, LVIS_SELECTED | LVIS_FOCUSED, LVIS_SELECTED | LVIS_FOCUSED);
+						list_filters.SetSelectionMark(idx);
+
+						// it always scrolls one item down :Z
+						if (bottom > 0) bottom -= 1;
+						list_filters.EnsureVisible(bottom, TRUE);
+					}
+				}
 			}
 		}
-
 	}
 }

@@ -343,7 +343,7 @@ namespace DSUtil
 
 			key_name.Format(_T("CLSID\\%s"), str_clsid);
 			CRegKey		key;
-			if (key.Open(HKEY_CLASSES_ROOT, key_name, KEY_READ | KEY_WRITE) != ERROR_SUCCESS) { 
+			if (key.Open(HKEY_CLASSES_ROOT, key_name, KEY_READ | KEY_WRITE) == ERROR_SUCCESS) { 
 				// simply write the new merit.
 				key.SetDWORDValue(_T("Merit"), merit);
 			} else {
@@ -363,7 +363,7 @@ namespace DSUtil
 
 			key_name.Format(_T("CLSID\\{083863F1-70DE-11d0-BD40-00A0C911CE86}\\Instance\\%s"), str_clsid);
 			CRegKey		key;
-			if (key.Open(HKEY_CLASSES_ROOT, key_name, KEY_READ | KEY_WRITE) != ERROR_SUCCESS) { 
+			if (key.Open(HKEY_CLASSES_ROOT, key_name, KEY_READ | KEY_WRITE) == ERROR_SUCCESS) { 
 
 				ULONG		size = 256*1024;
 				BYTE		*largebuf = (BYTE*)malloc(size);

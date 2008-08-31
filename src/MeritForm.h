@@ -25,6 +25,11 @@ public:
 	CStatic					label_filter;
 	CFont					font_filter;
 	CString					filter_name;
+	CEdit					edit_original;
+	CComboBox				cb_newmerit;
+
+	DWORD					old_merit;
+	DWORD					new_merit;
 
 public:
 	CMeritChangeDialog(CWnd* pParent = NULL);   
@@ -34,6 +39,7 @@ public:
 	enum { IDD = IDD_DIALOG_MERITCHANGE };
 
 	virtual BOOL OnInitDialog();
+	virtual void OnOK();
 };
 
 
