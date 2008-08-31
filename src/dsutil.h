@@ -113,6 +113,7 @@ namespace DSUtil
 		HRESULT FindFilename();
 
 		int Load(char *buf, int size);
+		int WriteMerit();
 		int ParseMonikerName();
 	};
 
@@ -212,7 +213,13 @@ namespace DSUtil
 	HRESULT ConnectFilters(IGraphBuilder *gb, IBaseFilter *output, IBaseFilter *input, bool direct=false);
 	HRESULT ConnectPin(IGraphBuilder *gb, IPin *output, IBaseFilter *input, bool direct=false);
 
+	bool IsVideoUncompressed(GUID subtype);
+
 	CString get_next_token(CString &str, CString separator);
+
+	// remove registry information
+	HRESULT UnregisterFilter(GUID clsid, GUID category);
+	HRESULT UnregisterCOM(GUID clsid);
 
 };
 

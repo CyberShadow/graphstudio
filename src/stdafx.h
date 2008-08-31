@@ -75,7 +75,14 @@ using namespace std;
 #pragma comment(lib, "Version.lib")
 #include "xml_parser.h"
 
+#include "dsutil.h"
+
 #include "bits.h"
+
+#include "..\interfaces\monofilters.h"
+#include "filters\dump\filter_dump.h"
+#include "filters\time_measure\filter_time.h"
+
 #include "mtypes_ext.h"
 
 #include "title_bar.h"
@@ -83,12 +90,12 @@ using namespace std;
 #include "EVR_VideoWindow.h"
 #include "display_graph.h"
 #include "display_view.h"
-#include "dsutil.h"
 #include "filter_list.h"
 #include "prop_tree.h"
 #include "schedule_list.h"
 
 #include "object_details.h"
+#include "filename_list.h"
 
 #include "graphstudio.h"
 #include "mru_list.h"
@@ -96,12 +103,15 @@ using namespace std;
 #include "graphDoc.h"
 #include "FiltersForm.h"
 #include "volumebarform.h"
+#include "ConfirmForm.h"
+#include "MeritForm.h"
 
 #include "CustomPage.h"
 #include "FilterDetailsPage.h"
 #include "FilterVCMPage.h"
 #include "FilterACMPage.h"
 
+#include "DecPerformanceForm.h"
 #include "FavoritesForm.h"
 #include "EventsForm.h"
 #include "ScheduleForm.h"
@@ -116,8 +126,6 @@ using namespace std;
 #include "NewGroupForm.h"
 #include "graphView.h"
 
-#include "..\interfaces\monofilters.h"
-#include "filters\dump\filter_dump.h"
 
 
 #ifdef _UNICODE

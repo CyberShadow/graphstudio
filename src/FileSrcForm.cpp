@@ -55,8 +55,8 @@ BOOL CFileSrcForm::OnInitDialog()
 	if (!ret) return FALSE;
 
 	// load saved lists
-	LoadRecentlyUsedList(_T("FileCache"), file_list);
-	LoadRecentlyUsedList(_T("URLCache"), url_list);
+	file_list.LoadList(_T("FileCache"));
+	url_list.LoadList(_T("URLCache"));
 
 	int i;
 	for (i=0; i<file_list.GetCount(); i++) combo_file.AddString(file_list[i]);
@@ -64,56 +64,6 @@ BOOL CFileSrcForm::OnInitDialog()
 
 	OnBnClickedRadioFile();
 	return TRUE;
-}
-
-void CFileSrcForm::SaveRecentlyUsedList(CString name, CArray<CString> &list)
-{
-	CString		count_name;
-	count_name = name + _T("_count");
-	int count = list.GetCount();
-	// limit to 30
-	if (count > 30) count = 30;
-
-	AfxGetApp()->WriteProfileInt(_T("Settings"), count_name, count);
-
-	for (int i=0; i<count; i++) {
-		CString		key;
-		key.Format(_T("%s_%d"), name, i);
-		AfxGetApp()->WriteProfileString(_T("Settings"), key, list[i]);
-	}
-}
-
-void CFileSrcForm::UpdateList(CString item, CArray<CString> &list)
-{
-	for (int i=0; i<list.GetCount(); i++) {
-		if (list[i] == item) {
-			list.RemoveAt(i);
-			break;
-		}
-	}
-	list.InsertAt(0, item);
-}
-
-
-void CFileSrcForm::LoadRecentlyUsedList(CString name, CArray<CString> &list)
-{
-	CString		count_name;
-	count_name = name + _T("_count");
-	int count = AfxGetApp()->GetProfileInt(_T("Settings"), count_name, 0);
-
-	// limit to 30
-	if (count > 30) count = 30;
-	list.RemoveAll();
-
-	for (int i=0; i<count; i++) {
-		CString		item;
-		CString		key;
-		key.Format(_T("%s_%d"), name, i);
-		item = AfxGetApp()->GetProfileString(_T("Settings"), key, _T(""));
-		if (item != _T("")) {
-			list.Add(item);
-		}
-	}
 }
 
 void CFileSrcForm::OnBnClickedRadioFile()
@@ -157,14 +107,14 @@ void CFileSrcForm::OnOK()
 		combo_url.GetWindowText(result_file);
 
 		if (result_file != _T("")) {
-			UpdateList(result_file, url_list);
-			SaveRecentlyUsedList(_T("URLCache"), url_list);
+			url_list.UpdateList(result_file);
+			url_list.SaveList(_T("URLCache"));
 		}
 	} else {
 		combo_file.GetWindowText(result_file);
 		if (result_file != _T("")) {
-			UpdateList(result_file, file_list);
-			SaveRecentlyUsedList(_T("FileCache"), file_list);
+			file_list.UpdateList(result_file);
+			file_list.SaveList(_T("FileCache"));
 		}
 	}
 
@@ -175,8 +125,10 @@ void CFileSrcForm::OnBnClickedButtonClear()
 {
 	url_list.RemoveAll();
 	file_list.RemoveAll();
-	SaveRecentlyUsedList(_T("URLCache"), url_list);
-	SaveRecentlyUsedList(_T("FileCache"), file_list);
+
+	url_list.SaveList(_T("URLCache"));
+	file_list.SaveList(_T("FileCache"));
+
 	combo_file.ResetContent();
 	combo_url.ResetContent();
 }

@@ -37,6 +37,9 @@
 #define IDD_DIALOG_VCM_DIALOGS          157
 #define IDD_DIALOG_VCM                  158
 #define IDD_DIALOG_AUDIO_COMPRESS       159
+#define IDD_DIALOG_DEC_PERFORMANCE      160
+#define IDD_DIALOG_UNREGCONFIRM         161
+#define IDD_DIALOG_MERITCHANGE          162
 #define IDC_COMBO_CATEGORIES            1001
 #define IDC_LIST_FILTERS                1002
 #define IDC_COMBO_MERIT                 1003
@@ -47,9 +50,12 @@
 #define IDC_BUTTON3                     1008
 #define IDC_BUTTON_UNREGISTER           1008
 #define IDC_BUTTON_COPYTEXT             1008
+#define IDC_BUTTON_SAVE                 1008
 #define IDC_BUTTON_INSERT               1009
 #define IDC_BUTTON_MEDIATYPES           1010
+#define IDC_BUTTON_LOCATE               1010
 #define IDC_STATIC_TITLE                1011
+#define IDC_BUTTON_MERIT                1011
 #define IDC_STATIC_SEPARATOR            1012
 #define IDC_BUTTON_CLEAR                1013
 #define IDC_LIST_EVENTS                 1014
@@ -91,6 +97,8 @@
 #define IDC_EDIT1                       1031
 #define IDC_EDIT_NAME                   1031
 #define IDC_EDIT_TIME                   1031
+#define IDC_EDIT_PASSES                 1031
+#define IDC_EDIT_ORIGINAL               1031
 #define IDC_TREE1                       1033
 #define IDC_TREE                        1033
 #define IDC_PROGRESS_POSITION           1034
@@ -127,12 +135,23 @@
 #define IDC_STATIC_BITRATE              1067
 #define IDC_COMBO4                      1068
 #define IDC_COMBO_FORMAT                1068
+#define IDC_COMBO_PRESETS               1068
+#define IDC_COMBO_RENDERER              1071
+#define IDC_LIST_RESULTS                1072
+#define IDC_COMBO_DECODER               1073
+#define IDC_SPIN_PASSES                 1074
+#define IDC_BUTTON_START                1075
+#define IDC_BUTTON_STOP                 1076
+#define IDC_STATIC_FILTER               1077
+#define IDC_COMBO1                      1078
+#define IDC_COMBO_NEW                   1078
 #define ID_LIST_MRU_CLEAR               4999
 #define ID_LIST_MRU_FILE0               5000
 #define ID_AUDIO_RENDERER0              6000
 #define ID_VIDEO_RENDERER0              6100
 #define ID_FAVORITE_FILTER              6200
-#define ID_STREAM_SELECT				6800
+#define ID_STREAM_SELECT                6800
+#define ID_PREFERRED_VIDEO_RENDERER     8000
 #define ID_Menu                         32771
 #define ID_FILE_RENDERURL               32772
 #define ID_FILE_RENDERDVD               32773
@@ -196,14 +215,16 @@
 #define ID_BUTTON32850                  32850
 #define ID_BUTTON_SEEK                  32851
 #define ID_AUTOMATICRESTART_SCHEDULE    32852
+#define ID_OPTIONS_PREFERREDVIDEORENDERER 32853
+#define ID_VIEW_DECODERPERFORMANCE      32854
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        157
-#define _APS_NEXT_COMMAND_VALUE         32853
-#define _APS_NEXT_CONTROL_VALUE         1069
+#define _APS_NEXT_RESOURCE_VALUE        163
+#define _APS_NEXT_COMMAND_VALUE         32855
+#define _APS_NEXT_CONTROL_VALUE         1079
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

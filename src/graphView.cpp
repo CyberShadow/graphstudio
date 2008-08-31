@@ -55,6 +55,7 @@ BEGIN_MESSAGE_MAP(CGraphView, GraphStudio::DisplayView)
 	ON_COMMAND_RANGE(ID_AUDIO_RENDERER0, ID_AUDIO_RENDERER0+100, &CGraphView::OnDummyEvent)
 	ON_COMMAND_RANGE(ID_VIDEO_RENDERER0, ID_VIDEO_RENDERER0+100, &CGraphView::OnDummyEvent)
 	ON_COMMAND_RANGE(ID_FAVORITE_FILTER, ID_FAVORITE_FILTER+500, &CGraphView::OnDummyEvent)
+	ON_COMMAND_RANGE(ID_PREFERRED_VIDEO_RENDERER, ID_PREFERRED_VIDEO_RENDERER+100, &CGraphView::OnDummyEvent)
 
 	ON_WM_KEYDOWN()
 	ON_WM_DESTROY()
@@ -95,6 +96,7 @@ BEGIN_MESSAGE_MAP(CGraphView, GraphStudio::DisplayView)
 	ON_COMMAND(ID_VIEW_PROGRESSVIEW, &CGraphView::OnViewProgressview)
 	ON_COMMAND(ID_FILE_SAVEASXML, &CGraphView::OnFileSaveasxml)
 	ON_COMMAND(ID_AUTOMATICRESTART_SCHEDULE, &CGraphView::OnAutomaticrestartSchedule)
+	ON_COMMAND(ID_VIEW_DECODERPERFORMANCE, &CGraphView::OnViewDecoderPerformance)
 END_MESSAGE_MAP()
 
 //-----------------------------------------------------------------------------
@@ -114,6 +116,8 @@ CGraphView::CGraphView()
 	form_progress = NULL;
 	form_volume = NULL;
 	form_seek = NULL;
+	form_dec_performance = NULL;
+
 	filename = _T("");
 	can_save = false;
 }
@@ -122,6 +126,7 @@ CGraphView::~CGraphView()
 {
 	if (form_volume) { form_volume->DestroyWindow(); delete form_volume; }
 	if (form_progress) { form_progress->DestroyWindow(); delete form_progress; }
+	if (form_dec_performance) { form_dec_performance->DestroyWindow(); delete form_dec_performance; }
 	if (form_filters) { form_filters->DestroyWindow(); delete form_filters; }
 	if (form_events) { form_events->DestroyWindow(); delete form_events; }
 	if (form_schedule) { form_schedule->DestroyWindow(); delete form_schedule; }
@@ -258,6 +263,11 @@ void CGraphView::OnInit()
 	default:	OnView100(); break;
 	}
 
+	// load default renderer
+	CString		def_vr = AfxGetApp()->GetProfileString(_T("Settings"), _T("Pref_Video_Renderer"), _T(""));
+	render_params.preferred_video_renderer = def_vr;
+	render_params.video_renderers = &video_renderers;
+
 	UpdateGraphState();
 	UpdateMRUMenu();
 
@@ -293,6 +303,9 @@ LRESULT CGraphView::OnWmCommand(WPARAM wParam, LPARAM lParam)
 	if (id >= ID_VIDEO_RENDERER0 && id < ID_VIDEO_RENDERER0 + 100) {
 		OnVideoRendererClick(id);
 	} else
+	if (id >= ID_PREFERRED_VIDEO_RENDERER && id < ID_PREFERRED_VIDEO_RENDERER + 100) {
+		OnPreferredVideoRendererClick(id);
+	} else
 	if (id >= ID_FAVORITE_FILTER && id < ID_FAVORITE_FILTER + 500) {
 		OnFavoriteFilterClick(id);
 	} else
@@ -301,6 +314,90 @@ LRESULT CGraphView::OnWmCommand(WPARAM wParam, LPARAM lParam)
 	}	
 
 	return 0;
+}
+
+void CGraphView::OnPreferredVideoRendererClick(UINT nID)
+{
+	int		id = nID - ID_PREFERRED_VIDEO_RENDERER;
+
+	// default ?
+	if (id <= 0 || (id > video_renderers.filters.GetCount())) {
+		render_params.preferred_video_renderer = _T("");
+	} else {
+		id -= 1;
+
+		// store the name
+		render_params.preferred_video_renderer = video_renderers.filters[id].moniker_name;
+
+	}
+
+	// save the value to the registry
+	AfxGetApp()->WriteProfileString(_T("Settings"), _T("Pref_Video_Renderer"), render_params.preferred_video_renderer);
+
+	UpdatePreferredVideoRenderersMenu();
+}
+
+void CGraphView::UpdatePreferredVideoRenderersMenu()
+{
+	/*	Not working yet :(
+	*/
+	CMenu	*mainmenu  = GetParentFrame()->GetMenu();
+	CMenu	*optionsmenu = mainmenu->GetSubMenu(4);
+
+	if (optionsmenu->GetMenuItemCount() > 4) {
+		optionsmenu->RemoveMenu(4, MF_BYPOSITION);
+		optionsmenu->RemoveMenu(4, MF_BYPOSITION);
+	}
+
+	return ;
+
+	CMenu	newmenu;		
+	CMenu	*menu;
+
+	int		i;
+
+	MENUITEMINFO		info;
+	memset(&info, 0, sizeof(info));
+	info.cbSize = sizeof(info);
+	info.fMask = MIIM_SUBMENU;		// we want to see if this menu item has an attached submenu
+
+	optionsmenu->GetMenuItemInfo(ID_OPTIONS_PREFERREDVIDEORENDERER, &info);
+
+	if (info.hSubMenu != NULL) { 
+		// we can use the one that already exists
+		menu = optionsmenu->GetSubMenu(5);
+	} else {
+		// create a new submenu
+
+		newmenu.CreatePopupMenu();
+
+		optionsmenu->ModifyMenu(ID_OPTIONS_PREFERREDVIDEORENDERER, MF_BYCOMMAND | MF_POPUP | MF_STRING, 
+		 					   (UINT_PTR)newmenu.m_hMenu, _T("Preferred Video Renderer"));
+		newmenu.Detach();
+		menu = optionsmenu->GetSubMenu(5);
+	}
+
+	if (!menu) return ;
+
+	// now we can kick all items that might be there
+	while (menu->GetMenuItemCount() > 0) menu->RemoveMenu(0, MF_BYPOSITION);
+
+	// now add the fresh new items
+	bool	pref_default = (render_params.preferred_video_renderer == _T("") ? true : false);
+	if (pref_default) {
+		menu->InsertMenu(0, MF_CHECKED | MF_BYPOSITION | MF_STRING, ID_PREFERRED_VIDEO_RENDERER + 0, _T("Default"));
+	} else {
+		menu->InsertMenu(0, MF_BYPOSITION | MF_STRING, ID_PREFERRED_VIDEO_RENDERER + 0, _T("Default"));
+	}
+	menu->InsertMenu(1, MF_SEPARATOR);
+
+	for (i=0; i<video_renderers.filters.GetCount(); i++) {
+		DSUtil::FilterTemplate	&filter = video_renderers.filters[i];
+
+		int flags	= MF_STRING;
+		if (filter.moniker_name == render_params.preferred_video_renderer) flags |= MF_CHECKED;
+		menu->InsertMenu(menu->GetMenuItemCount(), flags, ID_PREFERRED_VIDEO_RENDERER + 1 + i, filter.name);
+	}
 }
 
 void CGraphView::UpdateRenderersMenu()
@@ -324,26 +421,25 @@ void CGraphView::UpdateRenderersMenu()
 		audio_menu.InsertMenu(i, MF_STRING, ID_AUDIO_RENDERER0 + i, filter.name);
 	}
 
-	graphmenu->ModifyMenu(ID_GRAPH_INSERTAUDIORENDERER,
-						  MF_BYCOMMAND | MF_POPUP | MF_STRING, 
-						  (UINT_PTR)audio_menu.m_hMenu,
-						  _T("Insert Audio Renderer"));
+	graphmenu->ModifyMenu(ID_GRAPH_INSERTAUDIORENDERER, MF_BYCOMMAND | MF_POPUP | MF_STRING, 
+						  (UINT_PTR)audio_menu.m_hMenu, _T("Insert Audio Renderer"));
 
 	audio_menu.Detach();
 
 	// fill in video renderers
 	video_menu.CreatePopupMenu();
+
 	for (i=0; i<video_renderers.filters.GetCount(); i++) {
 		DSUtil::FilterTemplate	&filter = video_renderers.filters[i];
 		video_menu.InsertMenu(i, MF_STRING, ID_VIDEO_RENDERER0 + i, filter.name);
 	}
 
-	graphmenu->ModifyMenu(ID_GRAPH_INSERTVIDEORENDERER,
-						  MF_BYCOMMAND | MF_POPUP | MF_STRING, 
-						  (UINT_PTR)video_menu.m_hMenu,
-						  _T("Insert Video Renderer"));
+	graphmenu->ModifyMenu(ID_GRAPH_INSERTVIDEORENDERER, MF_BYCOMMAND | MF_POPUP | MF_STRING, 
+						  (UINT_PTR)video_menu.m_hMenu, _T("Insert Video Renderer"));
 
 	video_menu.Detach();
+
+	UpdatePreferredVideoRenderersMenu();
 }
 
 void CGraphView::UpdateMRUMenu()
@@ -399,6 +495,19 @@ void CGraphView::OnPlayPauseToggleClick()
 	}
 }
 
+void CGraphView::OnViewDecoderPerformance()
+{
+	if (!form_dec_performance) {
+		form_dec_performance = new CDecPerformanceForm();
+		form_dec_performance->view = this;
+		form_dec_performance->DoCreateDialog();
+	}
+
+	// bring up the decoder performance form
+	form_dec_performance->ShowWindow(SW_SHOW);
+}
+
+
 void CGraphView::OnSeekClick()
 {
 	if (!form_seek) {
@@ -422,6 +531,11 @@ void CGraphView::OnNewClick()
 
 	if (!graph.is_remote) {
 		OnStopClick();
+	}
+
+	// stop any running decoder tests
+	if (form_dec_performance) {
+		form_dec_performance->Stop();
 	}
 
 	GetDocument()->SetTitle(_T("Untitled"));
@@ -700,6 +814,16 @@ void CGraphView::OnRenderFileClick()
 		graph.Dirty();
 		Invalidate();
 	}
+}
+
+void CGraphView::OnGraphComplete()
+{
+	OnStopClick();
+
+	// if there were any tests running, let the form know
+	if (form_dec_performance) {
+		form_dec_performance->OnPhaseComplete();
+	}	
 }
 
 void CGraphView::OnGraphInsertfilter()
@@ -1421,3 +1545,4 @@ void CGraphView::OnOverlayIconClick(GraphStudio::OverlayIcon *icon, CPoint point
 		break;
 	}
 }
+

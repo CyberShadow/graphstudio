@@ -51,6 +51,10 @@ namespace GraphStudio
 		is_frame_stepping = false;
 		uses_clock = true;
 
+		HRESULT			hr = NOERROR;
+		graph_callback = new GraphCallbackImpl(NULL, &hr, this);
+		graph_callback->NonDelegatingAddRef();
+
 		MakeNew();
 
 		dirty = true;
@@ -64,6 +68,11 @@ namespace GraphStudio
 		if (ms) ms = NULL;
 		cgb = NULL;
 		gb = NULL;
+
+		if (graph_callback) {
+			graph_callback->NonDelegatingRelease();
+			graph_callback = NULL;
+		}
 
 		ZeroTags();
 		RemoveUnusedFilters();
@@ -174,6 +183,20 @@ namespace GraphStudio
 			gb->QueryInterface(IID_IVideoFrameStep, (void**)&fs);
 
 			AttachCaptureGraphBuilder();
+
+			// attach graph callback
+			CComPtr<IObjectWithSite>		obj_with_site;
+			hr = gb->QueryInterface(IID_IObjectWithSite, (void**)&obj_with_site);
+			if (SUCCEEDED(hr)) {
+				CComPtr<IUnknown>	unk;
+				graph_callback->NonDelegatingQueryInterface(IID_IUnknown, (void**)&unk);
+
+				obj_with_site->SetSite(unk);
+
+				unk = NULL;
+				obj_with_site = NULL;
+			}
+
 		} while (0);
 
 		if (FAILED(hr)) {
@@ -2480,6 +2503,10 @@ namespace GraphStudio
 
 		Zoom(1.0);
 
+		// no preferred renderer
+		preferred_video_renderer = _T("");
+		video_renderers = NULL;
+
 		// load bitmaps
 		BOOL ok;	
 		ok = bmp_volume_hi.LoadBitmap(IDB_BITMAP_VOLUME_HI);					if (!ok) return ;
@@ -2511,7 +2538,79 @@ namespace GraphStudio
 		MakeFont(font_pin, _T("Arial"), size, false, false);
 	}
 
+	//-------------------------------------------------------------------------
+	//
+	//	DisplayGraph callback classes
+	//
+	//-------------------------------------------------------------------------
 
+	GraphCallbackImpl::GraphCallbackImpl(LPUNKNOWN punk, HRESULT *phr, GraphStudio::DisplayGraph *parent) :
+		CUnknown(_T("Graph Callback"), punk),
+		graph(parent)
+	{
+		if (phr) *phr = NOERROR;
+	}
+
+	GraphCallbackImpl::~GraphCallbackImpl()
+	{
+		// nothing yet
+	}
+
+	STDMETHODIMP GraphCallbackImpl::NonDelegatingQueryInterface(REFIID riid, void **ppv)
+	{
+		if (riid == IID_IAMGraphBuilderCallback) {
+			return GetInterface((IAMGraphBuilderCallback*)this, ppv);
+		} else
+			return __super::NonDelegatingQueryInterface(riid, ppv);
+	}
+
+	STDMETHODIMP GraphCallbackImpl::SelectedFilter(IMoniker *pMon)
+	{
+		HRESULT	hr;
+
+		// check for preferred video filter
+		/*
+			Hm :( This does not work as I hoped. Until I find
+			some other way I'll leave this disabled
+		*/
+	#if 0
+		if (graph->params) {
+			if (graph->params->preferred_video_renderer != _T("")) {
+
+				// get the moniker name for the filter
+				LPOLESTR	moniker_name;
+				hr = pMon->GetDisplayName(NULL, NULL, &moniker_name);
+				if (SUCCEEDED(hr)) {
+					CString		name = CString(moniker_name);
+					IMalloc		*alloc = NULL;
+					hr = CoGetMalloc(1, &alloc);
+					if (SUCCEEDED(hr)) { alloc->Free(moniker_name);	alloc->Release(); }
+
+					// if the name matches the preferred, we're good to go
+					if (name == graph->params->preferred_video_renderer) return NOERROR;
+
+					// if it's in the list of renderers, we will ignore this filter
+					if (graph->params->video_renderers) {						
+						for (int i=0; i<graph->params->video_renderers->filters.GetCount(); i++) {
+							DSUtil::FilterTemplate	&filter = graph->params->video_renderers->filters[i];
+							if (filter.moniker_name == name) {
+								return E_FAIL;
+							}
+						}
+					}
+				}
+			}
+		}
+	#endif
+
+		return NOERROR;
+	}
+
+	STDMETHODIMP GraphCallbackImpl::CreatedFilter(IBaseFilter *pFilter)
+	{
+		return NOERROR;
+	}
+	
 
 
 };

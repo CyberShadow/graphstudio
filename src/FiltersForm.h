@@ -30,7 +30,8 @@ public:
 	CButton						btn_insert;
 	CButton						btn_propertypage;
 	CButton						btn_unregister;
-	CButton						btn_mediatypes;
+	CButton						btn_locate;
+	CButton						btn_merit;
 	CButton						check_favorite;
 	GraphStudio::FilterListCtrl	list_filters;
 	GraphStudio::TitleBar		title;
@@ -74,19 +75,23 @@ public:
 	void OnComboCategoriesChange();
 	void OnSize(UINT nType, int cx, int cy);
 	void OnMeasureItem(int nIDCtl, LPMEASUREITEMSTRUCT item);
-	afx_msg void OnBnClickedButtonInsert();
+	void OnBnClickedButtonInsert();
+	BOOL PreTranslateMessage(MSG *pmsg);
 
 	// filtering
 	DSUtil::FilterTemplate *GetSelected();
 	bool CanBeDisplayed(DSUtil::FilterTemplate &filter);
-	afx_msg void OnComboMeritChange();
-	afx_msg void OnFilterItemClick(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void OnBnClickedButtonPropertypage();
+	void OnComboMeritChange();
+	void OnFilterItemClick(NMHDR *pNMHDR, LRESULT *pResult);
+	void OnBnClickedButtonPropertypage();
 
 	// filterlist callback
 	virtual void OnItemDblClk(int item);
 
-	afx_msg void OnBnClickedCheckFavorite();
+	void OnBnClickedCheckFavorite();
+	void OnLocateClick();
+	void OnUnregisterClick();
+	afx_msg void OnMeritClick();
 };
 
 int ConfigureInsertedFilter(IBaseFilter *filter);

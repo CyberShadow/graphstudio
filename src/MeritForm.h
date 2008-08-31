@@ -10,35 +10,31 @@
 
 //-----------------------------------------------------------------------------
 //
-//	CRenderUrlForm class
+//	CMeritChangeDialog class
 //
 //-----------------------------------------------------------------------------
-class CRenderUrlForm : public CDialog
+class CMeritChangeDialog : public CDialog
 {
 protected:
-	DECLARE_DYNAMIC(CRenderUrlForm)
+	DECLARE_DYNAMIC(CMeritChangeDialog)
 	DECLARE_MESSAGE_MAP()
 
 	virtual void DoDataExchange(CDataExchange* pDX);
 public:
-	GraphStudio::TitleBar	title;
-	CButton					radio_url;
-	CComboBox				combo_url;
-	CString					result_file;
 
-	// list of recent URLs/Files
-	GraphStudio::FilenameList		url_list;
+	CStatic					label_filter;
+	CFont					font_filter;
+	CString					filter_name;
 
 public:
-	CRenderUrlForm(CWnd* pParent = NULL);   
-	virtual ~CRenderUrlForm();
+	CMeritChangeDialog(CWnd* pParent = NULL);   
+	virtual ~CMeritChangeDialog();
 
 	// Dialog Data
-	enum { IDD = IDD_DIALOG_RENDERURL };
-
-	afx_msg void OnBnClickedRadioUrl();
+	enum { IDD = IDD_DIALOG_MERITCHANGE };
 
 	virtual BOOL OnInitDialog();
-	virtual void OnOK();
-	afx_msg void OnBnClickedButtonClear();
 };
+
+
+bool ChangeMeritDialog(CString name, DWORD original_merit, DWORD &new_merit);

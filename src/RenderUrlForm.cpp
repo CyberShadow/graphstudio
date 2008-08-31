@@ -49,63 +49,13 @@ BOOL CRenderUrlForm::OnInitDialog()
 	if (!ret) return FALSE;
 
 	// load saved lists
-	LoadRecentlyUsedList(_T("MRU-URLCache"), url_list);
+	url_list.LoadList(_T("MRU-URLCache"));
 
 	int i;
 	for (i=0; i<url_list.GetCount(); i++) combo_url.AddString(url_list[i]);
 
 	OnBnClickedRadioUrl();
 	return TRUE;
-}
-
-void CRenderUrlForm::SaveRecentlyUsedList(CString name, CArray<CString> &list)
-{
-	CString		count_name;
-	count_name = name + _T("_count");
-	int count = list.GetCount();
-	// limit to 30
-	if (count > 30) count = 30;
-
-	AfxGetApp()->WriteProfileInt(_T("Settings"), count_name, count);
-
-	for (int i=0; i<count; i++) {
-		CString		key;
-		key.Format(_T("%s_%d"), name, i);
-		AfxGetApp()->WriteProfileString(_T("Settings"), key, list[i]);
-	}
-}
-
-void CRenderUrlForm::UpdateList(CString item, CArray<CString> &list)
-{
-	for (int i=0; i<list.GetCount(); i++) {
-		if (list[i] == item) {
-			list.RemoveAt(i);
-			break;
-		}
-	}
-	list.InsertAt(0, item);
-}
-
-
-void CRenderUrlForm::LoadRecentlyUsedList(CString name, CArray<CString> &list)
-{
-	CString		count_name;
-	count_name = name + _T("_count");
-	int count = AfxGetApp()->GetProfileInt(_T("Settings"), count_name, 0);
-
-	// limit to 30
-	if (count > 30) count = 30;
-	list.RemoveAll();
-
-	for (int i=0; i<count; i++) {
-		CString		item;
-		CString		key;
-		key.Format(_T("%s_%d"), name, i);
-		item = AfxGetApp()->GetProfileString(_T("Settings"), key, _T(""));
-		if (item != _T("")) {
-			list.Add(item);
-		}
-	}
 }
 
 void CRenderUrlForm::OnBnClickedRadioUrl()
@@ -119,8 +69,8 @@ void CRenderUrlForm::OnOK()
 	combo_url.GetWindowText(result_file);
 
 	if (result_file != _T("")) {
-		UpdateList(result_file, url_list);
-		SaveRecentlyUsedList(_T("MRU-URLCache"), url_list);
+		url_list.UpdateList(result_file);
+		url_list.SaveList(_T("MRU-URLCache"));
 	}
 
 	EndDialog(IDOK);
@@ -129,6 +79,6 @@ void CRenderUrlForm::OnOK()
 void CRenderUrlForm::OnBnClickedButtonClear()
 {
 	url_list.RemoveAll();
-	SaveRecentlyUsedList(_T("MRU-URLCache"), url_list);
+	url_list.SaveList(_T("MRU-URLCache"));
 	combo_url.ResetContent();
 }

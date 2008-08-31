@@ -134,7 +134,7 @@ void CEventsForm::OnGraphEvent(long evcode, LONG_PTR param1, LONG_PTR param2)
 	case EC_COMPLETE:		
 		{ 
 			msg = _T("EC_COMPLETE"); 
-			view->OnStopClick();
+			view->OnGraphComplete();
 		} 
 		break;
 	case EC_DEVICE_LOST:

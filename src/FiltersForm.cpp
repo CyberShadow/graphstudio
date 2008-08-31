@@ -9,6 +9,9 @@
 #include "FiltersForm.h"
 
 
+typedef HRESULT (_stdcall *DllUnregisterServerProc)(); 
+
+
 //-----------------------------------------------------------------------------
 //
 //	CFiltersForm class
@@ -25,6 +28,9 @@ BEGIN_MESSAGE_MAP(CFiltersForm, CDialog)
 	ON_NOTIFY(LVN_ITEMCHANGED, IDC_LIST_FILTERS, &CFiltersForm::OnFilterItemClick)
 	ON_BN_CLICKED(IDC_BUTTON_PROPERTYPAGE, &CFiltersForm::OnBnClickedButtonPropertypage)
 	ON_BN_CLICKED(IDC_CHECK_FAVORITE, &CFiltersForm::OnBnClickedCheckFavorite)
+	ON_BN_CLICKED(IDC_BUTTON_LOCATE, &CFiltersForm::OnLocateClick)
+	ON_BN_CLICKED(IDC_BUTTON_UNREGISTER, &CFiltersForm::OnUnregisterClick)
+	ON_BN_CLICKED(IDC_BUTTON_MERIT, &CFiltersForm::OnMeritClick)
 END_MESSAGE_MAP()
 
 //-----------------------------------------------------------------------------
@@ -50,7 +56,8 @@ void CFiltersForm::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_TITLEBAR, title);
 	DDX_Control(pDX, IDC_LIST_FILTERS, list_filters);
 	DDX_Control(pDX, IDC_BUTTON_INSERT, btn_insert);
-	DDX_Control(pDX, IDC_BUTTON_MEDIATYPES, btn_mediatypes);
+	DDX_Control(pDX, IDC_BUTTON_LOCATE, btn_locate);
+	DDX_Control(pDX, IDC_BUTTON_MERIT, btn_merit);
 	DDX_Control(pDX, IDC_BUTTON_PROPERTYPAGE, btn_propertypage);
 	DDX_Control(pDX, IDC_BUTTON_UNREGISTER, btn_unregister);
 	DDX_Control(pDX, IDC_CHECK_FAVORITE, check_favorite);
@@ -220,7 +227,7 @@ void CFiltersForm::OnSize(UINT nType, int cx, int cy)
 	tree_details.SetWindowPos(NULL, right_x, details_top, rc.Width()-right_x, rc.Height() - 100-details_top, SWP_SHOWWINDOW);
 
 	check_favorite.GetWindowRect(&rc2);
-	check_favorite.SetWindowPos(NULL, right_x+8, rc.Height()-100+8, rc.Width()-16-right_x, rc2.Height(), SWP_SHOWWINDOW);
+	check_favorite.SetWindowPos(NULL, right_x+8, rc.Height()-100+8, rc.Width()-128-right_x, rc2.Height(), SWP_SHOWWINDOW);
 
 	// combo boxes
 	combo_categories.GetWindowRect(&rc2);
@@ -236,7 +243,9 @@ void CFiltersForm::OnSize(UINT nType, int cx, int cy)
 	btn_insert.GetWindowRect(&rc2);
 	btn_insert.SetWindowPos(NULL, right_x+8, rc.Height() - 2*(8+btn_height), rc2.Width(), btn_height, SWP_SHOWWINDOW);
 	btn_propertypage.SetWindowPos(NULL, right_x+8, rc.Height() - 1*(8+btn_height), rc2.Width(), btn_height, SWP_SHOWWINDOW);
-	btn_mediatypes.SetWindowPos(NULL, rc.Width() - 8 - rc2.Width(), rc.Height() - 2*(8+btn_height), rc2.Width(), btn_height, SWP_SHOWWINDOW);
+
+	btn_merit.SetWindowPos(NULL, rc.Width() - 8 - rc2.Width(), rc.Height() - 3*(8+btn_height), rc2.Width(), btn_height, SWP_SHOWWINDOW);
+	btn_locate.SetWindowPos(NULL, rc.Width() - 8 - rc2.Width(), rc.Height() - 2*(8+btn_height), rc2.Width(), btn_height, SWP_SHOWWINDOW);
 	btn_unregister.SetWindowPos(NULL, rc.Width() - 8 - rc2.Width(), rc.Height() - 1*(8+btn_height), rc2.Width(), btn_height, SWP_SHOWWINDOW);
 
 
@@ -247,7 +256,8 @@ void CFiltersForm::OnSize(UINT nType, int cx, int cy)
 	btn_registry.Invalidate();
 	btn_insert.Invalidate();
 	btn_propertypage.Invalidate();
-	btn_mediatypes.Invalidate();
+	btn_locate.Invalidate();
+	btn_merit.Invalidate();
 	btn_unregister.Invalidate();
 
 	list_filters.Invalidate();
@@ -316,6 +326,19 @@ void CFiltersForm::OnComboMeritChange()
 	merit_mode = combo_merit.GetCurSel();
 	OnComboCategoriesChange();
 }
+
+BOOL CFiltersForm::PreTranslateMessage(MSG *pmsg)
+{
+	if (pmsg->message == WM_KEYDOWN) {
+		if (pmsg->wParam == VK_RETURN) {
+			OnBnClickedButtonInsert();
+			return TRUE;
+		}
+	}
+	return __super::PreTranslateMessage(pmsg);
+}
+
+
 
 void CFiltersForm::OnFilterItemClick(NMHDR *pNMHDR, LRESULT *pResult)
 {
@@ -517,3 +540,133 @@ int ConfigureInsertedFilter(IBaseFilter *filter)
 	return ret;
 }
 
+
+void CFiltersForm::OnLocateClick()
+{
+	DSUtil::FilterTemplate *filter = GetSelected();
+	if (filter) {
+
+		// get the file name
+		CString		filename = filter->file;
+
+		// open the explorer with the location
+		CString		param;
+		param = _T("/select, \"");
+		param += filename;
+		param += _T("\"");
+
+		ShellExecute(NULL, _T("open"), _T("explorer.exe"), param, NULL,	SW_NORMAL);
+	}
+}
+
+void CFiltersForm::OnUnregisterClick()
+{
+	DSUtil::FilterTemplate *filter = GetSelected();
+	if (filter) {
+
+		HRESULT				hr;
+
+		// DMOs do it differently
+		if (filter->type == DSUtil::FilterTemplate::FT_DMO) {
+
+			hr = DMOUnregister(filter->clsid, filter->category);
+			if (SUCCEEDED(hr)) {
+				MessageBox(_T("Unregister succeeded."), _T("Information"));
+			} else {
+				CString		msg;
+				msg.Format(_T("Unregister failed: 0x%08x"), hr);
+				MessageBox(msg, _T("Error"), MB_ICONERROR);
+			}
+
+		} else
+		if (filter->type == DSUtil::FilterTemplate::FT_FILTER) {
+
+			/*
+				We either call DllUnregisterServer in the file.
+				Or simply delete the entries if the file is no longer 
+				available.
+			*/
+
+			CString		fn = filter->file;
+			fn = fn.MakeLower();
+			
+			if (fn.Find(_T("quartz.dll")) >= 0 ||
+				fn.Find(_T("qdvd.dll")) >= 0 ||
+				fn.Find(_T("qdv.dll")) >= 0 ||
+				fn.Find(_T("qedit.dll")) >= 0 || 
+				fn.Find(_T("qasf.dll")) >= 0 ||
+				fn.Find(_T("qcap.dll")) >= 0
+				) {
+
+				// we simply won't let the users unregister these files...
+				// If they really try to do this, perhaps they should be
+				// doing something else than computers...
+				MessageBox(_T("This file is essential to the system.\nPermission denied."), _T("Warning"), MB_ICONWARNING);
+				return ;
+			}
+
+			// ask the user for confirmation
+			if (!ConfirmUnregisterFilter(filter->name)) {
+				return ;
+			}
+
+			HMODULE		library = LoadLibrary(fn);
+			if (library) {
+	
+				DllUnregisterServerProc		unreg = (DllUnregisterServerProc)GetProcAddress(library, "DllUnregisterServer");
+				if (unreg) {
+					hr = unreg();
+					if (SUCCEEDED(hr)) {
+						MessageBox(_T("Unregister succeeded."), _T("Information"));
+					} else {
+						CString		msg;
+						msg.Format(_T("Unregister failed: 0x%08x"), hr);
+						MessageBox(msg, _T("Error"), MB_ICONERROR);
+					}
+				}
+				FreeLibrary(library);
+
+			} else {
+
+				// dirty removing...
+				hr = DSUtil::UnregisterFilter(filter->clsid, filter->category);
+				if (SUCCEEDED(hr)) {
+					hr = DSUtil::UnregisterCOM(filter->clsid);
+				}
+				if (SUCCEEDED(hr)) {
+					MessageBox(_T("Unregister succeeded."), _T("Information"));
+				} else {
+					CString		msg;
+					msg.Format(_T("Unregister failed: 0x%08x"), hr);
+					MessageBox(msg, _T("Error"), MB_ICONERROR);
+				}
+			}
+
+		}
+
+		// reload the filters
+		OnComboCategoriesChange();
+	}
+}
+
+void CFiltersForm::OnMeritClick()
+{
+	DSUtil::FilterTemplate *filter = GetSelected();
+	if (filter) {
+
+		if (filter->type == DSUtil::FilterTemplate::FT_DMO ||
+			filter->type == DSUtil::FilterTemplate::FT_FILTER
+			) {
+
+			DWORD		oldmerit = filter->merit;
+			DWORD		newmerit = filter->merit;
+
+			if (ChangeMeritDialog(filter->name, oldmerit, newmerit)) {
+
+				// reload the filters
+				OnComboCategoriesChange();
+			}
+		}
+
+	}
+}

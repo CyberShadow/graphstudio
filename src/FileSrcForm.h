@@ -31,12 +31,9 @@ public:
 	CString					result_file;
 
 	// list of recent URLs/Files
-	CArray<CString>	file_list;
-	CArray<CString>	url_list;
+	GraphStudio::FilenameList		file_list;
+	GraphStudio::FilenameList		url_list;
 
-	void LoadRecentlyUsedList(CString name, CArray<CString> &list);
-	void SaveRecentlyUsedList(CString name, CArray<CString> &list);
-	void UpdateList(CString item, CArray<CString> &list);
 public:
 	CFileSrcForm(CWnd* pParent = NULL);   
 	virtual ~CFileSrcForm();

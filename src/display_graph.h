@@ -62,6 +62,10 @@ namespace GraphStudio
 		CBitmap			bmp_clock_inactive_hi;
 		CBitmap			bmp_clock_inactive_lo;
 
+		// preferred video renderer
+		CString						preferred_video_renderer;		// display name
+		DSUtil::FilterTemplates		*video_renderers;				// list of filters we consider video renderers
+
 	public:
 		RenderParameters();
 		virtual ~RenderParameters();
@@ -227,7 +231,7 @@ namespace GraphStudio
 
 	//-------------------------------------------------------------------------
 	//
-	//	DisplayGraph class
+	//	DisplayGraph callback classes
 	//
 	//-------------------------------------------------------------------------
 	
@@ -238,6 +242,29 @@ namespace GraphStudio
 	public:
 		virtual void OnFilterRemoved(DisplayGraph *sender, Filter *filter) = 0;
 	};
+
+	class GraphCallbackImpl : public CUnknown, public IAMGraphBuilderCallback 
+	{
+	public:
+		DisplayGraph	*graph;
+
+	public:
+		GraphCallbackImpl(LPUNKNOWN punk, HRESULT *phr, DisplayGraph *parent);
+		virtual ~GraphCallbackImpl();
+
+		DECLARE_IUNKNOWN;
+		STDMETHODIMP NonDelegatingQueryInterface(REFIID riid, void **ppv);
+
+		STDMETHODIMP SelectedFilter(IMoniker *pMon);
+		STDMETHODIMP CreatedFilter(IBaseFilter *pFilter);
+	};
+
+
+	//-------------------------------------------------------------------------
+	//
+	//	DisplayGraph class
+	//
+	//-------------------------------------------------------------------------
 
 	class DisplayGraph
 	{
@@ -256,6 +283,7 @@ namespace GraphStudio
 
 		// render parameters
 		RenderParameters				*params;
+		GraphCallbackImpl				*graph_callback;
 
 		// bins in filters are (smart placement)
 		CArray<CPoint>					bins;

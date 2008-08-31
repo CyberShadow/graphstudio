@@ -327,6 +327,75 @@ namespace DSUtil
 		return NOERROR;
 	}
 
+	int FilterTemplate::WriteMerit()
+	{
+		/*
+			Currently works only for DMO and normal filters
+		*/
+
+		LPOLESTR	str;
+		StringFromCLSID(clsid, &str);
+		CString		str_clsid(str);
+		CString		key_name;
+		if (str) CoTaskMemFree(str);
+
+		if (type == FilterTemplate::FT_DMO) {
+
+			key_name.Format(_T("CLSID\\%s"), str_clsid);
+			CRegKey		key;
+			if (key.Open(HKEY_CLASSES_ROOT, key_name, KEY_READ | KEY_WRITE) != ERROR_SUCCESS) { 
+				// simply write the new merit.
+				key.SetDWORDValue(_T("Merit"), merit);
+			} else {
+				// cannot update merit
+				return -1;
+			}
+			key.Close();
+			return 0;
+
+		} else
+		if (type == FilterTemplate::FT_FILTER) {
+
+			/*
+				Load the FilterData buffer, then change the merit value and
+				write it back.
+			*/
+
+			key_name.Format(_T("CLSID\\{083863F1-70DE-11d0-BD40-00A0C911CE86}\\Instance\\%s"), str_clsid);
+			CRegKey		key;
+			if (key.Open(HKEY_CLASSES_ROOT, key_name, KEY_READ | KEY_WRITE) != ERROR_SUCCESS) { 
+
+				ULONG		size = 256*1024;
+				BYTE		*largebuf = (BYTE*)malloc(size);
+				LONG		lret;
+
+				if (!largebuf) { key.Close(); return -1; }
+
+				lret = key.QueryBinaryValue(_T("FilterData"), largebuf, &size);
+				if (lret != ERROR_SUCCESS) { free(largebuf); key.Close(); return -1; }
+
+				// change the merit
+				DWORD		*dwbuf = (DWORD*)largebuf;
+				dwbuf[1] = merit;
+
+				// and write the buffer back
+				lret = key.SetBinaryValue(_T("FilterData"), largebuf, size);
+				if (lret != ERROR_SUCCESS) { free(largebuf); key.Close(); return -1; }
+
+				free(largebuf);
+				
+			} else {
+				// cannot update merit
+				return -1;
+			}
+			key.Close();
+			return 0;
+
+		}
+
+		return -1;
+	}
+
 	int FilterTemplate::Load(char *buf, int size)
 	{
 		DWORD	*b = (DWORD*)buf;
@@ -1124,6 +1193,118 @@ namespace DSUtil
 		}
 		ipins.RemoveAll();
 		return E_FAIL;
+	}
+
+	bool IsVideoUncompressed(GUID subtype)
+	{
+		if (subtype == MEDIASUBTYPE_RGB1 ||
+			subtype == MEDIASUBTYPE_RGB16_D3D_DX7_RT ||
+			subtype == MEDIASUBTYPE_RGB16_D3D_DX9_RT ||
+			subtype == MEDIASUBTYPE_RGB24 ||
+			subtype == MEDIASUBTYPE_RGB32 ||
+			subtype == MEDIASUBTYPE_RGB32_D3D_DX7_RT ||
+			subtype == MEDIASUBTYPE_RGB32_D3D_DX9_RT ||
+			subtype == MEDIASUBTYPE_RGB4 ||
+			subtype == MEDIASUBTYPE_RGB555 ||
+			subtype == MEDIASUBTYPE_RGB565 ||
+			subtype == MEDIASUBTYPE_RGB8 ||
+			subtype == MEDIASUBTYPE_ARGB1555 ||
+			subtype == MEDIASUBTYPE_ARGB1555_D3D_DX7_RT ||
+			subtype == MEDIASUBTYPE_ARGB1555_D3D_DX9_RT ||
+			subtype == MEDIASUBTYPE_ARGB32 ||
+			subtype == MEDIASUBTYPE_ARGB32_D3D_DX7_RT ||
+			subtype == MEDIASUBTYPE_ARGB32_D3D_DX9_RT ||
+			subtype == MEDIASUBTYPE_ARGB4444 ||
+			subtype == MEDIASUBTYPE_ARGB4444_D3D_DX7_RT ||
+			subtype == MEDIASUBTYPE_ARGB4444_D3D_DX9_RT ||
+			subtype == MEDIASUBTYPE_UYVY ||
+			subtype == MEDIASUBTYPE_YUY2 ||
+			subtype == MEDIASUBTYPE_YUYV ||
+			subtype == MEDIASUBTYPE_YV12 ||
+			subtype == MEDIASUBTYPE_Y211 ||
+			subtype == MEDIASUBTYPE_Y411 ||
+			subtype == MEDIASUBTYPE_Y41P ||
+			subtype == MEDIASUBTYPE_YVU9 ||
+			subtype == MEDIASUBTYPE_YVYU ||
+			subtype == MEDIASUBTYPE_IYUV ||
+			subtype == Monogram::MEDIASUBTYPE_I420 ||
+			subtype == GUID_NULL
+			) {
+			return true;
+		}
+
+		return false;
+	}
+
+
+#define MAX_KEY_LEN  260
+
+	int EliminateSubKey(HKEY hkey, LPCTSTR strSubKey)
+	{
+		HKEY hk;
+		if (lstrlen(strSubKey) == 0) return -1;
+  
+		LONG lreturn = RegOpenKeyEx(hkey, strSubKey, 0, MAXIMUM_ALLOWED, &hk);
+		if (lreturn == ERROR_SUCCESS) {
+			while (true) {
+				TCHAR Buffer[MAX_KEY_LEN];
+				DWORD dw = MAX_KEY_LEN;
+				FILETIME ft;
+
+				lreturn = RegEnumKeyEx(hk, 0, Buffer, &dw, NULL, NULL, NULL, &ft);
+				if (lreturn == ERROR_SUCCESS) {
+					DSUtil::EliminateSubKey(hk, Buffer);
+				} else {
+					break;
+				}
+			}
+			RegCloseKey(hk);
+			RegDeleteKey(hkey, strSubKey);
+		}
+		return 0;
+	}
+
+
+
+	HRESULT UnregisterCOM(GUID clsid)
+	{
+		/*
+			We remove the registry key
+				HKEY_CLASSES_ROOT\CLSID\<clsid>
+		*/
+		
+		OLECHAR szCLSID[CHARS_IN_GUID];
+		StringFromGUID2(clsid, szCLSID, CHARS_IN_GUID);
+
+		CString	keyname;
+		keyname.Format(_T("CLSID\\%s"), szCLSID);
+
+		// delete subkey
+		int ret = DSUtil::EliminateSubKey(HKEY_CLASSES_ROOT, keyname.GetBuffer());
+		if (ret < 0) return -1;
+
+		return 0;
+	}
+
+	HRESULT UnregisterFilter(GUID clsid, GUID category)
+	{
+		/*
+			Remove using the filter mapper object.
+		*/
+
+		CComPtr<IFilterMapper2>		mapper;
+		HRESULT						hr;
+
+		hr = mapper.CoCreateInstance(CLSID_FilterMapper2);
+		if (FAILED(hr)) return E_FAIL;
+
+		hr = mapper->UnregisterFilter(&category, NULL, clsid);
+
+		// done with the mapper
+		mapper = NULL;
+		if (FAILED(hr)) return E_FAIL;
+
+		return NOERROR;
 	}
 
 

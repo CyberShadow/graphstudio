@@ -34,6 +34,7 @@ public:
 	CFavoritesForm				*form_favorites;
 	CProgressForm				*form_progress;
 	CVolumeBarForm				*form_volume;
+	CDecPerformanceForm			*form_dec_performance;
 	CSeekForm					*form_seek;
 
 	// active property pages
@@ -94,14 +95,17 @@ public:
 	void OnConnectRemote();
 	void OnDisconnectRemote();
 	void OnDummyEvent(UINT nID) { };
+	void OnGraphComplete();
 
 	// menu
 	void UpdateMRUMenu();
 	void UpdateRenderersMenu();
+	void UpdatePreferredVideoRenderersMenu();
 
 	void OnAudioRendererClick(UINT nID);
 	void OnVideoRendererClick(UINT nID);
 	void OnFavoriteFilterClick(UINT nID);
+	void OnPreferredVideoRendererClick(UINT nID);
 	int InsertFilterFromTemplate(DSUtil::FilterTemplate &filter);
 	int InsertFilterFromFavorite(GraphStudio::FavoriteFilter *filter);
 
@@ -177,6 +181,7 @@ public:
 	afx_msg void OnViewProgressview();
 	afx_msg void OnFileSaveasxml();
 	afx_msg void OnAutomaticrestartSchedule();
+	afx_msg void OnViewDecoderPerformance();
 };
 
 #ifndef _DEBUG  // debug version in graphView.cpp
