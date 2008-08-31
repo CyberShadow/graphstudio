@@ -1,4 +1,4 @@
-[0.2.8.0 - Beta    xx/August/2008]
+[0.2.8.0 - Beta    31/August/2008]
 + added support for ACM codec configuration (via IAMStreamConfig interface)
 + added support for stream selection via IAMStreamSelect interface
 + added decoder performance testing tool
