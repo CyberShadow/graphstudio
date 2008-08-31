@@ -33,6 +33,9 @@ public:
 	CButton					check_keyframe;
 	CEdit					edit_time;
 	CEdit					edit_frame;
+	CCheckListBox			list_caps;
+
+	__int64					caps;
 
 public:
 	CSeekForm(CWnd* pParent = NULL);   // standard constructor
@@ -49,6 +52,7 @@ public:
 
 	void OnTimeClick();
 	void OnFrameClick();
+	void GetCurrentCaps(__int64 &c);
 
 	virtual void OnOK();
 };

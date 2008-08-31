@@ -143,8 +143,9 @@
 #define IDC_BUTTON_START                1075
 #define IDC_BUTTON_STOP                 1076
 #define IDC_STATIC_FILTER               1077
-#define IDC_COMBO1                      1078
 #define IDC_COMBO_NEW                   1078
+#define IDC_LIST3                       1081
+#define IDC_LIST_CAPS                   1081
 #define ID_LIST_MRU_CLEAR               4999
 #define ID_LIST_MRU_FILE0               5000
 #define ID_AUDIO_RENDERER0              6000
@@ -224,7 +225,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        163
 #define _APS_NEXT_COMMAND_VALUE         32855
-#define _APS_NEXT_CONTROL_VALUE         1079
+#define _APS_NEXT_CONTROL_VALUE         1082
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

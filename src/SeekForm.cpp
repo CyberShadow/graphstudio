@@ -23,6 +23,43 @@ BEGIN_MESSAGE_MAP(CSeekForm, CDialog)
 
 END_MESSAGE_MAP()
 
+struct VALNAME
+{
+	DWORD		flag;
+	LPCTSTR		name;
+};
+
+// our temp values
+enum
+{
+	FLAG_FORMAT_FRAME		= 0x200,
+	FLAG_FORMAT_SAMPLE		= 0x400,
+	FLAG_FORMAT_FIELD		= 0x800,
+	FLAG_FORMAT_BYTE		= 0x1000,
+	FLAG_FORMAT_MEDIA_TIME	= 0x2000,
+};
+
+const VALNAME		CapsFlags[] = 
+{
+	{	AM_SEEKING_CanSeekAbsolute,		_T("AM_SEEKING_CanSeekAbsolute") },
+	{	AM_SEEKING_CanSeekForwards,		_T("AM_SEEKING_CanSeekForwards") },
+	{	AM_SEEKING_CanSeekBackwards,	_T("AM_SEEKING_CanSeekBackwards") },
+	{	AM_SEEKING_CanGetCurrentPos,	_T("AM_SEEKING_CanGetCurrentPos") },	
+	{	AM_SEEKING_CanGetStopPos,		_T("AM_SEEKING_CanGetStopPos") },
+	{	AM_SEEKING_CanGetDuration,		_T("AM_SEEKING_CanGetDuration") },
+	{	AM_SEEKING_CanPlayBackwards,	_T("AM_SEEKING_CanPlayBackwards") },
+	{	AM_SEEKING_CanDoSegments,		_T("AM_SEEKING_CanDoSegments") },	
+	{	AM_SEEKING_Source,				_T("AM_SEEKING_Source") },
+	
+	{	FLAG_FORMAT_FRAME,				_T("TIME_FORMAT_FRAME") },
+	{	FLAG_FORMAT_SAMPLE,				_T("TIME_FORMAT_SAMPLE") },
+	{	FLAG_FORMAT_FIELD,				_T("TIME_FORMAT_FIELD") },
+	{	FLAG_FORMAT_BYTE,				_T("TIME_FORMAT_BYTE") },	
+	{	FLAG_FORMAT_MEDIA_TIME,			_T("TIME_FORMAT_MEDIA_TIME") }
+};
+const int			CapsFlagsCount = sizeof(CapsFlags) / sizeof(CapsFlags[0]);
+
+
 //-----------------------------------------------------------------------------
 //
 //	CSeekForm class
@@ -51,6 +88,7 @@ void CSeekForm::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_EDIT_TIME, edit_time);
 	DDX_Control(pDX, IDC_EDIT_FRAME, edit_frame);
 	DDX_Control(pDX, IDC_CHECK_KEYFRAME, check_keyframe);
+	DDX_Control(pDX, IDC_LIST_CAPS, list_caps);
 }
 
 BOOL CSeekForm::DoCreateDialog()
@@ -66,6 +104,12 @@ BOOL CSeekForm::DoCreateDialog()
 
 	edit_time.SetWindowText(_T("00:00:00.000"));
 	edit_frame.SetWindowText(_T("0"));
+
+	list_caps.ResetContent();
+	for (int i=0; i<CapsFlagsCount; i++) {
+		list_caps.AddString(CapsFlags[i].name);
+		list_caps.Enable(i, FALSE);
+	}
 
 	OnTimeClick();
 	return TRUE;
@@ -107,6 +151,18 @@ void CSeekForm::OnTimer(UINT_PTR id)
 	case 0:
 		{
 			UpdateGraphPosition();
+
+			// refresh caps
+			__int64		c;
+			GetCurrentCaps(c);
+
+			if (c != caps) {
+				caps = c;
+				for (int i=0; i<CapsFlagsCount; i++) {
+					bool active = (caps & CapsFlags[i].flag ? true : false);
+					list_caps.SetCheck(i, (active ? 1 : 0));
+				}
+			}
 		}
 		break;
 	}
@@ -179,6 +235,31 @@ void MakeNiceTimeMS(int time_ms, CString &v)
 	s = time_ms;
 
 	v.Format(_T("%.2d:%.2d:%.2d.%.3d"), h, m, s, ms);
+}
+
+void CSeekForm::GetCurrentCaps(__int64 &c)
+{
+	c = 0;
+
+	if (view) {
+		if (view->graph.ms) {
+			// get the caps
+			DWORD		seekcaps = 0;
+			if (FAILED(view->graph.ms->GetCapabilities(&seekcaps))) {
+				seekcaps = 0;
+			}
+
+			// the lower values are exactly the same
+			c |= seekcaps;
+
+			// we query the time formats
+			if (view->graph.ms->IsFormatSupported(&TIME_FORMAT_FRAME) == NOERROR) c |= FLAG_FORMAT_FRAME;
+			if (view->graph.ms->IsFormatSupported(&TIME_FORMAT_SAMPLE) == NOERROR) c |= FLAG_FORMAT_SAMPLE;
+			if (view->graph.ms->IsFormatSupported(&TIME_FORMAT_FIELD) == NOERROR) c |= FLAG_FORMAT_FIELD;
+			if (view->graph.ms->IsFormatSupported(&TIME_FORMAT_BYTE) == NOERROR) c |= FLAG_FORMAT_BYTE;
+			if (view->graph.ms->IsFormatSupported(&TIME_FORMAT_MEDIA_TIME) == NOERROR) c |= FLAG_FORMAT_MEDIA_TIME;
+		}
+	}
 }
 
 
