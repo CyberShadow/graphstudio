@@ -23,6 +23,7 @@ namespace DSUtil
 	static const GUID CLSID_Dump =
 	{ 0x36a5f770, 0xfe4c, 0x11ce, { 0xa8, 0xed, 0x00, 0xaa, 0x00, 0x2f, 0xea, 0xb5 } };
 
+	typedef CArray<CMediaType>	MediaTypes;
 
 	//-------------------------------------------------------------------------
 	//
@@ -157,6 +158,9 @@ namespace DSUtil
 		int Enumerate(GUID clsid);
 		int EnumerateDMO(GUID clsid);
 
+		// enumerating compatible filters
+		int EnumerateCompatible(MediaTypes &mtypes, DWORD min_merit, bool need_output, bool exact);
+
 		// enumerating filters
 		int EnumerateAudioRenderers();
 		int EnumerateVideoRenderers();
@@ -201,8 +205,6 @@ namespace DSUtil
 	};
 
 	typedef CArray<Pin>			PinArray;
-	typedef CArray<CMediaType>	MediaTypes;
-
 
 	// zobrazenie property pagesy
 	HRESULT DisplayPropertyPage(IBaseFilter *filter, HWND parent = NULL);

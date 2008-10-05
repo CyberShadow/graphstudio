@@ -38,6 +38,7 @@ BEGIN_MESSAGE_MAP(CGraphView, GraphStudio::DisplayView)
 	ON_COMMAND(ID_BUTTON_REFRESH, &CGraphView::OnRefreshFilters)
 	ON_COMMAND(ID_BUTTON_SEEK, &CGraphView::OnSeekClick)
 	ON_COMMAND(ID_OPTIONS_DIRECT, &CGraphView::OnOptionsDirectConnectClick)
+	ON_COMMAND(ID_OPTIONS_EXACTMATCH, &CGraphView::OnOptionsExactMatchClick)
 	ON_COMMAND(ID_FILE_NEW, &CGraphView::OnNewClick)
 	ON_COMMAND(ID_FILE_OPEN, &CGraphView::OnFileOpenClick)
 	ON_COMMAND(ID_FILE_SAVE, &CGraphView::OnFileSaveClick)
@@ -65,6 +66,7 @@ BEGIN_MESSAGE_MAP(CGraphView, GraphStudio::DisplayView)
 	ON_UPDATE_COMMAND_UI(ID_GRAPH_USECLOCK, &CGraphView::OnUpdateUseClock)
 	ON_UPDATE_COMMAND_UI(ID_BUTTON_DIRECT, &CGraphView::OnUpdateDirectConnect)
 	ON_UPDATE_COMMAND_UI(ID_OPTIONS_DIRECT, &CGraphView::OnUpdateOptionsDirectConnect)
+	ON_UPDATE_COMMAND_UI(ID_OPTIONS_EXACTMATCH, &CGraphView::OnUpdateOptionsExactMatch)
 	ON_UPDATE_COMMAND_UI(ID_BUTTON_PLAY, &CGraphView::OnUpdatePlayButton)
 	ON_UPDATE_COMMAND_UI(ID_BUTTON_PAUSE, &CGraphView::OnUpdatePauseButton)
 	ON_UPDATE_COMMAND_UI(ID_BUTTON_STOP, &CGraphView::OnUpdateStopButton)
@@ -344,13 +346,14 @@ void CGraphView::UpdatePreferredVideoRenderersMenu()
 	CMenu	*mainmenu  = GetParentFrame()->GetMenu();
 	CMenu	*optionsmenu = mainmenu->GetSubMenu(4);
 
-	if (optionsmenu->GetMenuItemCount() > 4) {
-		optionsmenu->RemoveMenu(4, MF_BYPOSITION);
-		optionsmenu->RemoveMenu(4, MF_BYPOSITION);
+	if (optionsmenu->GetMenuItemCount() > 5) {
+		optionsmenu->RemoveMenu(5, MF_BYPOSITION);
+		optionsmenu->RemoveMenu(5, MF_BYPOSITION);
 	}
 
 	return ;
 
+#if 0
 	CMenu	newmenu;		
 	CMenu	*menu;
 
@@ -398,6 +401,8 @@ void CGraphView::UpdatePreferredVideoRenderersMenu()
 		if (filter.moniker_name == render_params.preferred_video_renderer) flags |= MF_CHECKED;
 		menu->InsertMenu(menu->GetMenuItemCount(), flags, ID_PREFERRED_VIDEO_RENDERER + 1 + i, filter.name);
 	}
+#endif
+
 }
 
 void CGraphView::UpdateRenderersMenu()
@@ -1507,6 +1512,16 @@ void CGraphView::OnOptionsDirectConnectClick()
 void CGraphView::OnUpdateOptionsDirectConnect(CCmdUI *pCmdUI)
 {
 	pCmdUI->SetCheck(render_params.direct_connect);
+}
+
+void CGraphView::OnOptionsExactMatchClick()
+{
+	render_params.exact_match_mode = !render_params.exact_match_mode;
+}
+
+void CGraphView::OnUpdateOptionsExactMatch(CCmdUI *pCmdUI)
+{
+	pCmdUI->SetCheck(render_params.exact_match_mode);
 }
 
 void CGraphView::OnViewProgressview()

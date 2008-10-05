@@ -177,6 +177,8 @@ public:
 	void OnUpdateDirectConnect(CCmdUI *pCmdUI);
 	void OnOptionsDirectConnectClick();
 	void OnUpdateOptionsDirectConnect(CCmdUI *pCmdUI);
+	void OnOptionsExactMatchClick();
+	void OnUpdateOptionsExactMatch(CCmdUI *pCmdUI);
 
 	afx_msg void OnViewProgressview();
 	afx_msg void OnFileSaveasxml();

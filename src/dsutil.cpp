@@ -311,6 +311,8 @@ namespace DSUtil
 		SHGetSpecialFolderPath(NULL, temp, CSIDL_WINDOWS, FALSE);		windir = temp;
 		
 		DoReplace(file, _T("%PROGRAMFILES%"), progfiles);
+		DoReplace(file, _T("%SYSTEMROOT%"), windir);
+		DoReplace(file, _T("%WINDIR%"), windir);
 
 		DWORD ret = SearchPath(NULL, file.GetBuffer(), NULL, 4*1024, fullpath, &fn);
 		if (ret > 0) {
@@ -866,6 +868,81 @@ namespace DSUtil
 		return 0;
 	}
 
+	int FilterTemplates::EnumerateCompatible(MediaTypes &mtypes, DWORD min_merit, bool need_output, bool exact)
+	{
+		if (mtypes.GetCount() <= 0) return -1;
+
+		// our objects
+		IFilterMapper2		*mapper       = NULL;
+		IEnumMoniker		*enum_moniker = NULL;
+		GUID				*inlist       = NULL;
+		HRESULT				hr;
+		int					ret = -1;
+
+		do {
+			// create filter mapper object
+			hr = CoCreateInstance(CLSID_FilterMapper, NULL, CLSCTX_INPROC_SERVER, IID_IFilterMapper2, (void**)&mapper);
+			if (FAILED(hr)) break;
+
+			// prepare the media type list
+			int	cnt = mtypes.GetCount();
+			inlist = (GUID*)malloc(cnt * 2 * sizeof(GUID));
+			if (!inlist) break;
+
+			for (int i=0; i<cnt; i++) {
+				inlist[2*i + 0] = mtypes[i].majortype;
+				inlist[2*i + 1] = mtypes[i].subtype;
+			}
+
+			// search for the matching filters
+			hr = mapper->EnumMatchingFilters(&enum_moniker, 0, exact, min_merit,
+											 TRUE, cnt, inlist, NULL, NULL,
+											 FALSE,
+											 need_output, 0, NULL, NULL, NULL
+											 );
+			if (FAILED(hr)) break;
+
+			// add them to the list
+			ret = AddFilters(enum_moniker);
+
+			// finally we kick "ACM Wrapper" and "AVI Decompressor"
+			for (int j=filters.GetCount()-1; j >= 0; j--) {
+				if (filters[j].name == _T("ACM Wrapper") ||
+					filters[j].name == _T("AVI Decompressor")
+					) {
+					filters.RemoveAt(j);
+				}
+			}
+
+			// and make sure "Video Renderer", "VMR-7" and "VMR-9" are
+			// named properly
+			for (int k=0; k<filters.GetCount(); k++) {
+				FilterTemplate	&filt = filters[k];
+
+				if (filt.clsid == CLSID_VideoRendererDefault) {
+					filt.name = _T("Default Video Renderer");
+				} else
+				if (filt.clsid == CLSID_VideoMixingRenderer) {
+					filt.name = _T("Video Mixing Renderer 7");
+				} else
+				if (filt.clsid == CLSID_VideoMixingRenderer9) {
+					filt.name = _T("Video Mixing Renderer 9");
+				}
+			}
+
+		} while (0);
+
+		// get rid of the objects
+		if (mapper) mapper->Release();
+		if (enum_moniker) enum_moniker->Release();
+
+		if (inlist) {
+			free(inlist);
+		}
+
+		return ret;
+	}
+
 	int FilterTemplates::Enumerate(GUID clsid)
 	{
 
@@ -1172,6 +1249,8 @@ namespace DSUtil
 
 	HRESULT ConnectPin(IGraphBuilder *gb, IPin *output, IBaseFilter *input, bool direct)
 	{
+		if (!gb) return E_FAIL;
+
 		PinArray		ipins;
 		HRESULT			hr;
 
@@ -1220,6 +1299,7 @@ namespace DSUtil
 			subtype == MEDIASUBTYPE_UYVY ||
 			subtype == MEDIASUBTYPE_YUY2 ||
 			subtype == MEDIASUBTYPE_YUYV ||
+			subtype == MEDIASUBTYPE_NV12 ||
 			subtype == MEDIASUBTYPE_YV12 ||
 			subtype == MEDIASUBTYPE_Y211 ||
 			subtype == MEDIASUBTYPE_Y411 ||

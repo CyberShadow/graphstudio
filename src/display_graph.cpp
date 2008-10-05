@@ -2500,6 +2500,7 @@ namespace GraphStudio
 
 		display_file_name = true;
 		direct_connect = false;
+		exact_match_mode = false;
 
 		Zoom(1.0);
 

@@ -49,9 +49,11 @@ namespace GraphStudio
 		int					drag_mode;
 
 		// helpers for rightclick menu
-		Filter				*overlay_filter;
-		Filter				*current_filter;
-		Pin					*current_pin;
+		Filter						*overlay_filter;
+		Filter						*current_filter;
+		Pin							*current_pin;
+		DSUtil::FilterTemplates		compatible_filters;
+
 
 	public:
 		DisplayView();
@@ -70,13 +72,16 @@ namespace GraphStudio
 		void OnRenderPin();
 		void OnRenderNullStream();
 		void OnDumpStream();
+		void OnFileWriterStream();
 		void OnPropertyPage();
 
 		void MakeScreenshot();
 
 		// stream selection
 		void PrepareStreamSelectMenu(CMenu &menu, IUnknown *obj);
+		void PrepareCompatibleFiltersMenu(CMenu &menu, Pin *pin);
 		void OnSelectStream(UINT id);
+		void OnCompatibleFilterClick(UINT id);
 
 		// scrolling aid
 		void UpdateScrolling();

@@ -53,6 +53,7 @@ namespace GraphStudio
 		// display as file name
 		bool			display_file_name;
 		bool			direct_connect;
+		bool			exact_match_mode;
 
 		// Overlay Icons
 		CBitmap			bmp_volume_hi;
