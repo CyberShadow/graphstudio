@@ -1,4 +1,4 @@
-[0.2.9.0 - Beta	   xx/October/2008]
+[0.2.9.0 - Beta	   5/October/2008]
 + added MEDIASUBTYPE_NV12 to the list of uncompressed video subtypes
 + added "Insert File Writer" item for output pins delivering MEDIATYPE_Stream (e.g. mux filter output)
 + added "MERIT_DO_NOT_USE+1" and "MERIT_UNLIKELY+1" presets into the merit changer form
