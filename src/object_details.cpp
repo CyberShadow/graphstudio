@@ -430,7 +430,17 @@ namespace GraphStudio
 					len = pmt->cbFormat - sizeof(WAVEFORMATEXTENSIBLE);
 				}
 
-			} else {
+			} else 
+			if (wfx->wFormatTag == 0x55 && wfx->cbSize == 12) {
+				// WAVEFORMATEX
+				PropItem	*wfxinfo = mtinfo->AddItem(new PropItem(_T("WAVEFORMATEX")));
+				GetWaveFormatExDetails(wfx, wfxinfo);
+
+				// MPEGLAYER3WAVEFORMAT
+				PropItem	*mp3info = mtinfo->AddItem(new PropItem(_T("MPEGLAYER3WAVEFORMAT")));
+				GetMpegLayer3InfoDetails((MPEGLAYER3WAVEFORMAT*)wfx, mp3info);
+			} else
+			{
 				PropItem	*wfxinfo = mtinfo->AddItem(new PropItem(_T("WAVEFORMATEX")));
 				GetWaveFormatExDetails(wfx, wfxinfo);
 
@@ -700,9 +710,29 @@ namespace GraphStudio
 		return 0;
 	}
 
+	int GetMpegLayer3InfoDetails(MPEGLAYER3WAVEFORMAT *mp3, PropItem *mp3info)
+	{
+		mp3info->AddItem(new PropItem(_T("wID"), (int)mp3->wID));
+
+		CString		f;
+		switch (mp3->fdwFlags) {
+		case MPEGLAYER3_FLAG_PADDING_ISO:	f = _T("MPEGLAYER3_FLAG_PADDING_ISO"); break;
+		case MPEGLAYER3_FLAG_PADDING_ON:	f = _T("MPEGLAYER3_FLAG_PADDING_ON"); break;
+		case MPEGLAYER3_FLAG_PADDING_OFF:	f = _T("MPEGLAYER3_FLAG_PADDING_OFF"); break;
+		default:							f = _T("0"); break;
+		}
+		mp3info->AddItem(new PropItem(_T("fdwFlags"), f));
+		mp3info->AddItem(new PropItem(_T("nBlockSize"), (int)mp3->nBlockSize));
+		mp3info->AddItem(new PropItem(_T("nFramesPerBlock"), (int)mp3->nFramesPerBlock));
+		mp3info->AddItem(new PropItem(_T("nCodecDelay"), (int)mp3->nCodecDelay));
+
+		return 0;
+	}
+
 	int GetBitmapInfoDetails(BITMAPINFOHEADER *bih, PropItem *bihinfo)
 	{
-		CString		v;
+		CString		v, c;
+		int			ret;
 
 		bihinfo->AddItem(new PropItem(_T("biSize"), (int)bih->biSize));
 		bihinfo->AddItem(new PropItem(_T("biWidth"), (int)bih->biWidth));
@@ -710,7 +740,14 @@ namespace GraphStudio
 		bihinfo->AddItem(new PropItem(_T("biPlanes"), (int)bih->biPlanes));
 		bihinfo->AddItem(new PropItem(_T("biBitCount"), (int)bih->biBitCount));
 
-		v.Format(_T("0x%08x"), bih->biCompression);		bihinfo->AddItem(new PropItem(_T("biCompression"), v));
+
+		v.Format(_T("0x%08x"), bih->biCompression);		
+		ret = GetFourCC(bih->biCompression, c);
+		if (ret == 0) {
+			v = v + _T(" [") + c + _T("]");
+		}
+
+		bihinfo->AddItem(new PropItem(_T("biCompression"), v));
 		bihinfo->AddItem(new PropItem(_T("biSizeImage"), (int)bih->biSizeImage));
 
 		bihinfo->AddItem(new PropItem(_T("biXPelsPerMeter"), (int)bih->biXPelsPerMeter));
@@ -864,6 +901,36 @@ namespace GraphStudio
 
 		return 0;
 	}
+
+	int GetFourCC(DWORD fcc, CString &str)
+	{
+		BYTE		*b = (BYTE*)&fcc;
+		int			i;
+
+		// first check that the characters are reasonable
+		for (i=0; i<4; i++) {
+			if (b[i] >= 32 &&			// space
+				b[i] <= 126)			// ~
+			{
+				// continue
+			} else {
+				// we can't make nice fourcc string
+				return -1;
+			}
+		}
+
+		CStringA	ansi_str;
+
+		ansi_str = "";
+		for (i=0; i<4; i++) {
+			char	c = b[i];
+			ansi_str += c;
+		}
+
+		str = ansi_str;
+		return 0;
+	}
+
 
 };
 
