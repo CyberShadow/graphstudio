@@ -39,6 +39,7 @@ namespace GraphStudio
 	int GetMpeg1VideoInfoDetails(MPEG1VIDEOINFO *mvi, PropItem *mviinfo);
 	int GetMpeg2VideoInfoDetails(MPEG2VIDEOINFO *mvi, PropItem *mviinfo);
 	int GetMpegLayer3InfoDetails(MPEGLAYER3WAVEFORMAT *mp3, PropItem *mp3info);
+	int GetMpeg1WaveFormatDetails(MPEG1WAVEFORMAT *wfx, PropItem *mpinfo);
 
 	// Four-CC
 	int GetFourCC(DWORD fcc, CString &str);

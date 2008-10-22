@@ -1,5 +1,6 @@
 [0.3.0.0 - Beta	   xx/October/2008]
 + added support for MPEGLAYER3WAVEFORMAT structure
++ added support for MPEG1WAVEFORMAT structure
 + BITMAPINFOHEADER::biCompression is now also displayed as fourCC string
 
 [0.2.9.0 - Beta	   5/October/2008]

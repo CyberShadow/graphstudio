@@ -440,6 +440,15 @@ namespace GraphStudio
 				PropItem	*mp3info = mtinfo->AddItem(new PropItem(_T("MPEGLAYER3WAVEFORMAT")));
 				GetMpegLayer3InfoDetails((MPEGLAYER3WAVEFORMAT*)wfx, mp3info);
 			} else
+			if (wfx->wFormatTag == 0x50 && wfx->cbSize == 22) {
+				// WAVEFORMATEX
+				PropItem	*wfxinfo = mtinfo->AddItem(new PropItem(_T("WAVEFORMATEX")));
+				GetWaveFormatExDetails(wfx, wfxinfo);
+
+				// MPEG1WAVEFORMAT
+				PropItem	*mpinfo = mtinfo->AddItem(new PropItem(_T("MPEG1WAVEFORMAT")));
+				GetMpeg1WaveFormatDetails((MPEG1WAVEFORMAT*)wfx, mpinfo);				
+			} else
 			{
 				PropItem	*wfxinfo = mtinfo->AddItem(new PropItem(_T("WAVEFORMATEX")));
 				GetWaveFormatExDetails(wfx, wfxinfo);
@@ -725,6 +734,56 @@ namespace GraphStudio
 		mp3info->AddItem(new PropItem(_T("nBlockSize"), (int)mp3->nBlockSize));
 		mp3info->AddItem(new PropItem(_T("nFramesPerBlock"), (int)mp3->nFramesPerBlock));
 		mp3info->AddItem(new PropItem(_T("nCodecDelay"), (int)mp3->nCodecDelay));
+
+		return 0;
+	}
+
+	int GetMpeg1WaveFormatDetails(MPEG1WAVEFORMAT *wfx, PropItem *mpinfo)
+	{
+		CString		f;
+		switch (wfx->fwHeadLayer) {
+		case ACM_MPEG_LAYER1:		f = _T("ACM_MPEG_LAYER1"); break;
+		case ACM_MPEG_LAYER2:		f = _T("ACM_MPEG_LAYER2"); break;
+		case ACM_MPEG_LAYER3:		f = _T("ACM_MPEG_LAYER3"); break;
+		default:					f.Format(_T("%d"), wfx->fwHeadLayer); break;
+		}
+		mpinfo->AddItem(new PropItem(_T("fwHeadLayer"), f));
+		mpinfo->AddItem(new PropItem(_T("dwHeadBitrate"), (int)wfx->dwHeadBitrate));
+
+		switch (wfx->fwHeadMode) {
+		case ACM_MPEG_STEREO:		f = _T("ACM_MPEG_STEREO"); break;
+		case ACM_MPEG_JOINTSTEREO:	f = _T("ACM_MPEG_JOINTSTEREO"); break;
+		case ACM_MPEG_DUALCHANNEL:	f = _T("ACM_MPEG_DUALCHANNEL"); break;
+		case ACM_MPEG_SINGLECHANNEL:f = _T("ACM_MPEG_SINGLECHANNEL"); break;
+		default:					f.Format(_T("%d"), wfx->fwHeadMode);
+		}
+		mpinfo->AddItem(new PropItem(_T("fwHeadMode"), f));
+		mpinfo->AddItem(new PropItem(_T("fwHeadModeExt"), (int)wfx->fwHeadModeExt));
+
+		switch (wfx->wHeadEmphasis) {
+		case 1:		f = _T("1 [00] (None)"); break;
+		case 2:		f = _T("2 [01] (50/15 ms emphasis)"); break;
+		case 3:		f = _T("3 [10] (Reserved)"); break;
+		case 4:		f = _T("4 [11] (CCITT J.17)"); break;
+		default:	f.Format(_T("%d"), wfx->wHeadEmphasis);
+		}
+		mpinfo->AddItem(new PropItem(_T("wHeadEmphasis"), f));
+		mpinfo->AddItem(new PropItem(_T("fwHeadFlags"), (int)wfx->fwHeadFlags));
+		mpinfo->AddItem(new PropItem(_T("dwPTSLow"), (int)wfx->dwPTSLow));
+		mpinfo->AddItem(new PropItem(_T("dwPTSHigh"), (int)wfx->dwPTSHigh));
+
+		PropItem	*flags = mpinfo->AddItem(new PropItem(_T("Flags")));
+		bool	priv = wfx->fwHeadFlags & ACM_MPEG_PRIVATEBIT;
+		bool	copy = wfx->fwHeadFlags & ACM_MPEG_COPYRIGHT;
+		bool	orig = wfx->fwHeadFlags & ACM_MPEG_ORIGINALHOME;
+		bool	prot = wfx->fwHeadFlags & ACM_MPEG_PROTECTIONBIT;
+		bool	mpg1 = wfx->fwHeadFlags & ACM_MPEG_ID_MPEG1;
+
+		flags->AddItem(new PropItem(_T("ACM_MPEG_PRIVATEBIT"), (priv ? CString(_T("True")) : CString(_T("False")))));
+		flags->AddItem(new PropItem(_T("ACM_MPEG_COPYRIGHT"), (copy ? CString(_T("True")) : CString(_T("False")))));
+		flags->AddItem(new PropItem(_T("ACM_MPEG_ORIGINALHOME"), (orig ? CString(_T("True")) : CString(_T("False")))));
+		flags->AddItem(new PropItem(_T("ACM_MPEG_PROTECTIONBIT"), (prot ? CString(_T("True")) : CString(_T("False")))));
+		flags->AddItem(new PropItem(_T("ACM_MPEG_ID_MPEG1"), (mpg1 ? CString(_T("True")) : CString(_T("False")))));
 
 		return 0;
 	}
