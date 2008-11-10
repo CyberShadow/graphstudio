@@ -52,6 +52,8 @@ public:
     virtual HRESULT OnApplyChanges();
 	virtual void SetDirty();
 
+	virtual BOOL PreTranslateMessage(MSG *pMsg);
+
     // These implement an IPropertyPage interface
     STDMETHODIMP SetPageSite(LPPROPERTYPAGESITE pPageSite);
     STDMETHODIMP Activate(HWND hwndParent, LPCRECT prect,BOOL fModal);

@@ -369,6 +369,34 @@ int CPropertyForm::LoadPinPage(IPin *pin)
 
 	//---------------------------------------------------------------------
 	//
+	//	Support for Buffer Negotiation
+	//
+	//---------------------------------------------------------------------
+	CComPtr<IAMBufferNegotiation>		buf_neg;
+	if (SUCCEEDED(pin->QueryInterface(IID_IAMBufferNegotiation, (void**)&buf_neg))) {
+
+		CBufferNegotiationPage	*bn_page;
+		bn_page = new CBufferNegotiationPage(NULL, &hr, _T("Latency"));
+		if (bn_page) {
+			bn_page->AddRef();
+
+			hr = bn_page->QueryInterface(IID_IPropertyPage, (void**)&page);
+			if (SUCCEEDED(hr)) {
+				hr = page->SetObjects(1, (IUnknown**)&pin);
+				if (SUCCEEDED(hr)) {
+					container->AddPage(page);
+				}
+			}
+			page = NULL;
+
+			bn_page->Release();
+		}
+	}
+	buf_neg = NULL;
+
+
+	//---------------------------------------------------------------------
+	//
 	//	Support for Video For Windows
 	//
 	//---------------------------------------------------------------------

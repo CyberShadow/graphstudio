@@ -40,6 +40,7 @@
 #define IDD_DIALOG_DEC_PERFORMANCE      160
 #define IDD_DIALOG_UNREGCONFIRM         161
 #define IDD_DIALOG_MERITCHANGE          162
+#define IDD_DIALOG_BUFFERNEG            163
 #define IDC_COMBO_CATEGORIES            1001
 #define IDC_LIST_FILTERS                1002
 #define IDC_COMBO_MERIT                 1003
@@ -76,6 +77,7 @@
 #define IDC_BUTTON_CLOSE                1018
 #define IDC_BUTTON_CONFIG               1018
 #define IDC_BUTTON_DEF_IRATE            1018
+#define IDC_BUTTON_SET                  1018
 #define IDC_EDIT_DETAILS                1019
 #define IDC_BUTTON_DEF_PRATE            1019
 #define IDC_COMBO_REPORTTYPE            1020
@@ -99,6 +101,7 @@
 #define IDC_EDIT_TIME                   1031
 #define IDC_EDIT_PASSES                 1031
 #define IDC_EDIT_ORIGINAL               1031
+#define IDC_EDIT_LATENCY                1031
 #define IDC_TREE1                       1033
 #define IDC_TREE                        1033
 #define IDC_PROGRESS_POSITION           1034
@@ -146,6 +149,12 @@
 #define IDC_COMBO_NEW                   1078
 #define IDC_LIST3                       1081
 #define IDC_LIST_CAPS                   1081
+#define IDC_STATIC_ALIGN                1082
+#define IDC_STATIC_BUFFER               1083
+#define IDC_STATIC_PREFIX               1084
+#define IDC_STATIC_BUFFERS              1085
+#define IDC_STATIC_RATE                 1086
+#define IDC_STATIC_BYTES                1087
 #define ID_LIST_MRU_CLEAR               4999
 #define ID_LIST_MRU_FILE0               5000
 #define ID_AUDIO_RENDERER0              6000
@@ -153,7 +162,7 @@
 #define ID_FAVORITE_FILTER              6200
 #define ID_STREAM_SELECT                6800
 #define ID_PREFERRED_VIDEO_RENDERER     8000
-#define ID_COMPATIBLE_FILTER			9000
+#define ID_COMPATIBLE_FILTER            9000
 #define ID_Menu                         32771
 #define ID_FILE_RENDERURL               32772
 #define ID_FILE_RENDERDVD               32773
@@ -229,7 +238,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        163
 #define _APS_NEXT_COMMAND_VALUE         32858
-#define _APS_NEXT_CONTROL_VALUE         1082
+#define _APS_NEXT_CONTROL_VALUE         1088
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

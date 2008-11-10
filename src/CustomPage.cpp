@@ -29,6 +29,17 @@ CMFCPropertyPage::~CMFCPropertyPage()
 {
 }
 
+BOOL CMFCPropertyPage::PreTranslateMessage(MSG *pMsg)
+{
+	if (pMsg->message == WM_KEYDOWN) {
+		if (pMsg->wParam == VK_ESCAPE) {
+			// block ESC keypresses
+			return TRUE;
+		}
+	}
+	return __super::PreTranslateMessage(pMsg);
+}
+
 STDMETHODIMP_(ULONG) CMFCPropertyPage::NonDelegatingAddRef()
 {
     LONG lRef = InterlockedIncrement(&m_cRef);

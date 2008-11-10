@@ -950,6 +950,33 @@ BEGIN
     COMBOBOX        IDC_COMBO_FORMAT,18,192,144,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
 END
 
+IDD_DIALOG_BUFFERNEG DIALOGEX 0, 0, 272, 248
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD
+FONT 8, "MS Shell Dlg", 0, 0, 0x0
+BEGIN
+    CONTROL         "",IDC_TITLEBAR,"Static",SS_OWNERDRAW,0,0,272,20
+    LTEXT           "IAMBufferNegotiation Interface",IDC_STATIC,6,30,102,8
+    GROUPBOX        "Output media type",IDC_STATIC,6,48,258,54
+    LTEXT           "Sample rate:",IDC_STATIC,18,66,42,8
+    LTEXT           "Channels:",IDC_STATIC,18,75,33,8
+    LTEXT           "Avg. bytes per second:",IDC_STATIC,18,84,76,8
+    GROUPBOX        "Allocator properties",IDC_STATIC,6,108,258,72
+    LTEXT           "Latency (ms)",IDC_STATIC,168,121,42,8
+    EDITTEXT        IDC_EDIT_LATENCY,168,132,84,12,ES_AUTOHSCROLL | ES_NUMBER
+    PUSHBUTTON      "Set",IDC_BUTTON_SET,168,146,86,12
+    LTEXT           "cbAlign:",IDC_STATIC,18,126,26,8
+    LTEXT           "cbBuffer:",IDC_STATIC,18,138,31,8
+    LTEXT           "cbPrefix:",IDC_STATIC,18,150,30,8
+    LTEXT           "cBuffers:",IDC_STATIC,18,162,30,8
+    LTEXT           "-1",IDC_STATIC_ALIGN,54,126,66,8
+    LTEXT           "-1",IDC_STATIC_BUFFER,54,138,66,8
+    LTEXT           "-1",IDC_STATIC_PREFIX,54,150,66,8
+    LTEXT           "-1",IDC_STATIC_BUFFERS,54,162,66,8
+    LTEXT           "44100",IDC_STATIC_RATE,102,66,60,8
+    LTEXT           "2",IDC_STATIC_CHANNELS,102,75,60,8
+    LTEXT           "128000",IDC_STATIC_BYTES,102,84,60,8
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -992,6 +1019,14 @@ BEGIN
     END
 
     IDD_DIALOG_AUDIO_COMPRESS, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 265
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 241
+    END
+
+    IDD_DIALOG_BUFFERNEG, DIALOG
     BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 265

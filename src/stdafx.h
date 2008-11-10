@@ -110,6 +110,7 @@ using namespace std;
 #include "FilterDetailsPage.h"
 #include "FilterVCMPage.h"
 #include "FilterACMPage.h"
+#include "BufferNegotiationPage.h"
 
 #include "DecPerformanceForm.h"
 #include "FavoritesForm.h"
