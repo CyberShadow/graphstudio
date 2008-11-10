@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="windows-1250"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8.00"
+	Version="8,00"
 	Name="graphstudio"
 	ProjectGUID="{51117F20-9323-4EEE-964D-760C818DF80D}"
 	RootNamespace="graphstudio"
@@ -621,6 +621,14 @@
 			</File>
 			<File
 				RelativePath=".\src\title_bar.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\url_label.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\url_label.h"
 				>
 			</File>
 		</Filter>

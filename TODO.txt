@@ -1,6 +1,3 @@
 - some sort of encoding wizards
 - better filter placement algorithm
 - video window control via filter overlay icon (just like audio volume/balance)
-- performance measurement feature
-- AVI Mux property page (IConfigAviMux, IConfigInterleaving)
-- property page to set latency (buffer size) for audio capture filter

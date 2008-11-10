@@ -86,6 +86,7 @@ using namespace std;
 #include "mtypes_ext.h"
 
 #include "title_bar.h"
+#include "url_label.h"
 #include "seeking_bar.h"
 #include "EVR_VideoWindow.h"
 #include "display_graph.h"

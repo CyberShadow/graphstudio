@@ -116,6 +116,7 @@ public:
 	CAboutDlg();
 	
 	GraphStudio::TitleBar		titlebar;
+	GraphStudio::URLLabel		url_label;
 
 // Dialog Data
 	enum { IDD = IDD_ABOUTBOX };
@@ -136,7 +137,12 @@ void CAboutDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_TITLEBAR, titlebar);
+	DDX_Control(pDX, IDC_STATIC_URL, url_label);
+
+	// navigate to this location
+	url_label.url = _T("http://www.monogrammultimedia.com");
 }
+
 
 BEGIN_MESSAGE_MAP(CAboutDlg, CDialog)
 END_MESSAGE_MAP()
