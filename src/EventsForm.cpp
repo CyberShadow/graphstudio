@@ -174,7 +174,7 @@ void CEventsForm::OnGraphEvent(long evcode, LONG_PTR param1, LONG_PTR param2)
 	case EC_FULLSCREEN_LOST:	{ msg = _T("EC_FULLSCREEN_LOST"); } break;
 	case EC_GRAPH_CHANGED:	
 		{ 
-			view->graph.RefreshClock();
+			view->graph.RefreshFilters();
 			view->graph.SmartPlacement();
 			view->Invalidate();
 			msg = _T("EC_GRAPH_CHANGED"); 
