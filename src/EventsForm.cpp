@@ -172,7 +172,14 @@ void CEventsForm::OnGraphEvent(long evcode, LONG_PTR param1, LONG_PTR param2)
 		break;
 	case EC_FILE_CLOSED:	{ msg = _T("EC_FILE_CLOSED"); } break;
 	case EC_FULLSCREEN_LOST:	{ msg = _T("EC_FULLSCREEN_LOST"); } break;
-	case EC_GRAPH_CHANGED:	{ msg = _T("EC_GRAPH_CHANGED"); } break;
+	case EC_GRAPH_CHANGED:	
+		{ 
+			view->graph.RefreshClock();
+			view->graph.SmartPlacement();
+			view->Invalidate();
+			msg = _T("EC_GRAPH_CHANGED"); 
+		} 
+		break;
 	case EC_LENGTH_CHANGED:	{ msg = _T("EC_LENGTH_CHANGED"); } break;
 	case EC_LOADSTATUS:
 		{
