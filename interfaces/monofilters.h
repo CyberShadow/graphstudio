@@ -19,29 +19,21 @@ namespace Monogram
 	static const GUID MEDIASUBTYPE_I420 = 
 	{ 0x30323449, 0x0000, 0x000, { 0x80, 0x00, 0x00, 0xAA, 0x00, 0x38, 0x9B, 0x71 } };
 
-	// {BE0783E3-8A4B-4d1b-BCAF-27A78FEB20D2}
-	static const GUID CLSID_MonogramMultigraphSink = 
-	{ 0xbe0783e3, 0x8a4b, 0x4d1b, { 0xbc, 0xaf, 0x27, 0xa7, 0x8f, 0xeb, 0x20, 0xd2 } };
+	// {A3F41BB6-19DF-416c-941A-89A2D84F4B9F}
+	static const GUID CLSIDI_MonogramMultigraphSink = 
+	{ 0xa3f41bb6, 0x19df, 0x416c, { 0x94, 0x1a, 0x89, 0xa2, 0xd8, 0x4f, 0x4b, 0x9f } };
 
-	// {0F9C2E12-1C6E-4654-B1F9-F5A65907A81D}
-	static const GUID CLSID_MonogramMultigraphSinkPage = 
-	{ 0xf9c2e12, 0x1c6e, 0x4654, { 0xb1, 0xf9, 0xf5, 0xa6, 0x59, 0x7, 0xa8, 0x1d } };
-
-	// {C086333D-22E5-4431-841D-207AEE247AF1}
+	// {D3E5C632-3DC9-489b-8E80-7F436CE0F120}
 	static const GUID IID_IMonogramMultigraphSink = 
-	{ 0xc086333d, 0x22e5, 0x4431, { 0x84, 0x1d, 0x20, 0x7a, 0xee, 0x24, 0x7a, 0xf1 } };
+	{ 0xd3e5c632, 0x3dc9, 0x489b, { 0x8e, 0x80, 0x7f, 0x43, 0x6c, 0xe0, 0xf1, 0x20 } };
 
-	// {61084D92-AD47-4d45-809F-6B0379ECFC67}
+	// {AF2F9B96-DE7C-4ae4-A955-15201E47AF6F}
 	static const GUID CLSID_MonogramMultigraphSource = 
-	{ 0x61084d92, 0xad47, 0x4d45, { 0x80, 0x9f, 0x6b, 0x3, 0x79, 0xec, 0xfc, 0x67 } };
+	{ 0xaf2f9b96, 0xde7c, 0x4ae4, { 0xa9, 0x55, 0x15, 0x20, 0x1e, 0x47, 0xaf, 0x6f } };
 
-	// {FBB4C587-C037-4787-8F81-BD77EE2FC908}
-	static const GUID CLSID_MonogramMultigraphSourcePage = 
-	{ 0xfbb4c587, 0xc037, 0x4787, { 0x8f, 0x81, 0xbd, 0x77, 0xee, 0x2f, 0xc9, 0x8 } };
-
-	// {6AE30B50-C9C7-40f0-80B1-5691E64B3D51}
+	// {9016FD9E-03C5-42ce-8BE1-AA46AB736893}
 	static const GUID IID_IMonogramMultigraphSource = 
-	{ 0x6ae30b50, 0xc9c7, 0x40f0, { 0x80, 0xb1, 0x56, 0x91, 0xe6, 0x4b, 0x3d, 0x51 } };
+	{ 0x9016fd9e, 0x3c5, 0x42ce, { 0x8b, 0xe1, 0xaa, 0x46, 0xab, 0x73, 0x68, 0x93 } };
 
 	// {88F36DB6-D898-40b5-B409-466A0EECC26A}
 	static const GUID CLSID_MonogramAACEncoder = 
@@ -521,10 +513,18 @@ namespace Monogram
 		RTP_STREAM	streams[64];
 	};
 
+	enum META_MODE {
+		MM_NONE		 = 0,
+		MM_NETWORK	 = 1,
+		MM_MANUAL	 = 2,
+	};
+
 	struct META_CONFIG 
 	{
 		LPWSTR		host;
-		int			port;
+		int			port; 
+		int			interval;	// ako casto sa ma posielat "stare" xml v milisekundach INFINITE = raz
+		META_MODE	mode;		
 	};
 
 	struct VideoProcConfig
@@ -562,16 +562,16 @@ namespace Monogram
 
 	DECLARE_INTERFACE_(IMonogramMultigraphSink, IUnknown)
 	{
-		STDMETHOD(GetName)(BSTR *name);
-		STDMETHOD(SetName)(LPWSTR name);
-		STDMETHOD(GetBlocking)(BOOL *blocking);
+		STDMETHOD(SetName)(LPCWSTR name);
 		STDMETHOD(SetBlocking)(BOOL blocking);
 	};
 
 	DECLARE_INTERFACE_(IMonogramMultigraphSource, IUnknown)
 	{
-		STDMETHOD(GetName)(BSTR *name) PURE;
-		STDMETHOD(SetName)(LPWSTR name) PURE;
+		STDMETHOD(SetSourceName)(LPCWSTR name);
+		STDMETHOD(GetSourceName)(BSTR *name);
+		STDMETHOD(SetAudioOffset)(REFERENCE_TIME rtOffset);
+		STDMETHOD(GetAudioOffset)(REFERENCE_TIME *rtOffset);
 	};
 
 	DECLARE_INTERFACE_(IMonogramAACEncoderPropertyPage, IUnknown)
@@ -671,6 +671,7 @@ namespace Monogram
 		STDMETHOD(SetConfig)(META_CONFIG *cfg);
 		STDMETHOD(GetConfig)(META_CONFIG *cfg);
 		STDMETHOD(GetXML)(void **xml_root, int *version);			// XMLNode z MonoBase
+		STDMETHOD(SetXML)(LPCTSTR lpctstrXML, int length);
 	};
 
 	DECLARE_INTERFACE_(IMonogramVideoProc, IUnknown)

@@ -103,7 +103,7 @@ namespace GraphStudio
 			hr = filter->QueryInterface(Monogram::IID_IMonogramMultigraphSource, (void**)&src);
 			if (SUCCEEDED(hr)) {
 				CString	srcname = conf->GetValue(_T("name"));
-				hr = src->SetName(srcname.GetBuffer());
+				hr = src->SetSourceName(srcname.GetBuffer());
 				if (FAILED(hr)) return -1;
 				ret = 0;
 			}
@@ -383,7 +383,7 @@ namespace GraphStudio
 			}
 
 		PRESET("imonogrammetasource")
-			// <imonogrammetasource host="224.5.6.7" port="5000"/>
+			// <imonogrammetasource mode="network" host="224.5.6.7" port="5000" interval="100" />
 
 			CComPtr<Monogram::IMonogramMetaSource>	metasrc;
 			hr = filter->QueryInterface(Monogram::IID_IMonogramMetaSource, (void**)&metasrc);
@@ -391,11 +391,21 @@ namespace GraphStudio
 
 				Monogram::META_CONFIG		config;
 
-				CString		host = conf->GetValue(_T("host"));
-				if (host == _T("")) host = _T("224.5.6.7");
+				CString	host = conf->GetValue(_T("host"));
+				CString mode = conf->GetValue(_T("mode")); mode.MakeLower();
+				CString sinterval = conf->GetValue(_T("interval")); sinterval.MakeLower();
+				int interval = INFINITE;
+				if (sinterval != _T("infinite")) {
+					interval = conf->GetValue(_T("interval"), INFINITE);
+				}
 
 				config.host = host.GetBuffer();
-				config.port = conf->GetValue(_T("port"), 5000);
+				config.port = conf->GetValue(_T("port"), 0);
+				config.interval =  interval;
+				config.mode = Monogram::MM_NONE;
+				if (mode == _T("network")) config.mode = Monogram::MM_NETWORK;
+				if (mode == _T("manual")) config.mode = Monogram::MM_MANUAL;
+
 
 				metasrc->SetConfig(&config);
 				ret = 0;
