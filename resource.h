@@ -41,6 +41,7 @@
 #define IDD_DIALOG_UNREGCONFIRM         161
 #define IDD_DIALOG_MERITCHANGE          162
 #define IDD_DIALOG_BUFFERNEG            163
+#define IDD_DIALOG_WMADECODER           164
 #define IDC_COMBO_CATEGORIES            1001
 #define IDC_LIST_FILTERS                1002
 #define IDC_COMBO_MERIT                 1003
@@ -156,6 +157,8 @@
 #define IDC_STATIC_RATE                 1086
 #define IDC_STATIC_BYTES                1087
 #define IDC_STATIC_URL                  1089
+#define IDC_CHECK1                      1090
+#define IDC_CHECK_HIRES                 1090
 #define ID_LIST_MRU_CLEAR               4999
 #define ID_LIST_MRU_FILE0               5000
 #define ID_AUDIO_RENDERER0              6000
@@ -239,7 +242,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        163
 #define _APS_NEXT_COMMAND_VALUE         32858
-#define _APS_NEXT_CONTROL_VALUE         1090
+#define _APS_NEXT_CONTROL_VALUE         1091
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

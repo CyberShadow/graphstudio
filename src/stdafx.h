@@ -112,6 +112,7 @@ using namespace std;
 #include "FilterVCMPage.h"
 #include "FilterACMPage.h"
 #include "BufferNegotiationPage.h"
+#include "WMADecPage.h"
 
 #include "DecPerformanceForm.h"
 #include "FavoritesForm.h"

@@ -4,6 +4,7 @@
 + BITMAPINFOHEADER::biCompression is now also displayed as fourCC string
 + added property page for IAMBufferNegotiation interface
 + AboutBox MONOGRAM link navigates to home page
++ added high resolution output property page for WMA DMO Decoder
 
 [0.2.9.0 - Beta	   5/October/2008]
 + added MEDIASUBTYPE_NV12 to the list of uncompressed video subtypes

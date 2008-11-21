@@ -977,6 +977,18 @@ BEGIN
     LTEXT           "128000",IDC_STATIC_BYTES,102,84,60,8
 END
 
+IDD_DIALOG_WMADECODER DIALOGEX 0, 0, 272, 248
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD
+FONT 8, "MS Shell Dlg", 0, 0, 0x0
+BEGIN
+    CONTROL         "",IDC_TITLEBAR,"Static",SS_OWNERDRAW,0,0,272,20
+    LTEXT           "Windows Media Audio",IDC_STATIC,6,30,70,8
+    GROUPBOX        "Output settings",IDC_STATIC,6,48,258,90
+    CONTROL         "High resolution output ",IDC_CHECK_HIRES,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,18,66,89,10
+    LTEXT           "For this option to apply you need to connect the input pin first while leaving the output pin disconnected.",IDC_STATIC,30,84,222,18
+    LTEXT           "Note: This option is supported only for files that are not protected by DRM.",IDC_STATIC,12,120,246,8
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -1027,6 +1039,14 @@ BEGIN
     END
 
     IDD_DIALOG_BUFFERNEG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 265
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 241
+    END
+
+    IDD_DIALOG_WMADECODER, DIALOG
     BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 265

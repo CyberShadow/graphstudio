@@ -116,6 +116,9 @@ public:
 	int AnalyzeObject(IUnknown *obj);
 	int LoadPinPage(IPin *pin);
 
+	// check for DMO pages
+	int AnalyzeDMO(IUnknown *obj);
+
 	void OnDestroy();
 	void ResizeToFit(CSize size);
 	void OnSize(UINT nType, int cx, int cy);
