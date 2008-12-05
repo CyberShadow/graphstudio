@@ -184,6 +184,8 @@ public:
 	afx_msg void OnFileSaveasxml();
 	afx_msg void OnAutomaticrestartSchedule();
 	afx_msg void OnViewDecoderPerformance();
+	afx_msg void OnUpdateOptionsAbortrender(CCmdUI *pCmdUI);
+	afx_msg void OnOptionsAbortrender();
 };
 
 #ifndef _DEBUG  // debug version in graphView.cpp

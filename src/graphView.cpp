@@ -99,6 +99,8 @@ BEGIN_MESSAGE_MAP(CGraphView, GraphStudio::DisplayView)
 	ON_COMMAND(ID_FILE_SAVEASXML, &CGraphView::OnFileSaveasxml)
 	ON_COMMAND(ID_AUTOMATICRESTART_SCHEDULE, &CGraphView::OnAutomaticrestartSchedule)
 	ON_COMMAND(ID_VIEW_DECODERPERFORMANCE, &CGraphView::OnViewDecoderPerformance)
+	ON_UPDATE_COMMAND_UI(ID_OPTIONS_ABORTRENDER, &CGraphView::OnUpdateOptionsAbortrender)
+	ON_COMMAND(ID_OPTIONS_ABORTRENDER, &CGraphView::OnOptionsAbortrender)
 END_MESSAGE_MAP()
 
 //-----------------------------------------------------------------------------
@@ -346,9 +348,9 @@ void CGraphView::UpdatePreferredVideoRenderersMenu()
 	CMenu	*mainmenu  = GetParentFrame()->GetMenu();
 	CMenu	*optionsmenu = mainmenu->GetSubMenu(4);
 
-	if (optionsmenu->GetMenuItemCount() > 5) {
-		optionsmenu->RemoveMenu(5, MF_BYPOSITION);
-		optionsmenu->RemoveMenu(5, MF_BYPOSITION);
+	if (optionsmenu->GetMenuItemCount() > 6) {
+		optionsmenu->RemoveMenu(6, MF_BYPOSITION);
+		optionsmenu->RemoveMenu(6, MF_BYPOSITION);
 	}
 
 	return ;
@@ -1519,10 +1521,21 @@ void CGraphView::OnOptionsExactMatchClick()
 	render_params.exact_match_mode = !render_params.exact_match_mode;
 }
 
+void CGraphView::OnOptionsAbortrender()
+{
+	render_params.abort_timeout = !render_params.abort_timeout;
+}
+
 void CGraphView::OnUpdateOptionsExactMatch(CCmdUI *pCmdUI)
 {
 	pCmdUI->SetCheck(render_params.exact_match_mode);
 }
+
+void CGraphView::OnUpdateOptionsAbortrender(CCmdUI *pCmdUI)
+{
+	pCmdUI->SetCheck(render_params.abort_timeout);
+}
+
 
 void CGraphView::OnViewProgressview()
 {
@@ -1560,4 +1573,3 @@ void CGraphView::OnOverlayIconClick(GraphStudio::OverlayIcon *icon, CPoint point
 		break;
 	}
 }
-

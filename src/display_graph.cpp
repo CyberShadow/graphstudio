@@ -869,7 +869,9 @@ namespace GraphStudio
 		if (!pin) return -1;
 
 		// try to render
+		params->MarkRender(true);
 		HRESULT		hr = gb->Render(pin->pin);
+		params->MarkRender(false);
 		if (FAILED(hr)) return -1;
 
 		// reload newly added filters
@@ -1089,7 +1091,11 @@ namespace GraphStudio
 
 		do {
 
+			// mark 
+			params->MarkRender(true);
 			hr = gb->RenderFile(fn, NULL);
+			params->MarkRender(false);
+
 			if (FAILED(hr)) break;
 
 			graph_name = fn;
@@ -1176,11 +1182,15 @@ namespace GraphStudio
 		}
 
 		HRESULT hr;
+
+		params->MarkRender(true);
 		if (params->direct_connect) {
 			hr = gb->ConnectDirect(p1->pin, p2->pin, NULL);
 		} else {
 			hr = gb->Connect(p1->pin, p2->pin);
 		}
+		params->MarkRender(false);
+		
 		if (FAILED(hr)) return hr;
 
 		RefreshFilters();
@@ -2501,6 +2511,10 @@ namespace GraphStudio
 		display_file_name = true;
 		direct_connect = false;
 		exact_match_mode = false;
+		abort_timeout = true;
+
+		render_start_time = 0;
+		in_render = false;
 
 		Zoom(1.0);
 
@@ -2539,6 +2553,18 @@ namespace GraphStudio
 		MakeFont(font_pin, _T("Arial"), size, false, false);
 	}
 
+	void RenderParameters::MarkRender(bool start)
+	{
+		if (in_render == start) return ;
+
+		// remember the time
+		in_render = start;
+		if (start) {
+			render_start_time = GetTickCount();
+			render_can_proceed = true;
+		}
+	}
+
 	//-------------------------------------------------------------------------
 	//
 	//	DisplayGraph callback classes
@@ -2568,6 +2594,32 @@ namespace GraphStudio
 	STDMETHODIMP GraphCallbackImpl::SelectedFilter(IMoniker *pMon)
 	{
 		HRESULT	hr;
+
+		if (!graph->params) return NOERROR;
+
+		/*
+			Check for never-ending render operation.
+		*/
+		if (graph->params->abort_timeout && graph->params->in_render) {
+
+			DWORD		timenow = GetTickCount();
+
+			if (graph->params->render_can_proceed &&
+				(timenow > (graph->params->render_start_time + 10*1000))
+				) {
+	
+				// TODO: perhaps display some error message
+				graph->params->render_can_proceed = false;
+			}
+
+			// we stop accepting filters - graph builder will run out of options
+			// and the operation will stop
+			if (!graph->params->render_can_proceed) {
+				return E_FAIL;
+			}
+		}
+
+
 
 		// check for preferred video filter
 		/*

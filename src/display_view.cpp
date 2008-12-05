@@ -687,8 +687,11 @@ namespace GraphStudio
 	void DisplayView::OnRenderPin()
 	{
 		if (!current_pin) return ;
-	
+
+		render_params.MarkRender(true);	
 		HRESULT	hr = graph.gb->Render(current_pin->pin);
+		render_params.MarkRender(false);
+
 		if (SUCCEEDED(hr)) {
 			graph.RefreshFilters();
 			graph.SmartPlacement();

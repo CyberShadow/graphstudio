@@ -54,6 +54,12 @@ namespace GraphStudio
 		bool			display_file_name;
 		bool			direct_connect;
 		bool			exact_match_mode;
+		bool			abort_timeout;								// abort rendering operation after 10 seconds
+
+		// render operation state
+		DWORD			render_start_time;
+		bool			in_render;
+		bool			render_can_proceed;
 
 		// Overlay Icons
 		CBitmap			bmp_volume_hi;
@@ -73,6 +79,7 @@ namespace GraphStudio
 
 		// adjust sizes
 		void Zoom(int z);
+		void MarkRender(bool start);
 	};
 
 	//-------------------------------------------------------------------------

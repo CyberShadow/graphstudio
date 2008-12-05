@@ -157,7 +157,6 @@
 #define IDC_STATIC_RATE                 1086
 #define IDC_STATIC_BYTES                1087
 #define IDC_STATIC_URL                  1089
-#define IDC_CHECK1                      1090
 #define IDC_CHECK_HIRES                 1090
 #define ID_LIST_MRU_CLEAR               4999
 #define ID_LIST_MRU_FILE0               5000
@@ -235,13 +234,15 @@
 #define ID_PIN_FILE_WRITER              32855
 #define ID_OPTIONS_USEEXACTMATCHTOFINDCOMPATIBLEFILTERS 32856
 #define ID_OPTIONS_EXACTMATCH           32857
+#define ID_OPTIONS_ABORTRENDERAFTER10SECONDS 32858
+#define ID_OPTIONS_ABORTRENDER          32859
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        163
-#define _APS_NEXT_COMMAND_VALUE         32858
+#define _APS_NEXT_COMMAND_VALUE         32860
 #define _APS_NEXT_CONTROL_VALUE         1091
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
