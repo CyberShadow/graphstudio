@@ -1,4 +1,4 @@
-[0.3.1.0 - Beta    xx/December/2008]
+[0.3.1.0 - Beta    13/December/2008]
 + never-ending render operation is aborted after 10 seconds
 + GraphStudio generates a list of all selected and inserted filters after a render operation
 + GraphStudio is now also compiled for x64 architecture
