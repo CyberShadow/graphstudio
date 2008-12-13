@@ -147,7 +147,6 @@ BEGIN_MESSAGE_MAP(CSeekingBar, CDialogBar)
 	ON_WM_CTLCOLOR()
 	ON_WM_TIMER()
 	ON_WM_HSCROLL()
-	ON_MESSAGE(WM_INITDIALOG, OnInitDialog )
 END_MESSAGE_MAP()
 
 CSeekingBar::CSeekingBar()
@@ -176,6 +175,16 @@ void CSeekingBar::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogBar::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_STATIC_TIME, label_time);
+}
+
+BOOL CSeekingBar::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT *pResult)
+{
+	if (message == WM_INITDIALOG) {
+		*pResult = OnInitDialog(wParam, lParam);
+		return TRUE;
+	}
+
+	return __super::OnWndMsg(message, wParam, lParam, pResult);
 }
 
 LONG CSeekingBar::OnInitDialog(UINT wParam, LONG lParam)

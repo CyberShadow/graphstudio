@@ -81,6 +81,9 @@ public:
 	virtual BOOL Create(CWnd *pParent, UINT nIDTemplate, UINT nStyle, UINT nID);
 	BOOL OnEraseBkgnd(CDC *pDC);
 	void OnMove(int cx, int cy);
+
+	virtual BOOL OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT *pResult);
+
 	LONG OnInitDialog(UINT wParam, LONG lParam);
 	HBRUSH OnCtlColor(CDC *pDC, CWnd *pWnd, UINT nCtlColor);
 

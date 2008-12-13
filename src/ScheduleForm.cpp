@@ -189,7 +189,7 @@ void CScheduleForm::ToHMS(__int64 t, int &h, int &m, int &s)
 	}
 }
 
-void CScheduleForm::OnTimer(UINT nIDEvent)
+void CScheduleForm::OnTimer(UINT_PTR nIDEvent)
 {
 	__int64	tnow = GetTimeSec();
 	if (tnow > last_time) {

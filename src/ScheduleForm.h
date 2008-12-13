@@ -89,7 +89,7 @@ public:
 	BOOL OnEraseBkgnd(CDC *pDC);
 
 	// schedule timer
-	void OnTimer(UINT nIDEvent);
+	void OnTimer(UINT_PTR nIDEvent);
 	void OnTime(int h, int m, int s);
 
 	// events

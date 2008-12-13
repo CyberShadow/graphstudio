@@ -1,6 +1,7 @@
 [0.3.1.0 - Beta    xx/December/2008]
 + never-ending render operation is aborted after 10 seconds
 + GraphStudio generates a list of all selected and inserted filters after a render operation
++ GraphStudio is now also compiled for x64 architecture
 
 [0.3.0.0 - Beta	   21/November/2008]
 + added support for MPEGLAYER3WAVEFORMAT structure
