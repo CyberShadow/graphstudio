@@ -380,6 +380,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\GraphConstructionForm.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\GraphConstructionForm.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\MeritForm.cpp"
 				>
 			</File>
@@ -584,6 +592,14 @@
 			Name="Visual Components"
 			>
 			<File
+				RelativePath=".\src\BrowserControl.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\BrowserControl.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\EVR_VideoWindow.cpp"
 				>
 			</File>
@@ -673,6 +689,10 @@
 		<Global
 			Name="RESOURCE_FILE"
 			Value="graphstudio.rc"
+		/>
+		<Global
+			Name="{8856F961-340A-11D0-A96B-00C04FD705A2}"
+			Value="CBrowserControl"
 		/>
 	</Globals>
 </VisualStudioProject>

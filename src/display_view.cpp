@@ -691,6 +691,7 @@ namespace GraphStudio
 		render_params.MarkRender(true);	
 		HRESULT	hr = graph.gb->Render(current_pin->pin);
 		render_params.MarkRender(false);
+		OnRenderFinished();
 
 		if (SUCCEEDED(hr)) {
 			graph.RefreshFilters();
@@ -726,6 +727,10 @@ namespace GraphStudio
 	}
 
 	void DisplayView::OnOverlayIconClick(OverlayIcon *icon, CPoint point)
+	{
+	}
+
+	void DisplayView::OnRenderFinished()
 	{
 	}
 

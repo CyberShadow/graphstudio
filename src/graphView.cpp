@@ -101,6 +101,7 @@ BEGIN_MESSAGE_MAP(CGraphView, GraphStudio::DisplayView)
 	ON_COMMAND(ID_VIEW_DECODERPERFORMANCE, &CGraphView::OnViewDecoderPerformance)
 	ON_UPDATE_COMMAND_UI(ID_OPTIONS_ABORTRENDER, &CGraphView::OnUpdateOptionsAbortrender)
 	ON_COMMAND(ID_OPTIONS_ABORTRENDER, &CGraphView::OnOptionsAbortrender)
+	ON_COMMAND(ID_VIEW_GRAPHCONSTRUCTIONREPORT, &CGraphView::OnViewGraphconstructionreport)
 END_MESSAGE_MAP()
 
 //-----------------------------------------------------------------------------
@@ -112,6 +113,7 @@ END_MESSAGE_MAP()
 CGraphView::CGraphView()
 {
 	// TODO: add construction code here
+	form_construction = NULL;
 	form_filters = NULL;
 	form_events = NULL;
 	form_textinfo = NULL;
@@ -128,6 +130,7 @@ CGraphView::CGraphView()
 
 CGraphView::~CGraphView()
 {
+	if (form_construction) { form_construction->DestroyWindow(); delete form_construction; }
 	if (form_volume) { form_volume->DestroyWindow(); delete form_volume; }
 	if (form_progress) { form_progress->DestroyWindow(); delete form_progress; }
 	if (form_dec_performance) { form_dec_performance->DestroyWindow(); delete form_dec_performance; }
@@ -228,7 +231,6 @@ void CGraphView::OnInit()
 	frm->view = this;
 
 	LoadWindowPosition();
-
 
 	// initialize our event logger
 	form_events = new CEventsForm(NULL);
@@ -890,6 +892,18 @@ void CGraphView::OnAutomaticrestartSchedule()
 void CGraphView::OnViewGraphEvents()
 {
 	if (form_events) form_events->ShowWindow(SW_SHOW);
+}
+
+void CGraphView::OnViewGraphconstructionreport()
+{
+	if (!form_construction) {
+		form_construction = new CGraphConstructionForm(NULL);
+		form_construction->view = this;
+		form_construction->DoCreateDialog();
+		form_construction->Reload(&render_params);
+	}
+
+	form_construction->ShowWindow(SW_SHOW);
 }
 
 void CGraphView::UpdateGraphState()
@@ -1571,5 +1585,12 @@ void CGraphView::OnOverlayIconClick(GraphStudio::OverlayIcon *icon, CPoint point
 			}
 		}
 		break;
+	}
+}
+
+void CGraphView::OnRenderFinished()
+{
+	if (form_construction) {
+		form_construction->Reload(&render_params);
 	}
 }

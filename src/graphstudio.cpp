@@ -63,6 +63,7 @@ BOOL CgraphstudioApp::InitInstance()
 		return FALSE;
 	}
 	AfxEnableControlContainer();
+	AtlAxWinInit();
 
 	SetRegistryKey(_T("MONOGRAM"));
 	LoadStdProfileSettings(8);  // Load standard INI file options (including MRU)

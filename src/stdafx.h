@@ -42,6 +42,7 @@
 #include <afxext.h>         // MFC extensions
 #include <afxdisp.h>        // MFC Automation classes
 #include <atlbase.h>
+#include <atlwin.h>
 #include <atlpath.h>
 
 #ifndef _AFX_NO_OLE_SUPPORT
@@ -114,8 +115,11 @@ using namespace std;
 #include "BufferNegotiationPage.h"
 #include "WMADecPage.h"
 
+#include "BrowserControl.h"
+
 #include "DecPerformanceForm.h"
 #include "FavoritesForm.h"
+#include "GraphConstructionForm.h"
 #include "EventsForm.h"
 #include "ScheduleForm.h"
 #include "SeekForm.h"

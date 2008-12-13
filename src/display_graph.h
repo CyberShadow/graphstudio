@@ -15,6 +15,39 @@ namespace GraphStudio
 
 	//-------------------------------------------------------------------------
 	//
+	//	RenderAction class
+	//
+	//-------------------------------------------------------------------------
+	class RenderAction
+	{
+	public:
+		DWORD		time_ms;			// relative to operation start time
+		
+		enum {
+			ACTION_NONE			= 0,
+			ACTION_SELECT		= 1,
+			ACTION_CREATE		= 2
+		};
+
+		int			type;
+		CString		displ_name;			// display name
+		GUID		clsid;				// filter clsid
+
+	public:
+		RenderAction() : time_ms(0), displ_name(_T("")), type(RenderAction::ACTION_NONE), clsid(GUID_NULL) { }
+		RenderAction(const RenderAction &f) : time_ms(f.time_ms), displ_name(f.displ_name), type(f.type), clsid(f.clsid) { }
+		~RenderAction() { };
+		RenderAction &operator =(const RenderAction &f) {
+			time_ms = f.time_ms;
+			displ_name = f.displ_name;
+			type = f.type;
+			clsid = f.clsid;
+			return *this;
+		}
+	};
+
+	//-------------------------------------------------------------------------
+	//
 	//	RenderParameters class
 	//
 	//-------------------------------------------------------------------------
@@ -57,9 +90,10 @@ namespace GraphStudio
 		bool			abort_timeout;								// abort rendering operation after 10 seconds
 
 		// render operation state
-		DWORD			render_start_time;
-		bool			in_render;
-		bool			render_can_proceed;
+		DWORD					render_start_time;
+		bool					in_render;
+		bool					render_can_proceed;
+		vector<RenderAction>	render_actions;						// moniker name list for filters in the last render operation
 
 		// Overlay Icons
 		CBitmap			bmp_volume_hi;
@@ -249,6 +283,7 @@ namespace GraphStudio
 	{
 	public:
 		virtual void OnFilterRemoved(DisplayGraph *sender, Filter *filter) = 0;
+		virtual void OnRenderFinished() = 0;
 	};
 
 	class GraphCallbackImpl : public CUnknown, public IAMGraphBuilderCallback 

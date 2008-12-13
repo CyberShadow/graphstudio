@@ -91,6 +91,7 @@ namespace GraphStudio
 		virtual void OnDisplayPropertyPage(IUnknown *object, IUnknown *filter, CString title);
 		virtual void OnFilterRemoved(DisplayGraph *sender, Filter *filter);
 		virtual void OnOverlayIconClick(OverlayIcon *icon, CPoint point);
+		virtual void OnRenderFinished();
 	};
 
 

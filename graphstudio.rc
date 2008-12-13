@@ -144,6 +144,7 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "Progress View...\tF5",        ID_VIEW_PROGRESSVIEW
         MENUITEM SEPARATOR
+        MENUITEM "Graph Construction Report",   ID_VIEW_GRAPHCONSTRUCTIONREPORT
         MENUITEM "Graph Events\tCtrl+E",        ID_VIEW_GRAPHEVENTS
         MENUITEM "Text Information\tCtrl+T",    ID_VIEW_TEXTINFORMATION
         MENUITEM "Decoder Performance...",      ID_VIEW_DECODERPERFORMANCE
@@ -511,6 +512,15 @@ BEGIN
     COMBOBOX        IDC_COMBO_NEW,60,66,180,96,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
 END
 
+IDD_DIALOG_CONSTRUCTION DIALOGEX 0, 0, 330, 172
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
+CAPTION "Graph Construction Report"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    CONTROL         "",IDC_TITLEBAR,"Static",SS_OWNERDRAW,0,0,330,20
+    CONTROL         "",IDC_EXPLORER1,"{8856F961-340A-11D0-A96B-00C04FD705A2}",WS_TABSTOP,6,24,312,144
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -701,8 +711,37 @@ BEGIN
         TOPMARGIN, 7
         BOTTOMMARGIN, 123
     END
+
+    IDD_DIALOG_CONSTRUCTION, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 323
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 165
+    END
 END
 #endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog Info
+//
+
+IDD_DIALOG_CONSTRUCTION DLGINIT
+BEGIN
+    IDC_EXPLORER1, 0x376, 160, 0
+0x0000, 0x0000, 0x004c, 0x0000, 0x305f, 0x0000, 0x182f, 0x0000, 0x0000, 
+0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 
+0x0000, 0x0000, 0x004c, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0001, 
+0x0000, 0xd0e0, 0x0057, 0x3573, 0x11cf, 0x69ae, 0x0008, 0x2e2b, 0x6212, 
+0x0008, 0x0000, 0x0000, 0x0000, 0x004c, 0x0000, 0x1401, 0x0002, 0x0000, 
+0x0000, 0x00c0, 0x0000, 0x0000, 0x4600, 0x0080, 0x0000, 0x0000, 0x0000, 
+0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 
+0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0001, 0x0000, 
+0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 
+    0
+END
 
 
 /////////////////////////////////////////////////////////////////////////////

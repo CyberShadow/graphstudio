@@ -29,6 +29,7 @@ public:
 
 	CFiltersForm				*form_filters;
 	CEventsForm					*form_events;
+	CGraphConstructionForm		*form_construction;
 	CScheduleForm				*form_schedule;
 	CTextInfoForm				*form_textinfo;
 	CFavoritesForm				*form_favorites;
@@ -139,6 +140,7 @@ public:
 	virtual void OnDisplayPropertyPage(IUnknown *object, IUnknown *filter, CString title);
 	virtual void OnFilterRemoved(GraphStudio::DisplayGraph *sender, GraphStudio::Filter *filter);
 	virtual void OnPropertyPageClosed(CPropertyForm *page);
+	virtual void OnRenderFinished();
 	void ClosePropertyPages();
 	void ClosePropertyPage(IUnknown *filter);
 	virtual void OnOverlayIconClick(GraphStudio::OverlayIcon *icon, CPoint point);
@@ -186,6 +188,7 @@ public:
 	afx_msg void OnViewDecoderPerformance();
 	afx_msg void OnUpdateOptionsAbortrender(CCmdUI *pCmdUI);
 	afx_msg void OnOptionsAbortrender();
+	afx_msg void OnViewGraphconstructionreport();
 };
 
 #ifndef _DEBUG  // debug version in graphView.cpp

@@ -872,6 +872,7 @@ namespace GraphStudio
 		params->MarkRender(true);
 		HRESULT		hr = gb->Render(pin->pin);
 		params->MarkRender(false);
+		if (callback) callback->OnRenderFinished();
 		if (FAILED(hr)) return -1;
 
 		// reload newly added filters
@@ -1095,6 +1096,7 @@ namespace GraphStudio
 			params->MarkRender(true);
 			hr = gb->RenderFile(fn, NULL);
 			params->MarkRender(false);
+			if (callback) callback->OnRenderFinished();
 
 			if (FAILED(hr)) break;
 
@@ -1190,6 +1192,7 @@ namespace GraphStudio
 			hr = gb->Connect(p1->pin, p2->pin);
 		}
 		params->MarkRender(false);
+		if (callback) callback->OnRenderFinished();
 		
 		if (FAILED(hr)) return hr;
 
@@ -2515,6 +2518,7 @@ namespace GraphStudio
 
 		render_start_time = 0;
 		in_render = false;
+		render_actions.clear();
 
 		Zoom(1.0);
 
@@ -2562,6 +2566,7 @@ namespace GraphStudio
 		if (start) {
 			render_start_time = GetTickCount();
 			render_can_proceed = true;
+			render_actions.clear();
 		}
 	}
 
@@ -2597,9 +2602,9 @@ namespace GraphStudio
 
 		if (!graph->params) return NOERROR;
 
-		/*
+		/**********************************************************************
 			Check for never-ending render operation.
-		*/
+		***********************************************************************/
 		if (graph->params->abort_timeout && graph->params->in_render) {
 
 			DWORD		timenow = GetTickCount();
@@ -2619,7 +2624,30 @@ namespace GraphStudio
 			}
 		}
 
+		/**********************************************************************
+			List of filters used in a render operation
+		***********************************************************************/
+		RenderAction	ra;
 
+		// moniker name
+		LPOLESTR	moniker_name;
+		hr = pMon->GetDisplayName(NULL, NULL, &moniker_name);
+		if (SUCCEEDED(hr)) {
+			ra.type	= RenderAction::ACTION_SELECT;
+			ra.displ_name = CString(moniker_name);
+
+			IMalloc *alloc = NULL;
+			hr = CoGetMalloc(1, &alloc);
+			if (SUCCEEDED(hr)) {
+				alloc->Free(moniker_name);
+				alloc->Release();
+			}
+			ra.time_ms = GetTickCount() - graph->params->render_start_time;
+
+			if (ra.displ_name != _T("")) {
+				graph->params->render_actions.push_back(ra);
+			}
+		}
 
 		// check for preferred video filter
 		/*
@@ -2661,6 +2689,24 @@ namespace GraphStudio
 
 	STDMETHODIMP GraphCallbackImpl::CreatedFilter(IBaseFilter *pFilter)
 	{
+
+		/**********************************************************************
+			List of filters used in a render operation
+		***********************************************************************/
+		if (graph->params->in_render) {
+			RenderAction	ra;
+
+			// moniker name
+			CLSID		clsid;
+			pFilter->GetClassID(&clsid);
+
+			ra.time_ms = GetTickCount() - graph->params->render_start_time;
+			ra.type = RenderAction::ACTION_CREATE;
+			ra.clsid = clsid;
+
+			graph->params->render_actions.push_back(ra);
+		}
+
 		return NOERROR;
 	}
 	

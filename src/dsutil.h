@@ -113,6 +113,7 @@ namespace DSUtil
 		HRESULT CreateInstance(IBaseFilter **filter);
 		HRESULT FindFilename();
 
+		int LoadFromMoniker(CString displayname);
 		int Load(char *buf, int size);
 		int WriteMerit();
 		int ParseMonikerName();

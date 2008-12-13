@@ -515,6 +515,64 @@ namespace DSUtil
 		return 0;
 	}
 
+	int FilterTemplate::LoadFromMoniker(CString displayname)
+	{
+		/*
+			First create the moniker and then extract all the information just like when
+			enumerating a category.
+		*/
+
+		HRESULT					hr;
+		CComPtr<IMoniker>		loc_moniker;
+		CComPtr<IBindCtx>		bind;
+		CComPtr<IPropertyBag>	propbag;
+		ULONG					f, eaten = 0;
+
+		if (FAILED(CreateBindCtx(0, &bind))) return -1;
+		hr = MkParseDisplayName(bind, displayname, &eaten, &loc_moniker);
+		bind = NULL;
+		if (hr != NOERROR) { return -1; }
+
+		// get a property bagy object
+		hr = loc_moniker->BindToStorage(NULL, NULL, IID_IPropertyBag, (void**)&propbag);
+		if (SUCCEEDED(hr)) {
+			VARIANT				var;
+
+			VariantInit(&var);
+			hr = propbag->Read(L"FriendlyName", &var, 0);
+			if (SUCCEEDED(hr)) {
+				name = CString(var.bstrVal);
+			}
+			VariantClear(&var);
+
+			VariantInit(&var);
+			hr = propbag->Read(L"FilterData", &var, 0);
+			if (SUCCEEDED(hr)) {
+				SAFEARRAY	*ar = var.parray;
+				int	size = ar->rgsabound[0].cElements;
+
+				// load merit and version
+				Load((char*)ar->pvData, size);
+			}
+			VariantClear(&var);
+
+			VariantInit(&var);
+			hr = propbag->Read(L"CLSID", &var, 0);
+			if (SUCCEEDED(hr)) {
+				if (SUCCEEDED(CLSIDFromString(var.bstrVal, &clsid))) {
+					FindFilename();
+					moniker_name = displayname;
+					ParseMonikerName();
+				}
+			}
+			VariantClear(&var);
+		}
+
+		propbag = NULL;
+		loc_moniker = NULL;		
+		return 0;
+	}
+
 	FilterCategory::FilterCategory() :
 		name(_T("")),
 		clsid(GUID_NULL),
