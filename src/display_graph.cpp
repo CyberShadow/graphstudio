@@ -1592,6 +1592,11 @@ namespace GraphStudio
 
 			// get from the registry
 			GetObjectName(clsid, display_name);
+
+			// sometimes the FILTER_INFO contains 128-char long truncated file name instead of the proper filter name
+			if (clsid == CLSID_AsyncReader) {
+				name = _T("File Source (Async.)");
+			}
 		}
 		hr = f->QueryInterface(IID_IFileSinkFilter, (void**)&fsink);
 		if (SUCCEEDED(hr)) {

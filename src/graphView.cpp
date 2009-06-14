@@ -177,6 +177,20 @@ void CGraphView::OnDestroy()
 	__super::OnDestroy();
 }
 
+BOOL CALLBACK MonitorEnum(HMONITOR monitor, HDC dc, LPRECT rect, LPARAM data)
+{
+	CGraphView	*view = (CGraphView*)data;
+	if (!view) return FALSE;
+	view->OnMonitorCallback(monitor, dc, rect);
+	return TRUE;
+}
+
+void CGraphView::OnMonitorCallback(HMONITOR monitor, HDC dc, LPRECT rect)
+{
+	// append the monitor
+	monitors.push_back(monitor);
+}
+
 void CGraphView::LoadWindowPosition()
 {
 	int	x,y,cx,cy;
@@ -185,6 +199,36 @@ void CGraphView::LoadWindowPosition()
 	y = AfxGetApp()->GetProfileInt(_T("Settings"), _T("top"), 100);
 	cx = AfxGetApp()->GetProfileInt(_T("Settings"), _T("width"), 640);
 	cy = AfxGetApp()->GetProfileInt(_T("Settings"), _T("height"), 320);
+
+	monitors.clear();
+	EnumDisplayMonitors(NULL, NULL, MonitorEnum, (LPARAM)this);
+
+	bool		visible = false;
+
+	// make sure the window can be seen
+	for (int i=0; i<monitors.size(); i++) {
+		MONITORINFO			mi;
+		memset(&mi, 0, sizeof(mi));
+		mi.cbSize		= sizeof(mi);
+
+		GetMonitorInfo(monitors[i], &mi);
+
+		// 50-pixel borders 
+		if (x+cx-50 > mi.rcWork.left	&& x+50 < mi.rcWork.right &&
+			y+cy-50 > mi.rcWork.top		&& y+50 < mi.rcWork.bottom
+			) {
+			visible = true;
+			break;
+		}
+	}
+
+	// should be fine
+	if (!visible) {
+		x = 100;
+		y = 100;
+		cx = 640;
+		cy = 320;
+	}
 
 	GetParentFrame()->SetWindowPos(NULL, x, y, cx, cy, SWP_SHOWWINDOW);
 }
@@ -847,29 +891,34 @@ void CGraphView::OnGraphInsertfilter()
 	form_filters->ShowWindow(SW_SHOW);
 }
 
+void CGraphView::OnDeleteSelection()
+{
+	FILTER_STATE	state = State_Running;
+	if (graph.GetState(state, 0) != 0) {
+		state = State_Running;
+	}
+
+	if (state != State_Stopped) {
+		// play sound to warn the user
+		MessageBeep(MB_ICONASTERISK);
+		return ;
+	}
+
+	// avoid some unnecessary crashes
+	overlay_filter = NULL;
+
+	// delete selected objects
+	graph.DeleteSelected();
+	Invalidate();
+}
+
 void CGraphView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 {
 	if (!(nFlags & (MK_SHIFT | MK_ALT | MK_CONTROL))) {
 		switch (nChar) {
 		case VK_DELETE:
 			{
-				FILTER_STATE	state = State_Running;
-				if (graph.GetState(state, 0) != 0) {
-					state = State_Running;
-				}
-
-				if (state != State_Stopped) {
-					// play sound to warn the user
-					MessageBeep(MB_ICONASTERISK);
-					return ;
-				}
-
-				// avoid some unnecessary crashes
-				overlay_filter = NULL;
-
-				// delete selected objects
-				graph.DeleteSelected();
-				Invalidate();
+				OnDeleteSelection();
 			}
 			break;
 		}

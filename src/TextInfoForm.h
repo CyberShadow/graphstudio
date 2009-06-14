@@ -42,8 +42,7 @@ public:
 
 	void OnSize(UINT nType, int cx, int cy);
 	void OnInitialize();
-	afx_msg void OnBnClickedButtonRefresh();
-	afx_msg void OnBnClickedButtonClear();
+	void OnBnClickedButtonRefresh();
 
 	// report parts
 	void DoFilterList();
@@ -64,4 +63,5 @@ public:
 	void DoSimpleReport();
 	void Echo(CString t);
 	void DisplayReport();
+	afx_msg void OnBnClickedButtonCopytext();
 };

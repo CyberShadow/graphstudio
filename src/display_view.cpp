@@ -33,6 +33,7 @@ namespace GraphStudio
 		ON_COMMAND(ID_PIN_DUMP_STREAM, &DisplayView::OnDumpStream)
 		ON_COMMAND(ID_PIN_FILE_WRITER, &DisplayView::OnFileWriterStream)
 		ON_COMMAND(ID_PROPERTYPAGE, &DisplayView::OnPropertyPage)
+		ON_COMMAND(ID_DELETE_FILTER, &DisplayView::OnDeleteFilter)
 
 		ON_COMMAND_RANGE(ID_STREAM_SELECT, ID_STREAM_SELECT+100, &DisplayView::OnSelectStream)
 		ON_COMMAND_RANGE(ID_COMPATIBLE_FILTER, ID_COMPATIBLE_FILTER+999, &DisplayView::OnCompatibleFilterClick)
@@ -152,6 +153,11 @@ namespace GraphStudio
 
 		} else {
 			menu.InsertMenu(0, MF_STRING, ID_PROPERTYPAGE, _T("Properties"));
+
+			int p = menu.GetMenuItemCount();
+			menu.InsertMenu(p++, MF_BYPOSITION | MF_SEPARATOR);
+			menu.InsertMenu(p++, MF_BYPOSITION | MF_STRING, ID_DELETE_FILTER, _T("Delete Selection"));
+
 
 			// check for IAMStreamSelect interface
 			PrepareStreamSelectMenu(menu, current_filter->filter);
@@ -702,6 +708,12 @@ namespace GraphStudio
 		current_pin = NULL;
 	}
 
+	void DisplayView::OnDeleteFilter()
+	{
+		// ask the derived class to do it ...
+		OnDeleteSelection();
+	}
+
 	void DisplayView::OnPropertyPage()
 	{
 		CString	title;
@@ -715,6 +727,11 @@ namespace GraphStudio
 			OnDisplayPropertyPage(current_filter->filter, current_filter->filter, title);
 			return ;
 		}
+	}
+
+	void DisplayView::OnDeleteSelection()
+	{
+		// to be overriden
 	}
 
 	void DisplayView::OnFilterRemoved(DisplayGraph *sender, Filter *filter)

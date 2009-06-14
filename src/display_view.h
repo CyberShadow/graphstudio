@@ -74,6 +74,7 @@ namespace GraphStudio
 		void OnDumpStream();
 		void OnFileWriterStream();
 		void OnPropertyPage();
+		void OnDeleteFilter();
 
 		void MakeScreenshot();
 
@@ -92,6 +93,7 @@ namespace GraphStudio
 		virtual void OnFilterRemoved(DisplayGraph *sender, Filter *filter);
 		virtual void OnOverlayIconClick(OverlayIcon *icon, CPoint point);
 		virtual void OnRenderFinished();
+		virtual void OnDeleteSelection();
 	};
 
 

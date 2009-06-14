@@ -61,6 +61,8 @@ public:
 	bool						state_ready;
 	FILTER_STATE				graph_state;
 
+	// known system monitors
+	vector<HMONITOR>			monitors;
 
 public:
 	virtual ~CGraphView();
@@ -141,6 +143,8 @@ public:
 	virtual void OnFilterRemoved(GraphStudio::DisplayGraph *sender, GraphStudio::Filter *filter);
 	virtual void OnPropertyPageClosed(CPropertyForm *page);
 	virtual void OnRenderFinished();
+	virtual void OnDeleteSelection();
+
 	void ClosePropertyPages();
 	void ClosePropertyPage(IUnknown *filter);
 	virtual void OnOverlayIconClick(GraphStudio::OverlayIcon *icon, CPoint point);
@@ -148,6 +152,7 @@ public:
 	// save/load window position
 	void LoadWindowPosition();
 	void SaveWindowPosition();
+	void OnMonitorCallback(HMONITOR monitor, HDC dc, LPRECT rect);
 
 	void OnViewTextInformation();
 	void OnGraphInsertFileSource();

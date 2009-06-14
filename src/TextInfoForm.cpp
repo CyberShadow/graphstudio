@@ -19,7 +19,7 @@ IMPLEMENT_DYNAMIC(CTextInfoForm, CDialog)
 BEGIN_MESSAGE_MAP(CTextInfoForm, CDialog)
 	ON_WM_SIZE()
 	ON_BN_CLICKED(IDC_BUTTON_REFRESH, &CTextInfoForm::OnBnClickedButtonRefresh)
-	ON_BN_CLICKED(IDC_BUTTON_CLEAR, &CTextInfoForm::OnBnClickedButtonClear)
+	ON_BN_CLICKED(IDC_BUTTON_COPYTEXT, &CTextInfoForm::OnBnClickedButtonCopytext)
 END_MESSAGE_MAP()
 
 
@@ -83,13 +83,8 @@ void CTextInfoForm::OnSize(UINT nType, int cx, int cy)
 
 void CTextInfoForm::OnBnClickedButtonRefresh()
 {
-	// TODO: Add your control notification handler code here
-	DoSimpleReport();
-}
-
-void CTextInfoForm::OnBnClickedButtonClear()
-{
 	edit_report.SetWindowText(_T(""));
+	DoSimpleReport();
 }
 
 void CTextInfoForm::DoSimpleReport()
@@ -119,6 +114,10 @@ void CTextInfoForm::DoFilterList()
 		GraphStudio::Filter	*filter = view->graph.filters[i];
 		t.Format(_T("%3d. %s"), (i+1), filter->name);
 		Echo(t);
+
+		if (filter->file_name != _T("")) {
+			t = _T("      File: ") + filter->file_name;		Echo(t);
+		}
 	}
 	Echo(_T(""));
 }
@@ -376,3 +375,24 @@ void CTextInfoForm::DisplayReport()
 	edit_report.SetWindowText(t);
 }
 
+void CTextInfoForm::OnBnClickedButtonCopytext()
+{
+	// copy the content to the clipboard
+	CString		text;
+
+	edit_report.GetWindowText(text);
+
+	if (!OpenClipboard()) return ;
+
+	EmptyClipboard();
+	
+	HGLOBAL		hClipboardData  = GlobalAlloc(GMEM_DDESHARE, sizeof(TCHAR) * (text.GetLength() + 1));
+	TCHAR		*buf			= (TCHAR*)GlobalLock(hClipboardData);
+
+	memset(buf, 0, sizeof(TCHAR)*(text.GetLength() + 1));
+	memcpy(buf, text.GetBuffer(), sizeof(TCHAR)*(text.GetLength()));
+	
+	GlobalUnlock(hClipboardData);
+	SetClipboardData(CF_UNICODETEXT, hClipboardData);
+	CloseClipboard();	
+}

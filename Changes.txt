@@ -1,3 +1,11 @@
+[0.3.2.0 - Beta    14/June/2009]
++ Render URL can accept more characters than the width of the input box is
++ File name truncations fixed in "Text Information" form
++ "Copy" button copies the text report into the clipboard
++ Small "Text Information" form redesign
++ "Delete Selection" added to filter context menu
++ GraphStudio makes sure it is located on a visible portion of the screen at start
+
 [0.3.1.0 - Beta    13/December/2008]
 + never-ending render operation is aborted after 10 seconds
 + GraphStudio generates a list of all selected and inserted filters after a render operation
