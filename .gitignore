@@ -1,0 +1,6 @@
+/bin/
+/Debug/
+/Release/
+*.aps
+*.ncb
+*.suo
