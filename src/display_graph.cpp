@@ -669,8 +669,10 @@ namespace GraphStudio
 					Pin*	pin = filter->output_pins[j];
 					if (pin->peer) {
 						xml.BeginNode(_T("connect"));
-							xml.WriteValue(_T("out"), filter->name + _T("/") + pin->name);
-							xml.WriteValue(_T("in"), pin->peer->filter->name + _T("/") + pin->peer->name);
+							xml.WriteValue(_T("outfilter"), filter->name);
+							xml.WriteValue(_T("outpin"), j);
+							xml.WriteValue(_T("infilter"), pin->peer->filter->name);
+							xml.WriteValue(_T("inpin"), pin->peer->filter->FindPinIndex(pin->peer));
 							xml.WriteValue(_T("direct"), _T("true"));
 						xml.EndNode();
 					}
@@ -767,8 +769,9 @@ namespace GraphStudio
 
 		gf.LoadFromFilter(filter);
 
-		CString		pin_name = conf->GetValue(_T("pin"));
-		Pin			*pin = gf.FindPin(pin_name);
+		CString		pin_type = conf->GetValue(_T("pintype"));
+		int			pin_index = conf->GetValue(_T("pin"), -1);
+		Pin			*pin = gf.FindPin(pin_type, pin_index);
 		if (!pin) return -1;
 
 		// let's query for IAMBufferNegotiation
@@ -878,8 +881,11 @@ namespace GraphStudio
 
 	int DisplayGraph::LoadXML_Render(XML::XMLNode *node)
 	{
-		CString		pin_path = node->GetValue(_T("pin"));
-		Pin			*pin = FindPin(pin_path);
+		CString		filter_name = node->GetValue(_T("filter"));
+		Filter		*filter = FindFilter(filter_name);
+		CString		pin_type = node->GetValue(_T("pintype"));
+		int			pin_index = node->GetValue(_T("pin"), -1);
+		Pin			*pin = filter->FindPin(pin_type, pin_index);
 		if (!pin) return -1;
 
 		// try to render
@@ -896,14 +902,22 @@ namespace GraphStudio
 
 	int DisplayGraph::LoadXML_Connect(XML::XMLNode *node)
 	{
-		CString		opin_path = node->GetValue(_T("out"));
-		CString		ipin_path = node->GetValue(_T("in"));
+		CString		ofilter_name = node->GetValue(_T("outfilter"));
+		int			opin_index = node->GetValue(_T("outpin"), -1);
+
+		CString		ifilter_name = node->GetValue(_T("infilter"));
+		int			ipin_index = node->GetValue(_T("inpin"), -1);
 
 		CString		direct    = node->GetValue(_T("direct"));
 		if (direct == _T("")) direct = _T("false");
 
-		Pin			*opin = FindPin(opin_path);
-		Pin			*ipin = FindPin(ipin_path);
+		Filter		*ofilter = FindFilter(ofilter_name);
+		Filter		*ifilter = FindFilter(ifilter_name);
+
+		if (!ofilter || !ifilter) return -1;
+
+		Pin			*opin = ofilter->FindPin(_T("output"), opin_index);
+		Pin			*ipin = ifilter->FindPin(_T("input"), ipin_index);
 
 		if (!opin || !ipin) return -1;
 
@@ -1126,17 +1140,6 @@ namespace GraphStudio
 
 		RefreshFPS();
 		return 0;
-	}
-
-	Pin *DisplayGraph::FindPin(CString pin_path)
-	{
-		// find the filter
-		CString	filter_name = DSUtil::get_next_token(pin_path, _T("/"));
-		Filter	*filter = FindFilter(filter_name);
-		if (!filter) return NULL;
-
-		// try to find the pin
-		return filter->FindPin(pin_path);
 	}
 
 	Filter *DisplayGraph::FindFilter(CString name)
@@ -2116,17 +2119,33 @@ namespace GraphStudio
 		for (i=0; i<output_pins.GetCount(); i++) output_pins[i]->Select(select);
 	}
 
-	Pin *Filter::FindPin(CString name)
+	Pin* Filter::FindPin(CString d, int index)
+	{
+		CArray<Pin*>* pins;
+
+		if (d == _T("output"))
+			pins = &output_pins;
+		else
+		if (d == _T("input"))
+			pins = &input_pins;
+		else
+			return NULL;
+
+		if (index < 0 || index >= pins->GetCount())
+			return NULL;
+		return (*pins)[index];
+	}
+
+	int Filter::FindPinIndex(Pin* pin)
 	{
 		int i;
 		for (i=0; i<output_pins.GetCount(); i++) {
-			if (output_pins[i]->name == name) return output_pins[i];
+			if (output_pins[i] == pin) return i;
 		}
 		for (i=0; i<input_pins.GetCount(); i++) {
-			Pin *pin = input_pins[i];
-			if (pin->name == name) return pin;
+			if (input_pins[i] == pin) return i;
 		}
-		return NULL;
+		return -1;
 	}
 
 	Pin *Filter::FindPinByPos(CPoint p, bool not_connected)
