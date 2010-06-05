@@ -47,6 +47,7 @@ namespace GraphStudio
 		cgb = NULL;
 		dc = NULL;
 		fs = NULL;
+		params = NULL;
 		is_remote = false;
 		is_frame_stepping = false;
 		uses_clock = true;
@@ -1760,7 +1761,7 @@ namespace GraphStudio
 		//---------------------------------------------------------------------
 		// calculate size
 		//---------------------------------------------------------------------		
-		if (graph) {
+		if (graph && graph->dc && params) {
 			graph->dc->SelectObject(&params->font_filter);
 			CSize	size = graph->dc->GetTextExtent(display_name);
 			size.cx += 2 * 24;

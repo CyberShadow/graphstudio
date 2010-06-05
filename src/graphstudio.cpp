@@ -48,6 +48,48 @@ CgraphstudioApp theApp;
 
 // CgraphstudioApp initialization
 
+BOOL RenderGraph(CString fn)
+{
+	int		ret;
+	CPath	path(fn);
+	CString	ext = path.GetExtension();
+	GraphStudio::DisplayGraph graph;
+
+	ext = ext.MakeLower();
+	if (ext == _T(".grf"))
+		ret = graph.LoadGRF(fn);
+	else
+	if (ext == _T(".xml"))
+		ret = graph.LoadXML(fn);
+	else
+		ret = graph.RenderFile(fn);
+
+	if (ret < 0) return FALSE;
+
+	ret = graph.DoPlay();
+	
+	if (ret == S_OK) {
+		FILTER_STATE state;
+		HRESULT hr;
+		do {
+			Sleep(1);
+			hr = graph.GetState(state, 10);
+		} while (SUCCEEDED(hr) && state == State_Running);
+	}
+
+	return ret == S_OK;
+}
+
+BOOL HandleNonInteractiveCommandLine()
+{
+	if (__argc == 3 && _tcsicmp(__targv[1], _T("/render"))==0)
+	{
+		RenderGraph(__wargv[2]);
+		return TRUE;
+	}
+	return FALSE;
+}
+
 BOOL CgraphstudioApp::InitInstance()
 {
 	INITCOMMONCONTROLSEX InitCtrls;
@@ -77,6 +119,10 @@ BOOL CgraphstudioApp::InitInstance()
 	if (!pDocTemplate) return FALSE;
 	AddDocTemplate(pDocTemplate);
 
+
+	// handle non-interactive command-line parameters before doing anything else
+	if (HandleNonInteractiveCommandLine())
+		return FALSE;
 
 	// Parse command line for standard shell commands, DDE, file open
 	CCommandLineInfo cmdInfo;
