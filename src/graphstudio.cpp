@@ -69,12 +69,16 @@ BOOL RenderGraph(CString fn)
 	ret = graph.DoPlay();
 	
 	if (ret == S_OK) {
-		FILTER_STATE state;
+		//FILTER_STATE state;
+		double current, duration;
 		HRESULT hr;
 		do {
 			Sleep(1);
-			hr = graph.GetState(state, 10);
-		} while (SUCCEEDED(hr) && state == State_Running);
+			//hr = graph.GetState(state, 10);
+			hr = graph.GetPositions(current, duration);
+		} while (SUCCEEDED(hr) && /*state == State_Running*/ current < duration);
+		Sleep(1000);
+		graph.DoStop();
 	}
 
 	return ret == S_OK;
